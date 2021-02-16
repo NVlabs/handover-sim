@@ -1,0 +1,4 @@
+[submodule "OMG-Planner"]
+	path = OMG-Planner
+	url = ssh://git@gitlab-master.nvidia.com:12051/ychao/OMG-Planner.git
+	branch = handover-sim
