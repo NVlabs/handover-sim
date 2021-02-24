@@ -43,6 +43,7 @@ class DexYCB():
       self.load_raw()
 
     assert len(self._sequences) == _NUM_SEQUENCES
+    self._num_scenes = len(self._sequences)
 
   def load_raw(self):
     print('Loading DexYCB from raw dataset')
@@ -124,6 +125,10 @@ class DexYCB():
 
         pose = np.dstack((q_int, t_int))
         self._pose.append(pose)
+
+  @property
+  def num_scenes(self):
+    return self._num_scenes
 
   def save_cache(self):
     print('Saving DexYCB to cache: {}'.format(self._cache_dir))
