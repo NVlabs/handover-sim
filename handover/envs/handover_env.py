@@ -79,10 +79,10 @@ class HandoverEnv(gym.Env):
       # Simulate real-time rendering with sleep if computation takes less than
       # real time.
       time_spent = time.time() - self._last_frame_time
-      self._last_frame_time = time.time()
       time_sleep = self._time_step - time_spent
       if time_sleep > 0:
         time.sleep(time_sleep)
+      self._last_frame_time = time.time()
 
     if self._is_load_panda:
       self._panda.set_target_positions(action)
