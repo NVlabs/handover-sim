@@ -62,6 +62,10 @@ class YCB():
     return self._ycb_ids
 
   @property
+  def ycb_grasp_ind(self):
+    return self._ycb_grasp_ind
+
+  @property
   def pose(self):
     return self._pose
 

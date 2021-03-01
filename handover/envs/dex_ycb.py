@@ -49,6 +49,7 @@ class DexYCB():
     print('Loading DexYCB from raw dataset')
     self._sequences = []
     self._ycb_ids = []
+    self._ycb_grasp_ind = []
     self._pose = []
 
     for n in _SUBJECTS:
@@ -64,6 +65,7 @@ class DexYCB():
         with open(meta_file, 'r') as f:
           meta = yaml.load(f, Loader=yaml.FullLoader)
         self._ycb_ids.append(meta['ycb_ids'])
+        self._ycb_grasp_ind.append(meta['ycb_grasp_ind'])
 
         extr_file = os.path.join(self._raw_dir, "calibration",
                                  "extrinsics_" + meta['extrinsics'],
@@ -137,7 +139,11 @@ class DexYCB():
     if os.path.isfile(self._meta_file):
       print('Meta file already exists: {}'.format(self._meta_file))
     else:
-      meta = {'sequences': self._sequences, 'ycb_ids': self._ycb_ids}
+      meta = {
+          'sequences': self._sequences,
+          'ycb_ids': self._ycb_ids,
+          'ycb_grasp_ind': self._ycb_grasp_ind
+      }
       with open(self._meta_file, 'w') as f:
         json.dump(meta, f)
 
@@ -155,6 +161,7 @@ class DexYCB():
       meta = json.load(f)
     self._sequences = meta['sequences']
     self._ycb_ids = meta['ycb_ids']
+    self._ycb_grasp_ind = meta['ycb_grasp_ind']
 
     assert os.path.isfile(self._pose_file)
     pose = np.load(self._pose_file)
@@ -165,5 +172,6 @@ class DexYCB():
         'sequence': self._sequences[scene_id],
         'ycb_ids': self._ycb_ids[scene_id],
         'pose': self._pose[scene_id],
+        'ycb_grasp_ind': self._ycb_grasp_ind[scene_id],
     }
     return data
