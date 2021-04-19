@@ -2,7 +2,7 @@
 
 ### Prerequisites
 
-This code has so far been tested on Python 3.6.
+This code is tested with Python 3.7 on Linux.
 
 ### Installation
 
