@@ -89,10 +89,10 @@ class DexYCB():
         # Transform to tag coordinates.
         q = q_raw.reshape(-1, 4)
         t = t_raw.reshape(-1, 3)
-        R = Rot.from_quat(q).as_dcm().astype(np.float32)
+        R = Rot.from_quat(q).as_matrix().astype(np.float32)
         R = np.matmul(tag_R_inv, R)
         t = np.matmul(tag_R_inv, t.T).T + tag_t_inv
-        q = Rot.from_dcm(R).as_quat().astype(np.float32)
+        q = Rot.from_matrix(R).as_quat().astype(np.float32)
         q_trans = q.reshape(-1, num_y, 4)
         t_trans = t.reshape(-1, num_y, 3)
 

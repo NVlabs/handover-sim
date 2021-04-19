@@ -5,8 +5,8 @@ setup(
     install_requires=[
         'gym==0.18.0',
         'numpy==1.19.5',
-        'pybullet==3.0.8',
+        'pybullet==3.1.2',
         'pyyaml==5.4.1',
-        'scipy==1.5.4',
+        'scipy==1.6.2',
     ],
 )
