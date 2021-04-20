@@ -3,6 +3,5 @@
 handover.egg-info
 
 handover/data/models
-handover/data/dex-ycb
 handover/data/dex-ycb-cache
 handover/data/dex-ycb-stabilized

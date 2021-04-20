@@ -27,8 +27,10 @@ class DexYCB():
   def __init__(self, load_cache=False):
     self._load_cache = load_cache
 
+    assert 'DEX_YCB_DIR' in os.environ, "environment variable 'DEX_YCB_DIR' is not set"
+    self._raw_dir = os.environ['DEX_YCB_DIR']
+
     # TODO(ywchao): set time_step_resample from input and modify pose_file accordingly.
-    self._raw_dir = os.path.join(os.path.dirname(__file__), "../data/dex-ycb")
     self._time_step_raw = 0.04
     self._time_step_resample = 0.001
 

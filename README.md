@@ -35,33 +35,40 @@ This code is tested with Python 3.7 on Linux.
 
 5. Download the DexYCB dataset.
 
-   **Option 1**: Download cached dataset: **(recommended)**
-
-   ```Shell
-   cd handover/data
-   # Download dex-ycb-cache_20210225.tar.gz from https://drive.google.com/file/d/1NmoaIIhP4dGrX7aNMVPBrhuas9icyc-a.
-   tar -zxvf dex-ycb-cache_20210225.tar.gz
-   cd ../..
-   ```
-
-   **Option 2**: Download full dataset and cache the data:
+    **Option 1**: Download cached dataset: **(recommended)**
 
     ```Shell
     cd handover/data
-    ln -s $DEX_YCB_PATH dex-ycb
+    # Download dex-ycb-cache_20210225.tar.gz from https://drive.google.com/file/d/1NmoaIIhP4dGrX7aNMVPBrhuas9icyc-a.
+    tar -zxvf dex-ycb-cache_20210225.tar.gz
     cd ../..
-    python handover/data/cache_dex_ycb_data.py
     ```
 
-    `$DEX_YCB_PATH` should be a folder with the following structure:
+    **Option 2**: Download full dataset and cache the data:
 
-    ```Shell
-    ├── 20200709-weiy/
-    ├── 20200813-ceppner/
-    ├── ...
-    ├── calibration/
-    └── models/
-    ```
+    1.  Download the DexYCB dataset from the [DexYCB project site](https://dex-ycb.github.io).
+
+    2. Set the environment variable for dataset path:
+
+        ```Shell
+        export DEX_YCB_DIR=/path/to/dex-ycb
+        ```
+
+        `$DEX_YCB_DIR` should be a folder with the following structure:
+
+        ```Shell
+        ├── 20200709-weiy/
+        ├── 20200813-ceppner/
+        ├── ...
+        ├── calibration/
+        └── models/
+        ```
+
+    3. Cache the dataset:
+
+        ```Shell
+        python handover/data/cache_dex_ycb_data.py
+        ```
 
 ### Running demos
 
