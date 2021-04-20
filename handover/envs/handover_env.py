@@ -48,6 +48,7 @@ class HandoverEnv(gym.Env):
       self._p.resetSimulation()
       self._p.setGravity(0, 0, -9.8)
       self._p.setPhysicsEngineParameter(fixedTimeStep=self._time_step)
+      self._p.setPhysicsEngineParameter(deterministicOverlappingPairs=1)
 
       self._plane = self._p.loadURDF("plane_implicit.urdf")
       self._table = self._p.loadURDF(
