@@ -27,7 +27,7 @@ class HandoverEnvStabilizerWrapper(HandoverEnv):
 
     # Set the order using a volume-based heuristic.
     super().reset()
-    obj_vol = {i: self._ycb.get_aabb_volume(i) for i in self._ycb.CLASSES}
+    obj_vol = {i: self._ycb.get_aabb_volume(i) for i in self._ycb.classes}
     obj_order = sorted(obj_vol.keys(), key=lambda x: -obj_vol[x])
 
     # Make manual adjustments for corner cases.
@@ -73,7 +73,7 @@ class HandoverEnvStabilizerWrapper(HandoverEnv):
 
   @property
   def obj_names(self):
-    return self._ycb.CLASSES
+    return self._ycb.classes
 
   @property
   def obj_order(self):

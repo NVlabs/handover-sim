@@ -3,31 +3,33 @@ import os
 
 from handover.envs.dex_ycb import DexYCB
 
+_CLASSES = {
+     1: '002_master_chef_can',
+     2: '003_cracker_box',
+     3: '004_sugar_box',
+     4: '005_tomato_soup_can',
+     5: '006_mustard_bottle',
+     6: '007_tuna_fish_can',
+     7: '008_pudding_box',
+     8: '009_gelatin_box',
+     9: '010_potted_meat_can',
+    10: '011_banana',
+    11: '019_pitcher_base',
+    12: '021_bleach_cleanser',
+    13: '024_bowl',
+    14: '025_mug',
+    15: '035_power_drill',
+    16: '036_wood_block',
+    17: '037_scissors',
+    18: '040_large_marker',
+    20: '052_extra_large_clamp',
+    21: '061_foam_brick',
+}
+
 
 # TODO(ywchao): add ground-truth motions.
 class YCB():
-  CLASSES = {
-       1: '002_master_chef_can',
-       2: '003_cracker_box',
-       3: '004_sugar_box',
-       4: '005_tomato_soup_can',
-       5: '006_mustard_bottle',
-       6: '007_tuna_fish_can',
-       7: '008_pudding_box',
-       8: '009_gelatin_box',
-       9: '010_potted_meat_can',
-      10: '011_banana',
-      11: '019_pitcher_base',
-      12: '021_bleach_cleanser',
-      13: '024_bowl',
-      14: '025_mug',
-      15: '035_power_drill',
-      16: '036_wood_block',
-      17: '037_scissors',
-      18: '040_large_marker',
-      20: '052_extra_large_clamp',
-      21: '061_foam_brick',
-  }
+  classes = _CLASSES
 
   def __init__(self, bullet_client, table_height, is_control_object=True):
     self._p = bullet_client
@@ -39,7 +41,7 @@ class YCB():
     offset = np.array([0.0, 2.0, 0.2], dtype=np.float32)
     self._base_position = {
         i: np.array([xs[o % len(xs)], ys[o // len(xs)], 0], dtype=np.float32) +
-        offset for o, i in enumerate(self.CLASSES)
+        offset for o, i in enumerate(self.classes)
     }
     self._base_orientation = [0, 0, 0, 1]
 
@@ -72,7 +74,7 @@ class YCB():
   def reset(self, scene_id=None, pose=None):
     if self._objects is None:
       self._objects = {}
-      for i, name in self.CLASSES.items():
+      for i, name in self.classes.items():
         urdf_file = os.path.join(os.path.dirname(__file__), "../data/models",
                                  name, "model_normalized.urdf")
         uid = self._p.loadURDF(urdf_file,
