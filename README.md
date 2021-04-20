@@ -57,8 +57,8 @@ This code is tested with Python 3.7 on Linux.
         `$DEX_YCB_DIR` should be a folder with the following structure:
 
         ```Shell
-        ├── 20200709-weiy/
-        ├── 20200813-ceppner/
+        ├── 20200709-subject-01/
+        ├── 20200813-subject-02/
         ├── ...
         ├── calibration/
         └── models/
