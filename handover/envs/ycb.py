@@ -77,11 +77,11 @@ class YCB():
       for i, name in self.classes.items():
         urdf_file = os.path.join(os.path.dirname(__file__), "../data/models",
                                  name, "model_normalized.urdf")
-        uid = self._p.loadURDF(urdf_file,
-                               basePosition=self._base_position[i],
-                               baseOrientation=self._base_orientation,
-                               useFixedBase=True)
-        self._objects[i] = uid
+        self._objects[i] = self._p.loadURDF(
+            urdf_file,
+            basePosition=self._base_position[i],
+            baseOrientation=self._base_orientation,
+            useFixedBase=True)
 
     if scene_id is None:
       self._ycb_ids = []
@@ -115,19 +115,16 @@ class YCB():
         t = [0, 0, 0]
 
       # Reset joint states.
-      self._p.resetJointState(self._objects[i], 0, t[0], targetVelocity=0)
-      self._p.resetJointState(self._objects[i], 1, t[1], targetVelocity=0)
-      self._p.resetJointState(self._objects[i], 2, t[2], targetVelocity=0)
-      self._p.resetJointStateMultiDof(self._objects[i],
-                                      3,
-                                      q,
-                                      targetVelocity=[0, 0, 0])
+      self._p.resetJointState(uid, 0, t[0], targetVelocity=0)
+      self._p.resetJointState(uid, 1, t[1], targetVelocity=0)
+      self._p.resetJointState(uid, 2, t[2], targetVelocity=0)
+      self._p.resetJointStateMultiDof(uid, 3, q, targetVelocity=[0, 0, 0])
 
       # Reset controllers.
-      self._p.setJointMotorControlArray(self._objects[i], [0, 1, 2],
+      self._p.setJointMotorControlArray(uid, [0, 1, 2],
                                         self._p.POSITION_CONTROL,
                                         forces=[0, 0, 0])
-      self._p.setJointMotorControlMultiDof(self._objects[i],
+      self._p.setJointMotorControlMultiDof(uid,
                                            3,
                                            self._p.POSITION_CONTROL,
                                            targetPosition=[0, 0, 0, 1],
