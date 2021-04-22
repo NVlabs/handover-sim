@@ -4,6 +4,7 @@ import pybullet_utils.bullet_client as bullet_client
 import pybullet_data
 import time
 
+from handover.envs.table import Table
 from handover.robots.panda import Panda
 from handover.envs.dex_ycb import DexYCB
 from handover.envs.ycb import YCB
@@ -53,12 +54,10 @@ class HandoverEnv(gym.Env):
       self._p.setPhysicsEngineParameter(deterministicOverlappingPairs=1)
 
       self._plane = self._p.loadURDF("plane_implicit.urdf")
-      self._table = self._p.loadURDF(
-          "table/table.urdf",
-          basePosition=self._table_base_position,
-          baseOrientation=self._table_base_orientation)
-      self._p.changeVisualShape(self._table, -1, rgbaColor=[1, 1, 1, 1])
-      self._table_height = 0.625
+
+      self._table = Table(self._p,
+                          base_position=self._table_base_position,
+                          base_orientation=self._table_base_orientation)
 
       if self._is_load_panda_mano:
         self._panda = Panda(self._p,
@@ -68,10 +67,10 @@ class HandoverEnv(gym.Env):
       self._dex_ycb = DexYCB(load_cache=True)
       self._ycb = YCB(self._p,
                       self._dex_ycb,
-                      self._table_height,
+                      self._table.height,
                       is_control_object=self._is_control_object)
       if self._is_load_panda_mano:
-        self._mano = MANO(self._p, self._dex_ycb, self._table_height)
+        self._mano = MANO(self._p, self._dex_ycb, self._table.height)
 
     if self._is_load_panda_mano:
       self._panda.reset()
