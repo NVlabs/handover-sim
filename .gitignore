@@ -2,7 +2,7 @@
 
 handover.egg-info
 
-handover/data/models
+handover/data/assets
 handover/data/dex-ycb-cache_20210421.tar.gz
 handover/data/dex-ycb-cache
 handover/data/dex-ycb-stabilized

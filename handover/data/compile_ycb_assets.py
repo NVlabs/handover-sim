@@ -107,17 +107,18 @@ urdf_str = \
 """
 
 src_root = "../../../../OMG-Planner/data/objects"
-trg_root = os.path.join(os.path.dirname(__file__), "models")
+trg_root = os.path.join(os.path.dirname(__file__), "assets")
 
 
 def main():
-  print('Compiling YCB models')
+  print('Compiling YCB assets')
 
   for x in ycb_classes:
     print('{}'.format(x))
     src_dir = os.path.join(src_root, x)
     trg_dir = os.path.join(trg_root, x)
     os.makedirs(trg_dir, exist_ok=True)
+
     obj_files = ("model_normalized.obj", "model_normalized_convex.obj",
                  "textured_simple.obj.mtl", "texture_map.png")
     for y in obj_files:
@@ -125,11 +126,16 @@ def main():
       trg_obj = os.path.join(trg_dir, y)
       if not os.path.isfile(trg_obj):
         os.symlink(src_obj, trg_obj)
+      else:
+        assert os.readlink(trg_obj) == src_obj
+    
     trg_urdf = os.path.join(trg_dir, "model_normalized.urdf")
     if not os.path.isfile(trg_urdf):
-      # TODO(ywchao): move to a util file if reused.
       with open(trg_urdf, 'w') as f:
         f.write(urdf_str)
+    else:
+      with open(trg_urdf, 'r') as f:
+        assert f.read() == urdf_str
 
   print('Done')
 

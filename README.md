@@ -33,10 +33,10 @@ This code is tested with Python 3.7 on Linux.
     cd ..
     ```
 
-4. Compile YCB models:
+4. Compile assets:
 
     ```Shell
-    python handover/data/compile_ycb_models.py
+    ./handover/data/compile_assets.sh
     ```
 
 5. Download the DexYCB dataset.

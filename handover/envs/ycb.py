@@ -80,7 +80,7 @@ class YCB():
     if self._objects is None:
       self._objects = {}
       for i, name in self.classes.items():
-        urdf_file = os.path.join(os.path.dirname(__file__), "../data/models",
+        urdf_file = os.path.join(os.path.dirname(__file__), "../data/assets",
                                  name, "model_normalized.urdf")
         self._objects[i] = self._p.loadURDF(
             urdf_file,
