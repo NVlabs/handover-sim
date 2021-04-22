@@ -1,8 +1,6 @@
 import numpy as np
 import os
 
-from handover.envs.dex_ycb import DexYCB
-
 _CLASSES = {
      1: '002_master_chef_can',
      2: '003_cracker_box',
@@ -26,13 +24,20 @@ _CLASSES = {
     21: '061_foam_brick',
 }
 
+_COLLISION_ID = 1
+
 
 # TODO(ywchao): add ground-truth motions.
 class YCB():
   classes = _CLASSES
 
-  def __init__(self, bullet_client, table_height, is_control_object=True):
+  def __init__(self,
+               bullet_client,
+               dex_ycb,
+               table_height,
+               is_control_object=True):
     self._p = bullet_client
+    self._dex_ycb = dex_ycb
     self._table_height = table_height
     self._is_control_object = is_control_object
 
@@ -52,8 +57,6 @@ class YCB():
     self._objects = None
     self._frame = 0
     self._num_frames = 0
-
-    self._dex_ycb = DexYCB(load_cache=True)
 
   @property
   def num_scenes(self):
@@ -91,7 +94,7 @@ class YCB():
       scene_data = self._dex_ycb.get_scene_data(scene_id)
       self._ycb_ids = scene_data['ycb_ids']
       self._ycb_grasp_ind = scene_data['ycb_grasp_ind']
-      self._pose = scene_data['pose']
+      self._pose = scene_data['pose_y']
 
     # TODO(ywchao): use stable position for both q and t.
     if pose is None:
@@ -134,7 +137,7 @@ class YCB():
       # Speed up simulation by disabling collision for unused objects.
       if i in self._ycb_ids and (pose is None or
                                  np.any(pose[self._ycb_ids.index(i)] != 0)):
-        collision_id = -1
+        collision_id = _COLLISION_ID
       else:
         collision_id = 0
       for j in range(self._p.getNumJoints(uid)):

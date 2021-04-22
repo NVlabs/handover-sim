@@ -16,7 +16,13 @@ This code is tested with Python 3.7 on Linux.
 2. Install Python package and dependencies:
 
     ```Shell
+    # Install handover-sim
     pip install -e .
+
+    # Install mano_pybullet
+    cd mano_pybullet
+    pip install -e .
+    cd ..
     ```
 
 3. Download data from OMG-Planner:
@@ -69,6 +75,14 @@ This code is tested with Python 3.7 on Linux.
         ```Shell
         python handover/data/cache_dex_ycb_data.py
         ```
+
+6. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip the file:
+
+    ```Shell
+    cd handover/data
+    unzip mano_v1_2.zip
+    cd ../..
+    ```
 
 ### Running demos
 

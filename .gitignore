@@ -5,3 +5,5 @@ handover.egg-info
 handover/data/models
 handover/data/dex-ycb-cache
 handover/data/dex-ycb-stabilized
+handover/data/mano_v1_2.zip
+handover/data/mano_v1_2
