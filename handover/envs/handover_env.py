@@ -15,11 +15,14 @@ class HandoverEnv(gym.Env):
 
   def __init__(self,
                is_render=False,
-               is_control_object=True,
-               is_load_panda_mano=True):
+               is_control_ycb=True,
+               is_load_panda_mano=True,
+               is_disable_table_ycb_collision=True):
     self._is_render = is_render
-    self._is_control_object = is_control_object
+    self._is_control_ycb = is_control_ycb
     self._is_load_panda_mano = is_load_panda_mano
+    self._is_disable_table_ycb_collision = is_disable_table_ycb_collision
+    assert self._is_load_panda_mano == self._is_disable_table_ycb_collision
 
     self._time_step = 0.001
 
@@ -55,9 +58,11 @@ class HandoverEnv(gym.Env):
 
       self._plane = self._p.loadURDF("plane_implicit.urdf")
 
-      self._table = Table(self._p,
-                          base_position=self._table_base_position,
-                          base_orientation=self._table_base_orientation)
+      self._table = Table(
+          self._p,
+          base_position=self._table_base_position,
+          base_orientation=self._table_base_orientation,
+          is_filter_collision=self._is_disable_table_ycb_collision)
 
       if self._is_load_panda_mano:
         self._panda = Panda(self._p,
@@ -68,7 +73,8 @@ class HandoverEnv(gym.Env):
       self._ycb = YCB(self._p,
                       self._dex_ycb,
                       self._table.height,
-                      is_control_object=self._is_control_object)
+                      is_control=self._is_control_ycb,
+                      is_filter_collision=self._is_disable_table_ycb_collision)
       if self._is_load_panda_mano:
         self._mano = MANO(self._p, self._dex_ycb, self._table.height)
 

@@ -4,7 +4,7 @@ import numpy as np
 from mano_pybullet.hand_model import HandModel45
 from mano_pybullet.hand_body_base_joint import HandBodyBaseJoint
 
-_COLLISION_ID = 2
+_COLLISION_ID = 2**22
 
 
 # TODO(ywchao): add ground-truth motions.

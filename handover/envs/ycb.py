@@ -24,7 +24,7 @@ _CLASSES = {
     21: '061_foam_brick',
 }
 
-_COLLISION_ID = 1
+_COLLISION_ID = lambda i: 2**i
 
 
 # TODO(ywchao): add ground-truth motions.
@@ -35,11 +35,13 @@ class YCB():
                bullet_client,
                dex_ycb,
                table_height,
-               is_control_object=True):
+               is_control=True,
+               is_filter_collision=True):
     self._p = bullet_client
     self._dex_ycb = dex_ycb
     self._table_height = table_height
-    self._is_control_object = is_control_object
+    self._is_control = is_control
+    self._is_filter_collision = is_filter_collision
 
     xs = np.linspace(0.0, 1.2, 5)
     ys = np.linspace(0.0, 1.0, 4)
@@ -137,7 +139,10 @@ class YCB():
       # Speed up simulation by disabling collision for unused objects.
       if i in self._ycb_ids and (pose is None or
                                  np.any(pose[self._ycb_ids.index(i)] != 0)):
-        collision_id = _COLLISION_ID
+        if self._is_filter_collision:
+          collision_id = _COLLISION_ID(i)
+        else:
+          collision_id = -1
       else:
         collision_id = 0
       for j in range(self._p.getNumJoints(uid)):
@@ -152,7 +157,7 @@ class YCB():
 
     # TODO(ywchao): control grasped object only and use stable position for static ones.
     # TODO(ywchao): assert position is constant for static objects.
-    if self._is_control_object:
+    if self._is_control:
       # Set target position.
       for o, i in enumerate(self._ycb_ids):
         q, t = self.get_target_position(self._frame, o)
