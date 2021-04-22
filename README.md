@@ -45,8 +45,8 @@ This code is tested with Python 3.7 on Linux.
 
     ```Shell
     cd handover/data
-    # Download dex-ycb-cache_20210225.tar.gz from https://drive.google.com/file/d/1NmoaIIhP4dGrX7aNMVPBrhuas9icyc-a.
-    tar -zxvf dex-ycb-cache_20210225.tar.gz
+    # Download dex-ycb-cache_20210421.tar.gz from https://drive.google.com/file/d/1RHpds_6Cb6EzdhnszTt732luOOBsyBO1.
+    tar -zxvf dex-ycb-cache_20210421.tar.gz
     cd ../..
     ```
 
