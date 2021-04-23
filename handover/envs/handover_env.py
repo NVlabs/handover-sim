@@ -4,9 +4,9 @@ import pybullet_utils.bullet_client as bullet_client
 import pybullet_data
 import time
 
+from handover.envs.dex_ycb import DexYCB
 from handover.envs.table import Table
 from handover.robots.panda import Panda
-from handover.envs.dex_ycb import DexYCB
 from handover.envs.ycb import YCB
 from handover.envs.mano import MANO
 
@@ -34,9 +34,11 @@ class HandoverEnv(gym.Env):
     self._p = None
     self._last_frame_time = 0.0
 
+    self._dex_ycb = DexYCB(is_preload_from_raw=False)
+
   @property
   def num_scenes(self):
-    return self._ycb.num_scenes
+    return self._dex_ycb.num_scenes
 
   def reset(self, hard_reset=False, scene_id=None, pose=None):
     if self._p is None:
@@ -68,8 +70,6 @@ class HandoverEnv(gym.Env):
         self._panda = Panda(self._p,
                             base_position=self._panda_base_position,
                             base_orientation=self._panda_base_orientation)
-
-      self._dex_ycb = DexYCB(is_preload_from_raw=False)
       self._ycb = YCB(self._p,
                       self._dex_ycb,
                       self._table.height,

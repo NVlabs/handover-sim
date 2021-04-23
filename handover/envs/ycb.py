@@ -61,10 +61,6 @@ class YCB():
     self._num_frames = 0
 
   @property
-  def num_scenes(self):
-    return self._dex_ycb.num_scenes
-
-  @property
   def ycb_ids(self):
     return self._ycb_ids
 
