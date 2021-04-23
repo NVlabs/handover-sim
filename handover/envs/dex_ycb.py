@@ -20,13 +20,15 @@ _SUBJECTS = [
     '20201015-subject-09',
     '20201022-subject-10',
 ]
+
 _NUM_SEQUENCES = 1000
 
 
 class DexYCB():
+  num_scenes = _NUM_SEQUENCES
 
-  def __init__(self, load_cache=False):
-    self._load_cache = load_cache
+  def __init__(self, is_preload_from_raw=True):
+    self._is_preload_from_raw = is_preload_from_raw
 
     assert 'DEX_YCB_DIR' in os.environ, "environment variable 'DEX_YCB_DIR' is not set"
     self._raw_dir = os.environ['DEX_YCB_DIR']
@@ -37,23 +39,16 @@ class DexYCB():
 
     self._cache_dir = os.path.join(os.path.dirname(__file__),
                                    "../data/dex-ycb-cache")
-    self._meta_file = os.path.join(self._cache_dir, "meta.json")
-    self._pose_file = os.path.join(self._cache_dir, "pose.npz")
+    self._meta_file_str = os.path.join(self._cache_dir, "meta_{:03d}.json")
+    self._pose_file_str = os.path.join(self._cache_dir, "pose_{:03d}.npz")
 
-    if self._load_cache:
-      self.load_cache()
+    if self._is_preload_from_raw:
+      self._scene_data = self.preload_from_raw()
     else:
-      self.load_raw()
+      self._scene_data = {scene_id: None for scene_id in range(self.num_scenes)}
 
-    assert len(self._sequences) == _NUM_SEQUENCES
-    self._num_scenes = len(self._sequences)
-
-  @property
-  def num_scenes(self):
-    return self._num_scenes
-
-  def load_raw(self):
-    print('Loading DexYCB from raw dataset')
+  def preload_from_raw(self):
+    print('Preloading DexYCB from raw dataset')
 
     # Load MANO model.
     mano = {}
@@ -64,13 +59,8 @@ class DexYCB():
       with open(mano_file, 'rb') as f:
         mano[k] = pickle.load(f, encoding='latin1')
 
-    self._sequences = []
-    self._ycb_ids = []
-    self._ycb_grasp_ind = []
-    self._mano_sides = []
-    self._mano_betas = []
-    self._pose_y = []
-    self._pose_m = []
+    scene_data = {}
+    scene_id = 0
 
     for n in _SUBJECTS:
       print('{:02d}/{:02d}  {}'.format(
@@ -78,16 +68,12 @@ class DexYCB():
       seq = sorted(os.listdir(os.path.join(self._raw_dir, n)))
       seq = [os.path.join(n, s) for s in seq]
       assert len(seq) == 100
-      self._sequences += seq
 
-      for i, q in enumerate(seq):
+      for name in seq:
         # Load meta.
-        meta_file = os.path.join(self._raw_dir, q, "meta.yml")
+        meta_file = os.path.join(self._raw_dir, name, "meta.yml")
         with open(meta_file, 'r') as f:
           meta = yaml.load(f, Loader=yaml.FullLoader)
-        self._ycb_ids.append(meta['ycb_ids'])
-        self._ycb_grasp_ind.append(meta['ycb_grasp_ind'])
-        self._mano_sides.append(meta['mano_sides'])
 
         # Load extrinsics.
         extr_file = os.path.join(self._raw_dir, "calibration",
@@ -103,7 +89,7 @@ class DexYCB():
         tag_t_inv = np.matmul(tag_R_inv, -tag_t)
 
         # Load pose.
-        pose_file = os.path.join(self._raw_dir, q, "pose.npz")
+        pose_file = os.path.join(self._raw_dir, name, "pose.npz")
         pose = np.load(pose_file)
 
         # Process YCB pose.
@@ -114,7 +100,6 @@ class DexYCB():
         q, t = self.resample(q, t)
 
         pose_y = np.dstack((q, t))
-        self._pose_y.append(pose_y)
 
         # Process MANO pose.
         mano_betas = []
@@ -159,8 +144,22 @@ class DexYCB():
         q[i] = q_i
 
         pose_m = np.dstack((q, t))
-        self._pose_m.append(pose_m)
-        self._mano_betas.append(mano_betas)
+
+        scene_data[scene_id] = {
+            'name': name,
+            'ycb_ids': meta['ycb_ids'],
+            'ycb_grasp_ind': meta['ycb_grasp_ind'],
+            'mano_sides': meta['mano_sides'],
+            'mano_betas': mano_betas,
+            'pose_y': pose_y,
+            'pose_m': pose_m,
+        }
+
+        scene_id += 1
+
+    assert len(scene_data) == self.num_scenes
+
+    return scene_data
 
   def transform(self, q, t, tag_R_inv, tag_t_inv):
     """Transforms 6D pose to tag coordinates.
@@ -233,57 +232,61 @@ class DexYCB():
 
     return q_int, t_int
 
-  def save_cache(self):
+  def save_to_cache(self):
     print('Saving DexYCB to cache: {}'.format(self._cache_dir))
     os.makedirs(self._cache_dir, exist_ok=True)
 
-    if os.path.isfile(self._meta_file):
-      print('Meta file already exists: {}'.format(self._meta_file))
-    else:
-      meta = {
-          'sequences': self._sequences,
-          'ycb_ids': self._ycb_ids,
-          'ycb_grasp_ind': self._ycb_grasp_ind,
-          'mano_sides': self._mano_sides,
-          'mano_betas': self._mano_betas,
-      }
-      with open(self._meta_file, 'w') as f:
-        json.dump(meta, f)
+    for scene_id, data in self._scene_data.items():
+      meta_file = self._meta_file_str.format(scene_id)
+      if os.path.isfile(meta_file):
+        print('Meta file already exists: {}'.format(meta_file))
+      else:
+        meta = {
+            'name': data['name'],
+            'ycb_ids': data['ycb_ids'],
+            'ycb_grasp_ind': data['ycb_grasp_ind'],
+            'mano_sides': data['mano_sides'],
+            'mano_betas': data['mano_betas'],
+        }
+        with open(meta_file, 'w') as f:
+          json.dump(meta, f)
 
-    if os.path.isfile(self._pose_file):
-      print('Pose file already exists: {}'.format(self._pose_file))
-    else:
-      pose = {}
-      for s, y, m in zip(self._sequences, self._pose_y, self._pose_m):
-        pose[s + '/pose_y'] = y
-        pose[s + '/pose_m'] = m
-      np.savez_compressed(self._pose_file, **pose)
-
-  def load_cache(self):
-    print('Loading DexYCB from cache:{}'.format(self._cache_dir))
-
-    assert os.path.isfile(self._meta_file)
-    with open(self._meta_file, 'r') as f:
-      meta = json.load(f)
-    self._sequences = meta['sequences']
-    self._ycb_ids = meta['ycb_ids']
-    self._ycb_grasp_ind = meta['ycb_grasp_ind']
-    self._mano_sides = meta['mano_sides']
-    self._mano_betas = meta['mano_betas']
-
-    assert os.path.isfile(self._pose_file)
-    pose = np.load(self._pose_file)
-    self._pose_y = [pose[s + '/pose_y'] for s in self._sequences]
-    self._pose_m = [pose[s + '/pose_m'] for s in self._sequences]
+      pose_file = self._pose_file_str.format(scene_id)
+      if os.path.isfile(pose_file):
+        print('Pose file already exists: {}'.format(pose_file))
+      else:
+        pose = {
+            'pose_y': data['pose_y'],
+            'pose_m': data['pose_m'],
+        }
+        np.savez_compressed(pose_file, **pose)
 
   def get_scene_data(self, scene_id):
-    data = {
-        'sequence': self._sequences[scene_id],
-        'ycb_ids': self._ycb_ids[scene_id],
-        'ycb_grasp_ind': self._ycb_grasp_ind[scene_id],
-        'mano_sides': self._mano_sides[scene_id],
-        'mano_betas': self._mano_betas[scene_id],
-        'pose_y': self._pose_y[scene_id],
-        'pose_m': self._pose_m[scene_id],
+    if self._scene_data[scene_id] is None:
+      self._scene_data[scene_id] = self.load_from_cache(scene_id)
+
+    return self._scene_data[scene_id]
+
+  def load_from_cache(self, scene_id):
+    meta_file = self._meta_file_str.format(scene_id)
+    assert os.path.isfile(meta_file), "meta file does not exist: {}".format(
+        meta_file)
+    with open(meta_file, 'r') as f:
+      meta = json.load(f)
+
+    pose_file = self._pose_file_str.format(scene_id)
+    assert os.path.isfile(pose_file), "pose file does not exist: {}".format(
+        pose_file)
+    pose = np.load(pose_file)
+
+    scene_data = {
+        'name': meta['name'],
+        'ycb_ids': meta['ycb_ids'],
+        'ycb_grasp_ind': meta['ycb_grasp_ind'],
+        'mano_sides': meta['mano_sides'],
+        'mano_betas': meta['mano_betas'],
+        'pose_y': pose['pose_y'],
+        'pose_m': pose['pose_m'],
     }
-    return data
+
+    return scene_data

@@ -69,7 +69,7 @@ class HandoverEnv(gym.Env):
                             base_position=self._panda_base_position,
                             base_orientation=self._panda_base_orientation)
 
-      self._dex_ycb = DexYCB(load_cache=True)
+      self._dex_ycb = DexYCB(is_preload_from_raw=False)
       self._ycb = YCB(self._p,
                       self._dex_ycb,
                       self._table.height,
