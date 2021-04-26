@@ -18,9 +18,6 @@ class MANO():
     self._models_dir = os.path.join(os.path.dirname(__file__),
                                     "../data/mano_v1_2/models")
 
-    self._hide_trans = [0, 0, -2]
-    self._hide_pose = [0] * 48
-
     self._body = None
     self._frame = 0
     self._num_frames = 0
@@ -32,17 +29,12 @@ class MANO():
       return
     else:
       scene_data = self._dex_ycb.get_scene_data(scene_id)
-      mano_side = scene_data['mano_sides'][0]
-      mano_betas = scene_data['mano_betas'][0]
+      self._mano_side = scene_data['mano_sides'][0]
+      self._mano_betas = scene_data['mano_betas'][0]
       pose = scene_data['pose_m'][:, 0]
 
     self._sid = np.where(np.any(pose != 0, axis=1))[0][0]
     self._eid = np.where(np.any(pose != 0, axis=1))[0][-1]
-
-    model = HandModel45(left_hand=mano_side == 'left',
-                        models_dir=self._models_dir,
-                        betas=mano_betas)
-    self._body = HandBodyBaseJoint(self._p, model, shape_betas=mano_betas)
 
     self._q = pose[:, 0:48].copy()
     self._t = pose[:, 48:51].copy()
@@ -52,12 +44,22 @@ class MANO():
     self._frame = 0
     self._num_frames = len(self._q)
 
-    if self._sid == 0:
-      self._body.reset_from_mano(self._t[self._frame], self._q[self._frame])
-      self.enable_collision()
-    else:
-      self._body.reset_from_mano(self._hide_trans, self._hide_pose)
-      self.disable_collision()
+    if self._frame == self._sid:
+      self.make()
+
+  def make(self):
+    model = HandModel45(left_hand=self._mano_side == 'left',
+                        models_dir=self._models_dir,
+                        betas=self._mano_betas)
+    self._body = HandBodyBaseJoint(self._p, model, shape_betas=self._mano_betas)
+
+    self._body.reset_from_mano(self._t[self._frame], self._q[self._frame])
+
+    for j in range(4, 50, 3):
+      self._p.setCollisionFilterGroupMask(self._body.body_id,
+                                          j,
+                                          collisionFilterGroup=_COLLISION_ID,
+                                          collisionFilterMask=_COLLISION_ID)
 
   def clean(self):
     if self._body is not None:
@@ -68,29 +70,10 @@ class MANO():
     self._frame += 1
     self._frame = min(self._frame, self._num_frames - 1)
 
-    if self._body is not None:
-      if self._frame == self._sid:
-        self._body.reset_from_mano(self._t[self._frame], self._q[self._frame])
-        self.enable_collision()
-      if self._frame > self._sid and self._frame <= self._eid:
-        self._body.set_target_from_mano(self._t[self._frame],
-                                        self._q[self._frame])
-      if self._frame == self._eid + 1:
-        self._body.reset_from_mano(self._hide_trans, self._hide_pose)
-        self.disable_collision()
-
-  def enable_collision(self):
-    if self._body is not None:
-      for j in range(4, 50, 3):
-        self._p.setCollisionFilterGroupMask(self._body.body_id,
-                                            j,
-                                            collisionFilterGroup=_COLLISION_ID,
-                                            collisionFilterMask=_COLLISION_ID)
-
-  def disable_collision(self):
-    if self._body is not None:
-      for j in range(4, 50, 3):
-        self._p.setCollisionFilterGroupMask(self._body.body_id,
-                                            j,
-                                            collisionFilterGroup=0,
-                                            collisionFilterMask=0)
+    if self._frame == self._sid:
+      self.make()
+    if self._frame > self._sid and self._frame <= self._eid:
+      self._body.set_target_from_mano(self._t[self._frame],
+                                      self._q[self._frame])
+    if self._frame == self._eid + 1:
+      self.clean()
