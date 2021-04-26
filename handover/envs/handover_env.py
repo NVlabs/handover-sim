@@ -78,6 +78,13 @@ class HandoverEnv(gym.Env):
       if self._is_load_panda_mano:
         self._mano = MANO(self._p, self._dex_ycb, self._table.height)
 
+    if not hard_reset and pose is None:
+      # Remove bodies in reverse added order to maintain deterministic body id
+      # assignment for each scene.
+      if self._is_load_panda_mano:
+        self._mano.clean()
+      self._ycb.clean()
+
     if self._is_load_panda_mano:
       self._panda.reset()
     self._ycb.reset(scene_id=scene_id, pose=pose)

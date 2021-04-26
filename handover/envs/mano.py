@@ -26,11 +26,9 @@ class MANO():
     self._num_frames = 0
 
   def reset(self, scene_id=None):
-    if self._body is not None:
-      self._p.removeBody(self._body.body_id)
+    assert self._body is None
 
     if scene_id is None:
-      self._body = None
       return
     else:
       scene_data = self._dex_ycb.get_scene_data(scene_id)
@@ -60,6 +58,11 @@ class MANO():
     else:
       self._body.reset_from_mano(self._hide_trans, self._hide_pose)
       self.disable_collision()
+
+  def clean(self):
+    if self._body is not None:
+      self._p.removeBody(self._body.body_id)
+      self._body = None
 
   def step(self):
     self._frame += 1

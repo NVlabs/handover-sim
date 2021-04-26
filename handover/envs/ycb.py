@@ -56,7 +56,7 @@ class YCB():
     self._translation_gain_d = [1.0] * 3
     self._rotation_gain_p = 1.0
 
-    self._objects = None
+    self._objects = {}
     self._frame = 0
     self._num_frames = 0
 
@@ -73,19 +73,11 @@ class YCB():
     return self._pose
 
   def reset(self, scene_id=None, pose=None):
-    if self._objects is None:
-      self._objects = {}
-      for i, name in self.classes.items():
-        urdf_file = os.path.join(os.path.dirname(__file__), "../data/assets",
-                                 name, "model_normalized.urdf")
-        self._objects[i] = self._p.loadURDF(
-            urdf_file,
-            basePosition=self._base_position[i],
-            baseOrientation=self._base_orientation,
-            useFixedBase=True)
+    if pose is None:
+      assert self._objects == {}
 
     if scene_id is None:
-      self._ycb_ids = []
+      self._ycb_ids = list(self.classes.keys())
       self._ycb_grasp_ind = -1
       self._pose = np.zeros((1, 0, 7), dtype=np.float32)
     else:
@@ -107,45 +99,60 @@ class YCB():
     self._frame = 0
     self._num_frames = len(self._q)
 
-    for i, uid in self._objects.items():
-      if i in self._ycb_ids and (pose is None or
-                                 np.any(pose[self._ycb_ids.index(i)] != 0)):
-        q, t = self.get_target_position(self._frame, self._ycb_ids.index(i))
+    for i in self._ycb_ids:
+      if pose is None:
+        urdf_file = os.path.join(os.path.dirname(__file__), "../data/assets",
+                                 self.classes[i], "model_normalized.urdf")
+        self._objects[i] = self._p.loadURDF(
+            urdf_file,
+            basePosition=self._base_position[i],
+            baseOrientation=self._base_orientation,
+            useFixedBase=True)
       else:
-        q = [0, 0, 0, 1]
-        t = [0, 0, 0]
+        if np.all(pose[self._ycb_ids.index(i)] == 0):
+          continue
+
+      if scene_id is None:
+        continue
+
+      q, t = self.get_target_position(self._frame, self._ycb_ids.index(i))
 
       # Reset joint states.
-      self._p.resetJointState(uid, 0, t[0], targetVelocity=0)
-      self._p.resetJointState(uid, 1, t[1], targetVelocity=0)
-      self._p.resetJointState(uid, 2, t[2], targetVelocity=0)
-      self._p.resetJointStateMultiDof(uid, 3, q, targetVelocity=[0, 0, 0])
+      self._p.resetJointState(self._objects[i], 0, t[0], targetVelocity=0)
+      self._p.resetJointState(self._objects[i], 1, t[1], targetVelocity=0)
+      self._p.resetJointState(self._objects[i], 2, t[2], targetVelocity=0)
+      self._p.resetJointStateMultiDof(self._objects[i],
+                                      3,
+                                      q,
+                                      targetVelocity=[0, 0, 0])
 
       # Reset controllers.
-      self._p.setJointMotorControlArray(uid, [0, 1, 2],
+      self._p.setJointMotorControlArray(self._objects[i], [0, 1, 2],
                                         self._p.POSITION_CONTROL,
                                         forces=[0, 0, 0])
-      self._p.setJointMotorControlMultiDof(uid,
+      self._p.setJointMotorControlMultiDof(self._objects[i],
                                            3,
                                            self._p.POSITION_CONTROL,
                                            targetPosition=[0, 0, 0, 1],
                                            targetVelocity=[0, 0, 0],
                                            force=[0, 0, 0])
 
-      # Speed up simulation by disabling collision for unused objects.
-      if i in self._ycb_ids and (pose is None or
-                                 np.any(pose[self._ycb_ids.index(i)] != 0)):
-        if self._is_filter_collision:
-          collision_id = _COLLISION_ID(i)
-        else:
-          collision_id = -1
+      if self._is_filter_collision:
+        collision_id = _COLLISION_ID(i)
       else:
-        collision_id = 0
-      for j in range(self._p.getNumJoints(uid)):
-        self._p.setCollisionFilterGroupMask(uid,
+        collision_id = -1
+      for j in range(self._p.getNumJoints(self._objects[i])):
+        self._p.setCollisionFilterGroupMask(self._objects[i],
                                             j,
                                             collisionFilterGroup=collision_id,
                                             collisionFilterMask=collision_id)
+
+  def clean(self):
+    # Remove bodies in reverse added order to maintain deterministic body id
+    # assignment for each scene.
+    for i, uid in list(self._objects.items())[::-1]:
+      self._p.removeBody(uid)
+      self._objects.pop(i)
 
   def step(self):
     self._frame += 1
