@@ -19,8 +19,6 @@ class MANO():
                                     "../data/mano_v1_2/models")
 
     self._body = None
-    self._frame = 0
-    self._num_frames = 0
 
   def reset(self, scene_id=None):
     assert self._body is None

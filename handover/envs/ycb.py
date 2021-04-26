@@ -57,8 +57,6 @@ class YCB():
     self._rotation_gain_p = 1.0
 
     self._objects = {}
-    self._frame = 0
-    self._num_frames = 0
 
   @property
   def ycb_ids(self):
