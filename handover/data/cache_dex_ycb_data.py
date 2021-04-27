@@ -7,7 +7,7 @@ def main():
   dex_ycb = DexYCB()
   dex_ycb.save_to_cache()
 
-  print('Done')
+  print('Done.')
 
 
 if __name__ == '__main__':

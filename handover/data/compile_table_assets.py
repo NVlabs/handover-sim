@@ -49,7 +49,7 @@ def main():
       lines = [line.rstrip('\n') for line in f]
     assert lines == trg_lines
 
-  print('Done')
+  print('Done.')
 
 
 if __name__ == '__main__':

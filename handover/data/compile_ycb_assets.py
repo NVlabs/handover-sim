@@ -137,7 +137,7 @@ def main():
       with open(trg_urdf, 'r') as f:
         assert f.read() == urdf_str
 
-  print('Done')
+  print('Done.')
 
 
 if __name__ == '__main__':

@@ -89,7 +89,7 @@ class Stabilizer():
         cp = env.get_contact_points(obj_id)
         done = cp is () or max([x[9] for x in cp]) == 0
         if trial == 1 and done:
-          print('Succeeded with the default pose')
+          print('Succeeded with the default pose.')
         if verbose:
           delta_step = env.get_base_state(obj_id)[0][4:] - pose[o, 4:]
           print(
@@ -185,7 +185,7 @@ class Stabilizer():
         if done or step == max_steps:
           break
         step += 1
-      print('Done')
+      print('Done.')
 
       if step == max_steps and not done:
         print('Stopped: reached maximum number of steps')
@@ -312,7 +312,7 @@ class Stabilizer():
                 end='')
       if verbose:
         print('')
-    print('Done')
+    print('Done.')
 
     print('pose delta')
     for o, i in enumerate(env.obj_ids):
