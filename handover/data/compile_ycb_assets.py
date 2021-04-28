@@ -106,7 +106,8 @@ urdf_str = \
 </robot>
 """
 
-src_root = "../../../../OMG-Planner/data/objects"
+src_root = os.path.join("..", "..", "..", "..", "OMG-Planner", "data",
+                        "objects")
 trg_root = os.path.join(os.path.dirname(__file__), "assets")
 
 
@@ -128,7 +129,7 @@ def main():
         os.symlink(src_obj, trg_obj)
       else:
         assert os.readlink(trg_obj) == src_obj
-    
+
     trg_urdf = os.path.join(trg_dir, "model_normalized.urdf")
     if not os.path.isfile(trg_urdf):
       with open(trg_urdf, 'w') as f:

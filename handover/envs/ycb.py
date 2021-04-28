@@ -99,8 +99,9 @@ class YCB():
 
     for i in self._ycb_ids:
       if pose is None:
-        urdf_file = os.path.join(os.path.dirname(__file__), "../data/assets",
-                                 self.classes[i], "model_normalized.urdf")
+        urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
+                                 "assets", self.classes[i],
+                                 "model_normalized.urdf")
         self._objects[i] = self._p.loadURDF(
             urdf_file,
             basePosition=self._base_position[i],

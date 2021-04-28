@@ -18,8 +18,8 @@ class Table():
     self._base_orientation = base_orientation
     self._is_filter_collision = is_filter_collision
 
-    urdf_file = os.path.join(os.path.dirname(__file__),
-                             "../data/assets/table/table.urdf")
+    urdf_file = os.path.join(os.path.dirname(__file__), "..", "data", "assets",
+                             "table", "table.urdf")
     self._body_id = self._p.loadURDF(urdf_file,
                                      basePosition=self._base_position,
                                      baseOrientation=self._base_orientation)

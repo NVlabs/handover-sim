@@ -15,8 +15,8 @@ class MANO():
     self._dex_ycb = dex_ycb
     self._table_height = table_height
 
-    self._models_dir = os.path.join(os.path.dirname(__file__),
-                                    "../data/mano_v1_2/models")
+    self._models_dir = os.path.join(os.path.dirname(__file__), "..", "data",
+                                    "mano_v1_2", "models")
 
     self._body = None
 

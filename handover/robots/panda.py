@@ -32,9 +32,9 @@ class Panda:
 
   def reset(self):
     if self._robot is None:
-      urdf_file = os.path.join(
-          os.path.dirname(__file__),
-          "../../OMG-Planner/bullet/models/panda/panda_gripper.urdf")
+      urdf_file = os.path.join(os.path.dirname(__file__), "..", "..",
+                               "OMG-Planner", "bullet", "models", "panda",
+                               "panda_gripper.urdf")
       self._robot = self._p.loadURDF(urdf_file,
                                      basePosition=self._base_position,
                                      baseOrientation=self._base_orientation,
