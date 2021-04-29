@@ -56,7 +56,7 @@ class YCB():
     self._translation_gain_d = [1.0] * 3
     self._rotation_gain_p = 1.0
 
-    self._objects = {}
+    self._body_id = {}
 
   @property
   def ycb_ids(self):
@@ -72,7 +72,7 @@ class YCB():
 
   def reset(self, scene_id=None, pose=None):
     if pose is None:
-      assert self._objects == {}
+      assert self._body_id == {}
 
     if scene_id is None:
       self._ycb_ids = list(self.classes.keys())
@@ -102,7 +102,7 @@ class YCB():
         urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
                                  "assets", self.classes[i],
                                  "model_normalized.urdf")
-        self._objects[i] = self._p.loadURDF(
+        self._body_id[i] = self._p.loadURDF(
             urdf_file,
             basePosition=self._base_position[i],
             baseOrientation=self._base_orientation,
@@ -117,19 +117,19 @@ class YCB():
       q, t = self.get_target_position(self._frame, self._ycb_ids.index(i))
 
       # Reset joint states.
-      self._p.resetJointState(self._objects[i], 0, t[0], targetVelocity=0)
-      self._p.resetJointState(self._objects[i], 1, t[1], targetVelocity=0)
-      self._p.resetJointState(self._objects[i], 2, t[2], targetVelocity=0)
-      self._p.resetJointStateMultiDof(self._objects[i],
+      self._p.resetJointState(self._body_id[i], 0, t[0], targetVelocity=0)
+      self._p.resetJointState(self._body_id[i], 1, t[1], targetVelocity=0)
+      self._p.resetJointState(self._body_id[i], 2, t[2], targetVelocity=0)
+      self._p.resetJointStateMultiDof(self._body_id[i],
                                       3,
                                       q,
                                       targetVelocity=[0, 0, 0])
 
       # Reset controllers.
-      self._p.setJointMotorControlArray(self._objects[i], [0, 1, 2],
+      self._p.setJointMotorControlArray(self._body_id[i], [0, 1, 2],
                                         self._p.POSITION_CONTROL,
                                         forces=[0, 0, 0])
-      self._p.setJointMotorControlMultiDof(self._objects[i],
+      self._p.setJointMotorControlMultiDof(self._body_id[i],
                                            3,
                                            self._p.POSITION_CONTROL,
                                            targetPosition=[0, 0, 0, 1],
@@ -140,8 +140,8 @@ class YCB():
         collision_id = _COLLISION_ID(i)
       else:
         collision_id = -1
-      for j in range(self._p.getNumJoints(self._objects[i])):
-        self._p.setCollisionFilterGroupMask(self._objects[i],
+      for j in range(self._p.getNumJoints(self._body_id[i])):
+        self._p.setCollisionFilterGroupMask(self._body_id[i],
                                             j,
                                             collisionFilterGroup=collision_id,
                                             collisionFilterMask=collision_id)
@@ -149,9 +149,9 @@ class YCB():
   def clean(self):
     # Remove bodies in reverse added order to maintain deterministic body id
     # assignment for each scene.
-    for i, uid in list(self._objects.items())[::-1]:
-      self._p.removeBody(uid)
-      self._objects.pop(i)
+    for i in list(self._body_id)[::-1]:
+      self._p.removeBody(self._body_id[i])
+      self._body_id.pop(i)
 
   def step(self):
     self._frame += 1
@@ -164,13 +164,13 @@ class YCB():
       for o, i in enumerate(self._ycb_ids):
         q, t = self.get_target_position(self._frame, o)
         self._p.setJointMotorControlArray(
-            self._objects[i], [0, 1, 2],
+            self._body_id[i], [0, 1, 2],
             self._p.POSITION_CONTROL,
             targetPositions=t,
             positionGains=self._translation_gain_p,
             velocityGains=self._translation_gain_d)
         # targetVelocity and velocityGain seem not to have any effect here.
-        self._p.setJointMotorControlMultiDof(self._objects[i],
+        self._p.setJointMotorControlMultiDof(self._body_id[i],
                                              3,
                                              self._p.POSITION_CONTROL,
                                              targetPosition=q,
@@ -182,8 +182,8 @@ class YCB():
     return q, t
 
   def get_base_state(self, ycb_id, is_table_frame=False):
-    state_trans = self._p.getJointStates(self._objects[ycb_id], [0, 1, 2])
-    state_rot = self._p.getJointStateMultiDof(self._objects[ycb_id], 3)
+    state_trans = self._p.getJointStates(self._body_id[ycb_id], [0, 1, 2])
+    state_rot = self._p.getJointStateMultiDof(self._body_id[ycb_id], 3)
     pos_trans = [s[0] for s in state_trans]
     vel_trans = [s[1] for s in state_trans]
     pos_trans = [
@@ -196,16 +196,16 @@ class YCB():
     return pos, vel
 
   def get_contact_points(self, ycb_id):
-    return self._p.getContactPoints(self._objects[ycb_id])
+    return self._p.getContactPoints(self._body_id[ycb_id])
 
   def set_collision_filter(self, ycb_id, collision_id):
-    for j in range(self._p.getNumJoints(self._objects[ycb_id])):
-      self._p.setCollisionFilterGroupMask(self._objects[ycb_id],
+    for j in range(self._p.getNumJoints(self._body_id[ycb_id])):
+      self._p.setCollisionFilterGroupMask(self._body_id[ycb_id],
                                           j,
                                           collisionFilterGroup=collision_id,
                                           collisionFilterMask=collision_id)
 
   def get_aabb_volume(self, ycb_id):
-    aabb = self._p.getAABB(self._objects[ycb_id], linkIndex=3)
+    aabb = self._p.getAABB(self._body_id[ycb_id], linkIndex=3)
     dim = [a - b for a, b in zip(aabb[1], aabb[0])]
     return dim[0] * dim[1] * dim[2]
