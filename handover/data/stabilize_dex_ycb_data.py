@@ -22,8 +22,7 @@ class HandoverEnvStabilizerWrapper(HandoverEnv):
   def __init__(self, is_render=False):
     super().__init__(is_render=is_render,
                      is_control_ycb=False,
-                     is_load_panda_mano=False,
-                     is_disable_table_ycb_collision=False)
+                     is_load_panda_mano=False)
     self._is_render = is_render
 
     # Set the order using a volume-based heuristic.

@@ -31,17 +31,11 @@ _COLLISION_ID = lambda i: 2**i
 class YCB():
   classes = _CLASSES
 
-  def __init__(self,
-               bullet_client,
-               dex_ycb,
-               table_height,
-               is_control=True,
-               is_filter_collision=True):
+  def __init__(self, bullet_client, dex_ycb, table_height, is_control=True):
     self._p = bullet_client
     self._dex_ycb = dex_ycb
     self._table_height = table_height
     self._is_control = is_control
-    self._is_filter_collision = is_filter_collision
 
     xs = np.linspace(0.0, 1.2, 5)
     ys = np.linspace(0.0, 1.0, 4)
@@ -136,15 +130,12 @@ class YCB():
                                            targetVelocity=[0, 0, 0],
                                            force=[0, 0, 0])
 
-      if self._is_filter_collision:
-        collision_id = _COLLISION_ID(i)
-      else:
-        collision_id = -1
       for j in range(self._p.getNumJoints(self._body_id[i])):
-        self._p.setCollisionFilterGroupMask(self._body_id[i],
-                                            j,
-                                            collisionFilterGroup=collision_id,
-                                            collisionFilterMask=collision_id)
+        self._p.setCollisionFilterGroupMask(
+            self._body_id[i],
+            j,
+            collisionFilterGroup=_COLLISION_ID(i),
+            collisionFilterMask=_COLLISION_ID(i))
 
   def clean(self):
     # Remove bodies in reverse added order to maintain deterministic body id
