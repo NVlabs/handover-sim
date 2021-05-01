@@ -32,6 +32,7 @@ class HandoverEnv(gym.Env):
     self._last_frame_time = 0.0
 
     self._dex_ycb = DexYCB(is_preload_from_raw=False)
+    self._cur_scene_id = None
 
   @property
   def num_scenes(self):
@@ -72,12 +73,14 @@ class HandoverEnv(gym.Env):
       if self._is_load_panda_mano:
         self._mano = MANO(self._p, self._dex_ycb, self._table.height)
 
-    if not hard_reset and pose is None:
+    if not hard_reset and scene_id != self._cur_scene_id and pose is None:
       # Remove bodies in reverse added order to maintain deterministic body id
       # assignment for each scene.
       if self._is_load_panda_mano:
         self._mano.clean()
       self._ycb.clean()
+
+    self._cur_scene_id = scene_id
 
     if self._is_load_panda_mano:
       self._panda.reset()

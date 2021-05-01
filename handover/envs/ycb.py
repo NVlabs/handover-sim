@@ -65,9 +65,6 @@ class YCB():
     return self._pose
 
   def reset(self, scene_id=None, pose=None):
-    if pose is None:
-      assert self._body_id == {}
-
     if scene_id is None:
       self._ycb_ids = list(self.classes.keys())
       self._ycb_grasp_ind = -1
@@ -91,8 +88,8 @@ class YCB():
     self._frame = 0
     self._num_frames = len(self._q)
 
-    for i in self._ycb_ids:
-      if pose is None:
+    if self._body_id == {}:
+      for i in self._ycb_ids:
         urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
                                  "assets", self.classes[i],
                                  "model_normalized.urdf")
@@ -101,11 +98,14 @@ class YCB():
             basePosition=self._base_position[i],
             baseOrientation=self._base_orientation,
             useFixedBase=True)
-      else:
-        if np.all(pose[self._ycb_ids.index(i)] == 0):
-          continue
+    else:
+      assert list(self._body_id.keys()) == self._ycb_ids
 
-      if scene_id is None:
+    if scene_id is None:
+      return
+
+    for i in self._ycb_ids:
+      if pose is not None and np.all(pose[self._ycb_ids.index(i)] == 0):
         continue
 
       q, t = self.get_target_position(self._frame, self._ycb_ids.index(i))

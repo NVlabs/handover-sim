@@ -21,8 +21,6 @@ class MANO():
     self._body = None
 
   def reset(self, scene_id=None):
-    assert self._body is None
-
     if scene_id is None:
       return
     else:
@@ -44,20 +42,26 @@ class MANO():
 
     if self._frame == self._sid:
       self.make()
+    else:
+      self.clean()
 
   def make(self):
-    model = HandModel45(left_hand=self._mano_side == 'left',
-                        models_dir=self._models_dir,
-                        betas=self._mano_betas)
-    self._body = HandBodyBaseJoint(self._p, model, shape_betas=self._mano_betas)
+    if self._body is None:
+      model = HandModel45(left_hand=self._mano_side == 'left',
+                          models_dir=self._models_dir,
+                          betas=self._mano_betas)
+      self._body = HandBodyBaseJoint(self._p, model, shape_betas=model._betas)
+
+      for j in range(4, 50, 3):
+        self._p.setCollisionFilterGroupMask(self._body.body_id,
+                                            j,
+                                            collisionFilterGroup=_COLLISION_ID,
+                                            collisionFilterMask=_COLLISION_ID)
+    else:
+      assert self._body._model.is_left_hand == (self._mano_side == 'left')
+      assert self._body._model._betas == self._mano_betas
 
     self._body.reset_from_mano(self._t[self._frame], self._q[self._frame])
-
-    for j in range(4, 50, 3):
-      self._p.setCollisionFilterGroupMask(self._body.body_id,
-                                          j,
-                                          collisionFilterGroup=_COLLISION_ID,
-                                          collisionFilterMask=_COLLISION_ID)
 
   def clean(self):
     if self._body is not None:
