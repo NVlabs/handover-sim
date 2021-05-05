@@ -105,10 +105,11 @@ class YCB():
       return
 
     for i in self._ycb_ids:
-      if pose is not None and np.all(pose[self._ycb_ids.index(i)] == 0):
-        continue
-
-      q, t = self.get_target_position(self._frame, self._ycb_ids.index(i))
+      if pose is None or np.all(pose[self._ycb_ids.index(i)] != 0):
+        q, t = self.get_target_position(self._frame, self._ycb_ids.index(i))
+      else:
+        q = [0, 0, 0, 1]
+        t = [0, 0, 0]
 
       # Reset joint states.
       self._p.resetJointState(self._body_id[i], 0, t[0], targetVelocity=0)
@@ -130,12 +131,19 @@ class YCB():
                                            targetVelocity=[0, 0, 0],
                                            force=[0, 0, 0])
 
+      if pose is None:
+        collision_id = _COLLISION_ID(i)
+      else:
+        if np.all(pose[self._ycb_ids.index(i)] != 0):
+          collision_id = -1
+        else:
+          collision_id = 0
       for j in range(self._p.getNumJoints(self._body_id[i])):
-        self._p.setCollisionFilterGroupMask(
-            self._body_id[i],
-            j,
-            collisionFilterGroup=_COLLISION_ID(i),
-            collisionFilterMask=_COLLISION_ID(i))
+        self._p.setCollisionFilterGroupMask(self._body_id[i],
+                                            j,
+                                            collisionFilterGroup=collision_id,
+                                            collisionFilterMask=collision_id)
+
 
   def clean(self):
     # Remove bodies in reverse added order to maintain deterministic body id
