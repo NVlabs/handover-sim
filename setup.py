@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='handover',
+    name='handover-sim',
     install_requires=[
         'chumpy==0.70',
         'gym==0.18.0',
