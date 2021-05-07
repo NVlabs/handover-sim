@@ -30,9 +30,6 @@ class DexYCB():
   def __init__(self, is_preload_from_raw=True):
     self._is_preload_from_raw = is_preload_from_raw
 
-    assert 'DEX_YCB_DIR' in os.environ, "environment variable 'DEX_YCB_DIR' is not set"
-    self._raw_dir = os.environ['DEX_YCB_DIR']
-
     # TODO(ywchao): set time_step_resample from input and modify pose_file accordingly.
     self._time_step_raw = 0.04
     self._time_step_resample = 0.001
@@ -50,6 +47,10 @@ class DexYCB():
   def preload_from_raw(self):
     print('Preloading DexYCB from raw dataset')
 
+    # Get raw dataset dir.
+    assert 'DEX_YCB_DIR' in os.environ, "environment variable 'DEX_YCB_DIR' is not set"
+    raw_dir = os.environ['DEX_YCB_DIR']
+
     # Load MANO model.
     mano = {}
     for k, name in zip(('right', 'left'), ('RIGHT', 'LEFT')):
@@ -65,18 +66,18 @@ class DexYCB():
     for n in _SUBJECTS:
       print('{:02d}/{:02d}  {}'.format(
           _SUBJECTS.index(n) + 1, len(_SUBJECTS), n))
-      seq = sorted(os.listdir(os.path.join(self._raw_dir, n)))
+      seq = sorted(os.listdir(os.path.join(raw_dir, n)))
       seq = [os.path.join(n, s) for s in seq]
       assert len(seq) == 100
 
       for name in seq:
         # Load meta.
-        meta_file = os.path.join(self._raw_dir, name, "meta.yml")
+        meta_file = os.path.join(raw_dir, name, "meta.yml")
         with open(meta_file, 'r') as f:
           meta = yaml.load(f, Loader=yaml.FullLoader)
 
         # Load extrinsics.
-        extr_file = os.path.join(self._raw_dir, "calibration",
+        extr_file = os.path.join(raw_dir, "calibration",
                                  "extrinsics_{}".format(meta['extrinsics']),
                                  "extrinsics.yml")
         with open(extr_file, 'r') as f:
@@ -89,7 +90,7 @@ class DexYCB():
         tag_t_inv = np.matmul(tag_R_inv, -tag_t)
 
         # Load pose.
-        pose_file = os.path.join(self._raw_dir, name, "pose.npz")
+        pose_file = os.path.join(raw_dir, name, "pose.npz")
         pose = np.load(pose_file)
 
         # Process YCB pose.
@@ -105,7 +106,7 @@ class DexYCB():
         mano_betas = []
         root_trans = []
         for s, c in zip(meta['mano_sides'], meta['mano_calib']):
-          mano_calib_file = os.path.join(self._raw_dir, "calibration",
+          mano_calib_file = os.path.join(raw_dir, "calibration",
                                          "mano_{}".format(c), "mano.yml")
           with open(mano_calib_file, 'r') as f:
             mano_calib = yaml.load(f, Loader=yaml.FullLoader)
