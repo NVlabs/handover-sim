@@ -25,7 +25,7 @@ class HandoverEnv(gym.Env):
 
     self._table_base_position = [0.61, 0.28, 0.0]
     self._table_base_orientation = [0, 0, 0, 1]
-    self._panda_base_position = [0.6, -0.5, 0.875]
+    self._panda_base_position = [0.61, -0.50, 0.875]
     self._panda_base_orientation = [0.0, 0.0, 0.7071068, 0.7071068]
 
     self._p = None
