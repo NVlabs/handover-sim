@@ -9,6 +9,7 @@ _COLLISION_ID = 2**22
 
 # TODO(ywchao): add ground-truth motions.
 class MANO():
+  collision_id = _COLLISION_ID
 
   def __init__(self, bullet_client, dex_ycb, table_height):
     self._p = bullet_client

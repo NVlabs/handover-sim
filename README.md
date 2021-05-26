@@ -86,6 +86,14 @@ This code is tested with Python 3.7 on Linux.
 
 ### Running demos
 
-```Shell
-python examples/demo_handover_env.py
-```
+1. Running an handover environment:
+
+    ```Shell
+    python examples/demo_handover_env.py
+    ```
+
+2. Running a planned trajectory:
+
+    ```Shell
+    python examples/demo_trajectory.py
+    ```

@@ -64,6 +64,10 @@ class YCB():
   def pose(self):
     return self._pose
 
+  @property
+  def released(self):
+    return self._released
+
   def reset(self, scene_id=None, pose=None):
     if scene_id is None:
       self._ycb_ids = list(self.classes.keys())
@@ -87,6 +91,7 @@ class YCB():
 
     self._frame = 0
     self._num_frames = len(self._q)
+    self._released = False
 
     if self._body_id == {}:
       for i in self._ycb_ids:
@@ -144,7 +149,6 @@ class YCB():
                                             collisionFilterGroup=collision_id,
                                             collisionFilterMask=collision_id)
 
-
   def clean(self):
     # Remove bodies in reverse added order to maintain deterministic body id
     # assignment for each scene.
@@ -161,6 +165,8 @@ class YCB():
     if self._is_control:
       # Set target position.
       for o, i in enumerate(self._ycb_ids):
+        if self._released and o == self._ycb_grasp_ind:
+          continue
         q, t = self.get_target_position(self._frame, o)
         self._p.setJointMotorControlArray(
             self._body_id[i], [0, 1, 2],
@@ -174,6 +180,31 @@ class YCB():
                                              self._p.POSITION_CONTROL,
                                              targetPosition=q,
                                              positionGain=self._rotation_gain_p)
+
+  def release(self, mano_collision_id):
+    self._p.setJointMotorControlArray(
+        self._body_id[self._ycb_ids[self._ycb_grasp_ind]], [0, 1, 2],
+        self._p.POSITION_CONTROL,
+        forces=[0, 0, 0])
+    self._p.setJointMotorControlMultiDof(
+        self._body_id[self._ycb_ids[self._ycb_grasp_ind]],
+        3,
+        self._p.POSITION_CONTROL,
+        targetPosition=[0, 0, 0, 1],
+        targetVelocity=[0, 0, 0],
+        force=[0, 0, 0])
+
+    collision_id = -1 - mano_collision_id
+    for j in range(
+        self._p.getNumJoints(
+            self._body_id[self._ycb_ids[self._ycb_grasp_ind]])):
+      self._p.setCollisionFilterGroupMask(
+          self._body_id[self._ycb_ids[self._ycb_grasp_ind]],
+          j,
+          collisionFilterGroup=collision_id,
+          collisionFilterMask=collision_id)
+
+    self._released = True
 
   def get_target_position(self, frame, obj_id):
     q = self._q[frame, obj_id]
@@ -208,3 +239,7 @@ class YCB():
     aabb = self._p.getAABB(self._body_id[ycb_id], linkIndex=3)
     dim = [a - b for a, b in zip(aabb[1], aabb[0])]
     return dim[0] * dim[1] * dim[2]
+
+  def get_grasp_contact_points(self):
+    return self._p.getContactPoints(
+        self._body_id[self._ycb_ids[self._ycb_grasp_ind]])

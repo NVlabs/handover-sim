@@ -28,6 +28,8 @@ class HandoverEnv(gym.Env):
     self._panda_base_position = [0.61, -0.50, 0.875]
     self._panda_base_orientation = [0.0, 0.0, 0.7071068, 0.7071068]
 
+    self._release_force_threshold = 0.0
+
     self._p = None
     self._last_frame_time = 0.0
 
@@ -37,6 +39,10 @@ class HandoverEnv(gym.Env):
   @property
   def num_scenes(self):
     return self._dex_ycb.num_scenes
+
+  @property
+  def panda_body_id(self):
+    return self._panda.body_id
 
   def reset(self, hard_reset=False, scene_id=None, pose=None):
     if self._p is None:
@@ -110,5 +116,13 @@ class HandoverEnv(gym.Env):
       self._mano.step()
 
     self._p.stepSimulation()
+
+    if not self._ycb.released:
+      pts = self._ycb.get_grasp_contact_points()
+      pts = tuple(x for x in pts if x[2] == self._panda.body_id)
+      if len(pts) > 0:
+        max_force = max([x[9] for x in pts])
+        if max_force > self._release_force_threshold:
+          self._ycb.release(self._mano.collision_id)
 
     return None, None, None, None
