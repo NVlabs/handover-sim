@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from mano_pybullet.hand_model import HandModel45
-from mano_pybullet.hand_body_base_joint import HandBodyBaseJoint
+from mano_pybullet.hand_body_base_joint import HandBody, HandBodyBaseJoint
 
 _COLLISION_ID = 2**22
 
@@ -51,7 +51,11 @@ class MANO():
       model = HandModel45(left_hand=self._mano_side == 'left',
                           models_dir=self._models_dir,
                           betas=self._mano_betas)
-      self._body = HandBodyBaseJoint(self._p, model, shape_betas=model._betas)
+      flags = HandBody.FLAG_DEFAULT & ~HandBody.FLAG_USE_SELF_COLLISION
+      self._body = HandBodyBaseJoint(self._p,
+                                     model,
+                                     flags=flags,
+                                     shape_betas=model._betas)
 
       for j in range(4, 50, 3):
         self._p.setCollisionFilterGroupMask(self._body.body_id,
