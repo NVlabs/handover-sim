@@ -84,9 +84,9 @@ This code is tested with Python 3.7 on Linux.
     cd ../..
     ```
 
-### Running demos
+### Running Examples
 
-1. Running an handover environment:
+1. Running a handover environment:
 
     ```Shell
     python examples/demo_handover_env.py
