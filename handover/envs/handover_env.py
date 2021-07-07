@@ -118,11 +118,10 @@ class HandoverEnv(gym.Env):
     self._p.stepSimulation()
 
     if not self._ycb.released:
-      pts = self._ycb.get_grasp_contact_points()
-      pts = tuple(x for x in pts if x[2] == self._panda.body_id)
-      if len(pts) > 0:
-        max_force = max([x[9] for x in pts])
-        if max_force > self._release_force_threshold:
-          self._ycb.release(self._mano.collision_id)
+      pts = self._p.getContactPoints(
+          self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
+          self._panda.body_id)
+      if any([x[9] > self._release_force_threshold for x in pts]):
+        self._ycb.release(self._mano.collision_id)
 
     return None, None, None, None

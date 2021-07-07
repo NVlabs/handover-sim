@@ -53,6 +53,10 @@ class YCB():
     self._body_id = {}
 
   @property
+  def body_id(self):
+    return self._body_id
+
+  @property
   def ycb_ids(self):
     return self._ycb_ids
 
@@ -239,7 +243,3 @@ class YCB():
     aabb = self._p.getAABB(self._body_id[ycb_id], linkIndex=3)
     dim = [a - b for a, b in zip(aabb[1], aabb[0])]
     return dim[0] * dim[1] * dim[2]
-
-  def get_grasp_contact_points(self):
-    return self._p.getContactPoints(
-        self._body_id[self._ycb_ids[self._ycb_grasp_ind]])
