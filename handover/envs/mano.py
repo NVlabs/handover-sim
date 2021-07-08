@@ -21,14 +21,11 @@ class MANO():
 
     self._body = None
 
-  def reset(self, scene_id=None):
-    if scene_id is None:
-      return
-    else:
-      scene_data = self._dex_ycb.get_scene_data(scene_id)
-      self._mano_side = scene_data['mano_sides'][0]
-      self._mano_betas = scene_data['mano_betas'][0]
-      pose = scene_data['pose_m'][:, 0]
+  def reset(self, scene_id):
+    scene_data = self._dex_ycb.get_scene_data(scene_id)
+    self._mano_side = scene_data['mano_sides'][0]
+    self._mano_betas = scene_data['mano_betas'][0]
+    pose = scene_data['pose_m'][:, 0]
 
     self._sid = np.where(np.any(pose != 0, axis=1))[0][0]
     self._eid = np.where(np.any(pose != 0, axis=1))[0][-1]

@@ -25,7 +25,6 @@ _NUM_SEQUENCES = 1000
 
 
 class DexYCB():
-  num_scenes = _NUM_SEQUENCES
 
   def __init__(self, is_preload_from_raw=True):
     self._is_preload_from_raw = is_preload_from_raw
@@ -42,7 +41,7 @@ class DexYCB():
     if self._is_preload_from_raw:
       self._scene_data = self.preload_from_raw()
     else:
-      self._scene_data = {scene_id: None for scene_id in range(self.num_scenes)}
+      self._scene_data = {scene_id: None for scene_id in range(_NUM_SEQUENCES)}
 
   def preload_from_raw(self):
     print('Preloading DexYCB from raw dataset')
@@ -158,7 +157,7 @@ class DexYCB():
 
         scene_id += 1
 
-    assert len(scene_data) == self.num_scenes
+    assert len(scene_data) == _NUM_SEQUENCES
 
     return scene_data
 

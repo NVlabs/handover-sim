@@ -3,6 +3,8 @@ import pybullet
 
 from handover.envs.handover_env import HandoverEnv
 
+scene_id = 105
+
 start_conf = np.array([
     -0.0593, -1.6124, -0.1970, -2.5300, -0.0952, +1.6780, +0.587, +0.0400, +0.0400,
 ])
@@ -47,7 +49,7 @@ def main():
   env = HandoverEnv(is_render=True)
 
   while True:
-    env.reset(scene_id=105)
+    env.reset(scene_id)
 
     for _ in range(3000):
       action = start_conf

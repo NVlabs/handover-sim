@@ -13,13 +13,8 @@ from handover.envs.mano import MANO
 
 class HandoverEnv(gym.Env):
 
-  def __init__(self,
-               is_render=False,
-               is_control_ycb=True,
-               is_load_panda_mano=True):
+  def __init__(self, is_render=False):
     self._is_render = is_render
-    self._is_control_ycb = is_control_ycb
-    self._is_load_panda_mano = is_load_panda_mano
 
     self._time_step = 0.001
 
@@ -37,14 +32,10 @@ class HandoverEnv(gym.Env):
     self._cur_scene_id = None
 
   @property
-  def num_scenes(self):
-    return self._dex_ycb.num_scenes
-
-  @property
   def panda_body_id(self):
     return self._panda.body_id
 
-  def reset(self, hard_reset=False, scene_id=None, pose=None):
+  def reset(self, scene_id, hard_reset=False):
     if self._p is None:
       hard_reset = True
       if self._is_render:
@@ -68,31 +59,23 @@ class HandoverEnv(gym.Env):
                           base_position=self._table_base_position,
                           base_orientation=self._table_base_orientation)
 
-      if self._is_load_panda_mano:
-        self._panda = Panda(self._p,
-                            base_position=self._panda_base_position,
-                            base_orientation=self._panda_base_orientation)
-      self._ycb = YCB(self._p,
-                      self._dex_ycb,
-                      self._table.height,
-                      is_control=self._is_control_ycb)
-      if self._is_load_panda_mano:
-        self._mano = MANO(self._p, self._dex_ycb, self._table.height)
+      self._panda = Panda(self._p,
+                          base_position=self._panda_base_position,
+                          base_orientation=self._panda_base_orientation)
+      self._ycb = YCB(self._p, self._dex_ycb, self._table.height)
+      self._mano = MANO(self._p, self._dex_ycb, self._table.height)
 
-    if not hard_reset and scene_id != self._cur_scene_id and pose is None:
+    if not hard_reset and scene_id != self._cur_scene_id:
       # Remove bodies in reverse added order to maintain deterministic body id
       # assignment for each scene.
-      if self._is_load_panda_mano:
-        self._mano.clean()
+      self._mano.clean()
       self._ycb.clean()
 
     self._cur_scene_id = scene_id
 
-    if self._is_load_panda_mano:
-      self._panda.reset()
-    self._ycb.reset(scene_id=scene_id, pose=pose)
-    if self._is_load_panda_mano:
-      self._mano.reset(scene_id=scene_id)
+    self._panda.reset()
+    self._ycb.reset(scene_id)
+    self._mano.reset(scene_id)
 
     if self._is_render:
       self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 1)
@@ -109,11 +92,9 @@ class HandoverEnv(gym.Env):
         time.sleep(time_sleep)
       self._last_frame_time = time.time()
 
-    if self._is_load_panda_mano:
-      self._panda.set_target_positions(action)
+    self._panda.set_target_positions(action)
     self._ycb.step()
-    if self._is_load_panda_mano:
-      self._mano.step()
+    self._mano.step()
 
     self._p.stepSimulation()
 
