@@ -21,6 +21,13 @@ class MANO():
 
     self._body = None
 
+  @property
+  def body_id(self):
+    if self._body is None:
+      return None
+    else:
+      return self._body.body_id
+
   def reset(self, scene_id):
     scene_data = self._dex_ycb.get_scene_data(scene_id)
     self._mano_side = scene_data['mano_sides'][0]

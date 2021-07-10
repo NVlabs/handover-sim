@@ -105,4 +105,4 @@ class HandoverEnv(gym.Env):
       if any([x[9] > self._release_force_threshold for x in pts]):
         self._ycb.release(self._mano.collision_id)
 
-    return None, None, None, None
+    return None, None, False, {}

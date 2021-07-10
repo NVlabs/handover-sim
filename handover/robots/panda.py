@@ -7,8 +7,13 @@ https://github.com/liruiw/OMG-Planner/blob/dcbbb8279570cd62cf7388bf393c8b3e2d568
 
 import os
 
+_LINK_ID_HAND = 7
+_LINK_ID_FINGERS = [8, 9]
+
 
 class Panda:
+  link_id_hand = _LINK_ID_HAND
+  link_id_fingers = _LINK_ID_FINGERS
 
   def __init__(self,
                bullet_client,

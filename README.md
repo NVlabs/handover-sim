@@ -97,3 +97,9 @@ This code is tested with Python 3.7 on Linux.
     ```Shell
     python examples/demo_trajectory.py
     ```
+
+3. Running a benchmark environment:
+
+    ```Shell
+    python examples/demo_benchmark_env.py
+    ```

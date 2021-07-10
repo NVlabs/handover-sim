@@ -28,3 +28,7 @@ class Table():
                                         -1,
                                         collisionFilterGroup=_COLLISION_ID,
                                         collisionFilterMask=_COLLISION_ID)
+
+  @property
+  def body_id(self):
+    return self._body_id
