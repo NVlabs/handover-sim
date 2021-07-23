@@ -97,13 +97,10 @@ class YCB():
       q, t = self.get_target_position(self._frame, self._ycb_ids.index(i))
 
       # Reset joint states.
-      self._p.resetJointState(self._body_id[i], 0, t[0], targetVelocity=0)
-      self._p.resetJointState(self._body_id[i], 1, t[1], targetVelocity=0)
-      self._p.resetJointState(self._body_id[i], 2, t[2], targetVelocity=0)
-      self._p.resetJointStateMultiDof(self._body_id[i],
-                                      3,
-                                      q,
-                                      targetVelocity=[0, 0, 0])
+      self._p.resetJointState(self._body_id[i], 0, t[0])
+      self._p.resetJointState(self._body_id[i], 1, t[1])
+      self._p.resetJointState(self._body_id[i], 2, t[2])
+      self._p.resetJointStateMultiDof(self._body_id[i], 3, q)
 
       # Reset controllers.
       self._p.setJointMotorControlArray(self._body_id[i], [0, 1, 2],
@@ -113,7 +110,6 @@ class YCB():
                                            3,
                                            self._p.POSITION_CONTROL,
                                            targetPosition=[0, 0, 0, 1],
-                                           targetVelocity=[0, 0, 0],
                                            force=[0, 0, 0])
 
       for j in range(self._p.getNumJoints(self._body_id[i])):
@@ -163,7 +159,6 @@ class YCB():
         3,
         self._p.POSITION_CONTROL,
         targetPosition=[0, 0, 0, 1],
-        targetVelocity=[0, 0, 0],
         force=[0, 0, 0])
 
     collision_id = -1 - mano_collision_id
