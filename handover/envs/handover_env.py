@@ -62,8 +62,8 @@ class HandoverEnv(gym.Env):
       self._panda = Panda(self._p,
                           base_position=self._panda_base_position,
                           base_orientation=self._panda_base_orientation)
-      self._ycb = YCB(self._p, self._dex_ycb, self._table.height)
-      self._mano = MANO(self._p, self._dex_ycb, self._table.height)
+      self._ycb = YCB(self._p, self._dex_ycb, self._table.HEIGHT)
+      self._mano = MANO(self._p, self._dex_ycb, self._table.HEIGHT)
 
     if not hard_reset and scene_id != self._cur_scene_id:
       # Remove bodies in reverse added order to maintain deterministic body id
@@ -103,6 +103,6 @@ class HandoverEnv(gym.Env):
           self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
           self._panda.body_id)
       if any([x[9] > self._release_force_threshold for x in pts]):
-        self._ycb.release(self._mano.collision_id)
+        self._ycb.release(self._mano.COLLISION_ID)
 
     return None, None, False, {}

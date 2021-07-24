@@ -4,12 +4,10 @@ import numpy as np
 from mano_pybullet.hand_model import HandModel45
 from mano_pybullet.hand_body_base_joint import HandBody, HandBodyBaseJoint
 
-_COLLISION_ID = 2**22
-
 
 # TODO(ywchao): add ground-truth motions.
 class MANO():
-  collision_id = _COLLISION_ID
+  COLLISION_ID = 2**22
 
   def __init__(self, bullet_client, dex_ycb, table_height):
     self._p = bullet_client
@@ -62,10 +60,11 @@ class MANO():
                                      shape_betas=model._betas)
 
       for j in range(4, 50, 3):
-        self._p.setCollisionFilterGroupMask(self._body.body_id,
-                                            j,
-                                            collisionFilterGroup=_COLLISION_ID,
-                                            collisionFilterMask=_COLLISION_ID)
+        self._p.setCollisionFilterGroupMask(
+            self._body.body_id,
+            j,
+            collisionFilterGroup=self.COLLISION_ID,
+            collisionFilterMask=self.COLLISION_ID)
     else:
       assert self._body._model.is_left_hand == (self._mano_side == 'left')
       assert self._body._model._betas == self._mano_betas

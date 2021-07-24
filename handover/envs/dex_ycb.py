@@ -8,23 +8,22 @@ from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 from scipy import interpolate
 
-_SUBJECTS = [
-    '20200709-subject-01',
-    '20200813-subject-02',
-    '20200820-subject-03',
-    '20200903-subject-04',
-    '20200908-subject-05',
-    '20200918-subject-06',
-    '20200928-subject-07',
-    '20201002-subject-08',
-    '20201015-subject-09',
-    '20201022-subject-10',
-]
-
-_NUM_SEQUENCES = 1000
-
 
 class DexYCB():
+  _SUBJECTS = [
+      '20200709-subject-01',
+      '20200813-subject-02',
+      '20200820-subject-03',
+      '20200903-subject-04',
+      '20200908-subject-05',
+      '20200918-subject-06',
+      '20200928-subject-07',
+      '20201002-subject-08',
+      '20201015-subject-09',
+      '20201022-subject-10',
+  ]
+
+  _NUM_SEQUENCES = 1000
 
   def __init__(self, is_preload_from_raw=True):
     self._is_preload_from_raw = is_preload_from_raw
@@ -41,7 +40,9 @@ class DexYCB():
     if self._is_preload_from_raw:
       self._scene_data = self.preload_from_raw()
     else:
-      self._scene_data = {scene_id: None for scene_id in range(_NUM_SEQUENCES)}
+      self._scene_data = {
+          scene_id: None for scene_id in range(self._NUM_SEQUENCES)
+      }
 
   def preload_from_raw(self):
     print('Preloading DexYCB from raw dataset')
@@ -62,9 +63,9 @@ class DexYCB():
     scene_data = {}
     scene_id = 0
 
-    for n in _SUBJECTS:
+    for n in self._SUBJECTS:
       print('{:02d}/{:02d}  {}'.format(
-          _SUBJECTS.index(n) + 1, len(_SUBJECTS), n))
+          self._SUBJECTS.index(n) + 1, len(self._SUBJECTS), n))
       seq = sorted(os.listdir(os.path.join(raw_dir, n)))
       seq = [os.path.join(n, s) for s in seq]
       assert len(seq) == 100
@@ -157,7 +158,7 @@ class DexYCB():
 
         scene_id += 1
 
-    assert len(scene_data) == _NUM_SEQUENCES
+    assert len(scene_data) == self._NUM_SEQUENCES
 
     return scene_data
 

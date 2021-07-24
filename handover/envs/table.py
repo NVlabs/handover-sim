@@ -1,12 +1,10 @@
 import os
 
-_HEIGHT = 0.92
-
-_COLLISION_ID = 2**0
-
 
 class Table():
-  height = _HEIGHT
+  HEIGHT = 0.92
+
+  _COLLISION_ID = 2**0
 
   def __init__(self,
                bullet_client,
@@ -26,8 +24,8 @@ class Table():
 
     self._p.setCollisionFilterGroupMask(self._body_id,
                                         -1,
-                                        collisionFilterGroup=_COLLISION_ID,
-                                        collisionFilterMask=_COLLISION_ID)
+                                        collisionFilterGroup=self._COLLISION_ID,
+                                        collisionFilterMask=self._COLLISION_ID)
 
   @property
   def body_id(self):

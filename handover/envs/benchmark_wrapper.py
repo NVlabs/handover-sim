@@ -2,14 +2,11 @@ import numpy as np
 
 from handover.envs.handover_env import HandoverEnv
 
-_FAILURE_ROBOT_HUMAN_CONTACT = -1
-_FAILURE_OBJECT_DROP = -2
-_FAILURE_TIMEOUT = -4
-
-_EVAL_SKIP_OBJECT = [0, 15]
-
 
 class HandoverStatusEnv(HandoverEnv):
+  _FAILURE_ROBOT_HUMAN_CONTACT = -1
+  _FAILURE_OBJECT_DROP = -2
+  _FAILURE_TIMEOUT = -4
 
   def __init__(self, is_render=False, is_draw_goal=False):
     super().__init__(is_render=is_render)
@@ -78,7 +75,7 @@ class HandoverStatusEnv(HandoverEnv):
     status = self.check_status()
 
     if self._elapsed_steps >= self._max_episode_steps and status != 1:
-      status += _FAILURE_TIMEOUT
+      status += self._FAILURE_TIMEOUT
 
     done |= status != 0
 
@@ -93,7 +90,7 @@ class HandoverStatusEnv(HandoverEnv):
       pts = self._p.getContactPoints(self._mano.body_id, self._panda.body_id)
       for x in pts:
         if x[9] > self._contact_force_threshold:
-          status += _FAILURE_ROBOT_HUMAN_CONTACT
+          status += self._FAILURE_ROBOT_HUMAN_CONTACT
           break
 
     if not self._ycb.released:
@@ -111,7 +108,7 @@ class HandoverStatusEnv(HandoverEnv):
           x[4] for x in pts_panda if x[9] > self._contact_force_threshold
       ]
       is_contact_panda_fingers = set(
-          self._panda.link_id_fingers).issubset(pts_panda_link_id)
+          self._panda.LINK_ID_FINGERS).issubset(pts_panda_link_id)
       is_contact_table = any(
           [x[9] > self._contact_force_threshold for x in pts_table])
       is_contact_static_ycb = any(
@@ -119,7 +116,7 @@ class HandoverStatusEnv(HandoverEnv):
 
       pos, _ = self._ycb.get_base_state(
           self._ycb.ycb_ids[self._ycb.ycb_grasp_ind])
-      is_below_table = pos[6] < self._table.height
+      is_below_table = pos[6] < self._table.HEIGHT
 
       if not is_contact_panda_fingers and (is_contact_table or
                                            is_contact_static_ycb or
@@ -127,7 +124,7 @@ class HandoverStatusEnv(HandoverEnv):
         self._dropped = True
 
     if self._dropped:
-      status += _FAILURE_OBJECT_DROP
+      status += self._FAILURE_OBJECT_DROP
 
     if status < 0:
       return status
@@ -137,7 +134,7 @@ class HandoverStatusEnv(HandoverEnv):
         self._success_step_counter = 0
       return 0
 
-    pos = self._p.getLinkState(self.panda_body_id, self._panda.link_id_hand)[4]
+    pos = self._p.getLinkState(self.panda_body_id, self._panda.LINK_ID_HAND)[4]
     dist = np.linalg.norm(np.array(pos, dtype=np.float32) - self._goal_center)
     is_within_goal = dist < self._goal_radius
 
@@ -155,6 +152,7 @@ class HandoverStatusEnv(HandoverEnv):
 
 
 class HandoverBenchmarkEnv(HandoverStatusEnv):
+  _EVAL_SKIP_OBJECT = [0, 15]
 
   def __init__(self, setup, split, is_render=False, is_draw_goal=False):
     super().__init__(is_render=is_render, is_draw_goal=is_draw_goal)
@@ -205,7 +203,7 @@ class HandoverBenchmarkEnv(HandoverStatusEnv):
     self._scene_ids = []
     for i in range(1000):
       if i // 100 in subject_ind and i % 100 in sequence_ind:
-        if i // 5 % 20 in _EVAL_SKIP_OBJECT:
+        if i // 5 % 20 in self._EVAL_SKIP_OBJECT:
           continue
         self._scene_ids.append(i)
 

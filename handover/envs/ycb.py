@@ -1,34 +1,33 @@
 import numpy as np
 import os
 
-_CLASSES = {
-     1: '002_master_chef_can',
-     2: '003_cracker_box',
-     3: '004_sugar_box',
-     4: '005_tomato_soup_can',
-     5: '006_mustard_bottle',
-     6: '007_tuna_fish_can',
-     7: '008_pudding_box',
-     8: '009_gelatin_box',
-     9: '010_potted_meat_can',
-    10: '011_banana',
-    11: '019_pitcher_base',
-    12: '021_bleach_cleanser',
-    13: '024_bowl',
-    14: '025_mug',
-    15: '035_power_drill',
-    16: '036_wood_block',
-    17: '037_scissors',
-    18: '040_large_marker',
-    20: '052_extra_large_clamp',
-    21: '061_foam_brick',
-}
-
-_COLLISION_ID = lambda i: 2**i
-
 
 # TODO(ywchao): add ground-truth motions.
 class YCB():
+  _CLASSES = {
+       1: '002_master_chef_can',
+       2: '003_cracker_box',
+       3: '004_sugar_box',
+       4: '005_tomato_soup_can',
+       5: '006_mustard_bottle',
+       6: '007_tuna_fish_can',
+       7: '008_pudding_box',
+       8: '009_gelatin_box',
+       9: '010_potted_meat_can',
+      10: '011_banana',
+      11: '019_pitcher_base',
+      12: '021_bleach_cleanser',
+      13: '024_bowl',
+      14: '025_mug',
+      15: '035_power_drill',
+      16: '036_wood_block',
+      17: '037_scissors',
+      18: '040_large_marker',
+      20: '052_extra_large_clamp',
+      21: '061_foam_brick',
+  }
+
+  _COLLISION_ID = lambda self, i: 2**i
 
   def __init__(self, bullet_client, dex_ycb, table_height):
     self._p = bullet_client
@@ -40,7 +39,7 @@ class YCB():
     offset = np.array([0.0, 2.0, 0.2], dtype=np.float32)
     self._base_position = {
         i: np.array([xs[o % len(xs)], ys[o // len(xs)], 0], dtype=np.float32) +
-        offset for o, i in enumerate(_CLASSES)
+        offset for o, i in enumerate(self._CLASSES)
     }
     self._base_orientation = [0, 0, 0, 1]
 
@@ -84,7 +83,8 @@ class YCB():
     if self._body_id == {}:
       for i in self._ycb_ids:
         urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
-                                 "assets", _CLASSES[i], "model_normalized.urdf")
+                                 "assets", self._CLASSES[i],
+                                 "model_normalized.urdf")
         self._body_id[i] = self._p.loadURDF(
             urdf_file,
             basePosition=self._base_position[i],
@@ -116,8 +116,8 @@ class YCB():
         self._p.setCollisionFilterGroupMask(
             self._body_id[i],
             j,
-            collisionFilterGroup=_COLLISION_ID(i),
-            collisionFilterMask=_COLLISION_ID(i))
+            collisionFilterGroup=self._COLLISION_ID(i),
+            collisionFilterMask=self._COLLISION_ID(i))
 
   def clean(self):
     # Remove bodies in reverse added order to maintain deterministic body id
