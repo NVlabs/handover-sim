@@ -113,11 +113,9 @@ class YCB():
                                            force=[0, 0, 0])
 
       for j in range(self._p.getNumJoints(self._body_id[i])):
-        self._p.setCollisionFilterGroupMask(
-            self._body_id[i],
-            j,
-            collisionFilterGroup=self._COLLISION_ID(i),
-            collisionFilterMask=self._COLLISION_ID(i))
+        self._p.setCollisionFilterGroupMask(self._body_id[i], j,
+                                            self._COLLISION_ID(i),
+                                            self._COLLISION_ID(i))
 
   def clean(self):
     # Remove bodies in reverse added order to maintain deterministic body id
@@ -166,10 +164,8 @@ class YCB():
         self._p.getNumJoints(
             self._body_id[self._ycb_ids[self._ycb_grasp_ind]])):
       self._p.setCollisionFilterGroupMask(
-          self._body_id[self._ycb_ids[self._ycb_grasp_ind]],
-          j,
-          collisionFilterGroup=collision_id,
-          collisionFilterMask=collision_id)
+          self._body_id[self._ycb_ids[self._ycb_grasp_ind]], j, collision_id,
+          collision_id)
 
     self._released = True
 

@@ -22,10 +22,8 @@ class Table():
 
     self._p.changeVisualShape(self._body_id, -1, rgbaColor=[1, 1, 1, 1])
 
-    self._p.setCollisionFilterGroupMask(self._body_id,
-                                        -1,
-                                        collisionFilterGroup=self._COLLISION_ID,
-                                        collisionFilterMask=self._COLLISION_ID)
+    self._p.setCollisionFilterGroupMask(self._body_id, -1, self._COLLISION_ID,
+                                        self._COLLISION_ID)
 
   @property
   def body_id(self):

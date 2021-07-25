@@ -60,11 +60,9 @@ class MANO():
                                      shape_betas=model._betas)
 
       for j in range(4, 50, 3):
-        self._p.setCollisionFilterGroupMask(
-            self._body.body_id,
-            j,
-            collisionFilterGroup=self.COLLISION_ID,
-            collisionFilterMask=self.COLLISION_ID)
+        self._p.setCollisionFilterGroupMask(self._body.body_id, j,
+                                            self.COLLISION_ID,
+                                            self.COLLISION_ID)
     else:
       assert self._body._model.is_left_hand == (self._mano_side == 'left')
       assert self._body._model._betas == self._mano_betas
