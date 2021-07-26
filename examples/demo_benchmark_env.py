@@ -44,7 +44,7 @@ class Policy():
     num_steps = int(np.ceil(np.linalg.norm(vec) / 0.03))
     for i in range(num_steps):
       pos += step
-      conf = np.array(self._env._p.calculateInverseKinematics(
+      conf = np.array(pybullet.calculateInverseKinematics(
           self._env._panda.body_id, self._env._panda.LINK_ID_HAND, pos),
                       dtype=np.float32)
       conf[-2:] = 0.0
