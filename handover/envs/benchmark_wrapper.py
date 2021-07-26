@@ -87,7 +87,8 @@ class HandoverStatusEnv(HandoverEnv):
     status = 0
 
     if self._mano.body_id is not None:
-      pts = self._p.getContactPoints(self._mano.body_id, self._panda.body_id)
+      pts = self._p.getContactPoints(bodyA=self._mano.body_id,
+                                     bodyB=self._panda.body_id)
       for x in pts:
         if x[9] > self._contact_force_threshold:
           status += self._FAILURE_ROBOT_HUMAN_CONTACT
@@ -98,7 +99,7 @@ class HandoverStatusEnv(HandoverEnv):
 
     if not self._dropped:
       pts = self._p.getContactPoints(
-          self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]])
+          bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]])
 
       pts_panda = [x for x in pts if x[2] == self._panda.body_id]
       pts_table = [x for x in pts if x[2] == self._table.body_id]

@@ -96,8 +96,8 @@ class HandoverEnv(gym.Env):
 
     if not self._ycb.released:
       pts = self._p.getContactPoints(
-          self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
-          self._panda.body_id)
+          bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
+          bodyB=self._panda.body_id)
       if any([x[9] > self._release_force_threshold for x in pts]):
         self._ycb.release(self._mano.COLLISION_ID)
 
