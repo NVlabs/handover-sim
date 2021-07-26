@@ -31,10 +31,6 @@ class HandoverEnv(gym.Env):
     self._dex_ycb = DexYCB(is_preload_from_raw=False)
     self._cur_scene_id = None
 
-  @property
-  def panda_body_id(self):
-    return self._panda.body_id
-
   def reset(self, scene_id, hard_reset=False):
     if self._p is None:
       hard_reset = True

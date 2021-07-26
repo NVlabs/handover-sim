@@ -60,11 +60,11 @@ def main():
       for _ in range(num_action_repeat):
         env.step(action)
 
-    pos = pybullet.getLinkState(env.panda_body_id, 7)[4]
+    pos = pybullet.getLinkState(env._panda.body_id, env._panda.LINK_ID_HAND)[4]
     for i in range(10):
       pos = (pos[0], pos[1] - 0.03, pos[2])
       action = np.array(pybullet.calculateInverseKinematics(
-          env.panda_body_id, 7, pos),
+          env._panda.body_id, env._panda.LINK_ID_HAND, pos),
                         dtype=np.float32)
       action[-2:] = 0.0
       for _ in range(num_action_repeat):

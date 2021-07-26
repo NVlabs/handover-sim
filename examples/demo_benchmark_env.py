@@ -36,7 +36,8 @@ class Policy():
 
   def back(self):
     back = []
-    pos = pybullet.getLinkState(self._env.panda_body_id, 7)[4]
+    pos = pybullet.getLinkState(self._env._panda.body_id,
+                                self._env._panda.LINK_ID_HAND)[4]
     pos = np.array(pos, dtype=np.float32)
     vec = self._env.goal_center - pos
     step = (vec / np.linalg.norm(vec)) * 0.03
@@ -44,7 +45,7 @@ class Policy():
     for i in range(num_steps):
       pos += step
       conf = np.array(self._env._p.calculateInverseKinematics(
-          self._env.panda_body_id, 7, pos),
+          self._env._panda.body_id, self._env._panda.LINK_ID_HAND, pos),
                       dtype=np.float32)
       conf[-2:] = 0.0
       back.append(conf)
