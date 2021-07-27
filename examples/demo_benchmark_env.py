@@ -22,12 +22,16 @@ class Policy():
     elif frame < 3000 + len(traj) * num_action_repeat:
       i = (frame - 3000) // num_action_repeat
       action = traj[i]
+    elif frame < 3000 + len(traj) * num_action_repeat + 200:
+      action = traj[-1].copy()
+      action[-2:] = 0.0
     else:
-      if frame == 3000 + len(traj) * num_action_repeat:
+      if frame == 3000 + len(traj) * num_action_repeat + 200:
         self._back = self.back()
-      if frame < 3000 + len(traj) * num_action_repeat + len(
+      if frame < 3000 + len(traj) * num_action_repeat + 200 + len(
           self._back) * num_action_repeat:
-        i = (frame - 3000 - len(traj) * num_action_repeat) // num_action_repeat
+        i = (frame - 3000 - len(traj) * num_action_repeat -
+             200) // num_action_repeat
         action = self._back[i]
       else:
         action = self._back[-1]

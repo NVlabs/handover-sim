@@ -60,6 +60,11 @@ def main():
       for _ in range(num_action_repeat):
         env.step(action)
 
+    for _ in range(200):
+      action = traj[-1].copy()
+      action[-2:] = 0.0
+      env.step(action)
+
     pos = pybullet.getLinkState(env._panda.body_id, env._panda.LINK_ID_HAND)[4]
     for i in range(10):
       pos = (pos[0], pos[1] - 0.03, pos[2])

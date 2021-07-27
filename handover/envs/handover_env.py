@@ -24,6 +24,8 @@ class HandoverEnv(gym.Env):
     self._panda_base_orientation = [0.0, 0.0, 0.7071068, 0.7071068]
 
     self._release_force_threshold = 0.0
+    self._release_time_threshold = 0.2
+    self._release_step_threshold = self._release_time_threshold / self._time_step
 
     self._p = None
     self._last_frame_time = 0.0
@@ -76,6 +78,8 @@ class HandoverEnv(gym.Env):
     if self._is_render:
       self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 1)
 
+    self._release_step_counter = 0
+
     return None
 
   def step(self, action):
@@ -99,6 +103,11 @@ class HandoverEnv(gym.Env):
           bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
           bodyB=self._panda.body_id)
       if any([x[9] > self._release_force_threshold for x in pts]):
+        self._release_step_counter += 1
+      else:
+        if self._release_step_counter != 0:
+          self._release_step_counter = 0
+      if self._release_step_counter >= self._release_step_threshold:
         self._ycb.release(self._mano.COLLISION_ID)
 
     return None, None, False, {}
