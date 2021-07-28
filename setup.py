@@ -4,6 +4,7 @@ setup(
     name='handover-sim',
     install_requires=[
         'chumpy==0.70',
+        'easydict==1.9',
         'gym==0.18.0',
         'numpy==1.19.5',
         'pybullet==3.1.2',

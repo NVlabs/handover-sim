@@ -1,6 +1,8 @@
 import numpy as np
 import os
 
+from handover.envs.config import cfg
+
 
 # TODO(ywchao): add ground-truth motions.
 class YCB():
@@ -27,12 +29,9 @@ class YCB():
       21: '061_foam_brick',
   }
 
-  _COLLISION_ID = lambda self, i: 2**i
-
-  def __init__(self, bullet_client, dex_ycb, table_height):
+  def __init__(self, bullet_client, dex_ycb):
     self._p = bullet_client
     self._dex_ycb = dex_ycb
-    self._table_height = table_height
 
     xs = np.linspace(0.0, 1.2, 5)
     ys = np.linspace(0.0, 1.0, 4)
@@ -74,7 +73,7 @@ class YCB():
     self._q = self._pose[:, :, :4].copy()
     self._t = self._pose[:, :, 4:].copy()
 
-    self._t[:, :, 2] += self._table_height
+    self._t[:, :, 2] += cfg.ENV.TABLE_HEIGHT
 
     self._frame = 0
     self._num_frames = len(self._q)
@@ -114,8 +113,8 @@ class YCB():
 
       for j in range(self._p.getNumJoints(self._body_id[i])):
         self._p.setCollisionFilterGroupMask(self._body_id[i], j,
-                                            self._COLLISION_ID(i),
-                                            self._COLLISION_ID(i))
+                                            cfg.ENV.COLLISION_ID_YCB(i),
+                                            cfg.ENV.COLLISION_ID_YCB(i))
 
   def clean(self):
     # Remove bodies in reverse added order to maintain deterministic body id
@@ -147,7 +146,7 @@ class YCB():
                                            targetPosition=q,
                                            positionGain=self._rotation_gain_p)
 
-  def release(self, mano_collision_id):
+  def release(self):
     self._p.setJointMotorControlArray(
         self._body_id[self._ycb_ids[self._ycb_grasp_ind]], [0, 1, 2],
         self._p.POSITION_CONTROL,
@@ -159,7 +158,7 @@ class YCB():
         targetPosition=[0, 0, 0, 1],
         force=[0, 0, 0])
 
-    collision_id = -1 - mano_collision_id
+    collision_id = -1 - cfg.ENV.COLLISION_ID_MANO
     for j in range(
         self._p.getNumJoints(
             self._body_id[self._ycb_ids[self._ycb_grasp_ind]])):
@@ -183,7 +182,7 @@ class YCB():
         s + self._base_position[ycb_id][i] for i, s, in enumerate(pos_trans)
     ]
     if is_table_frame:
-      pos_trans[2] -= self._table_height
+      pos_trans[2] -= cfg.ENV.TABLE_HEIGHT
     pos = state_rot[0] + tuple(pos_trans)
     vel = state_rot[1] + tuple(vel_trans)
     return pos, vel

@@ -4,6 +4,7 @@ import pybullet_utils.bullet_client as bullet_client
 import pybullet_data
 import time
 
+from handover.envs.config import cfg
 from handover.envs.dex_ycb import DexYCB
 from handover.envs.table import Table
 from handover.robots.panda import Panda
@@ -16,16 +17,9 @@ class HandoverEnv(gym.Env):
   def __init__(self, is_render=False):
     self._is_render = is_render
 
-    self._time_step = 0.001
+    self._time_step = cfg.ENV.TIME_STEP
 
-    self._table_base_position = [0.61, 0.28, 0.0]
-    self._table_base_orientation = [0, 0, 0, 1]
-    self._panda_base_position = [0.61, -0.50, 0.875]
-    self._panda_base_orientation = [0.0, 0.0, 0.7071068, 0.7071068]
-
-    self._release_force_threshold = 0.0
-    self._release_time_threshold = 0.2
-    self._release_step_threshold = self._release_time_threshold / self._time_step
+    self._release_step_thresh = cfg.ENV.RELEASE_TIME_THRESH / self._time_step
 
     self._p = None
     self._last_frame_time = 0.0
@@ -53,15 +47,11 @@ class HandoverEnv(gym.Env):
 
       self._plane = self._p.loadURDF("plane_implicit.urdf")
 
-      self._table = Table(self._p,
-                          base_position=self._table_base_position,
-                          base_orientation=self._table_base_orientation)
+      self._table = Table(self._p)
 
-      self._panda = Panda(self._p,
-                          base_position=self._panda_base_position,
-                          base_orientation=self._panda_base_orientation)
-      self._ycb = YCB(self._p, self._dex_ycb, self._table.HEIGHT)
-      self._mano = MANO(self._p, self._dex_ycb, self._table.HEIGHT)
+      self._panda = Panda(self._p)
+      self._ycb = YCB(self._p, self._dex_ycb)
+      self._mano = MANO(self._p, self._dex_ycb)
 
     if not hard_reset and scene_id != self._cur_scene_id:
       # Remove bodies in reverse added order to maintain deterministic body id
@@ -102,12 +92,12 @@ class HandoverEnv(gym.Env):
       pts = self._p.getContactPoints(
           bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
           bodyB=self._panda.body_id)
-      if any([x[9] > self._release_force_threshold for x in pts]):
+      if any([x[9] > cfg.ENV.RELEASE_FORCE_THRESH for x in pts]):
         self._release_step_counter += 1
       else:
         if self._release_step_counter != 0:
           self._release_step_counter = 0
-      if self._release_step_counter >= self._release_step_threshold:
-        self._ycb.release(self._mano.COLLISION_ID)
+      if self._release_step_counter >= self._release_step_thresh:
+        self._ycb.release()
 
     return None, None, False, {}

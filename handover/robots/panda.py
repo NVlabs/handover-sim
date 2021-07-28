@@ -7,18 +7,15 @@ https://github.com/liruiw/OMG-Planner/blob/dcbbb8279570cd62cf7388bf393c8b3e2d568
 
 import os
 
+from handover.envs.config import cfg
+
 
 class Panda:
   LINK_ID_HAND = 7
-  LINK_ID_FINGERS = [8, 9]
+  LINK_ID_FINGERS = (8, 9)
 
-  def __init__(self,
-               bullet_client,
-               base_position=[0, 0, 0],
-               base_orientation=[0, 0, 0, 1]):
+  def __init__(self, bullet_client):
     self._p = bullet_client
-    self._base_position = base_position
-    self._base_orientation = base_orientation
 
     self._init_pos = [0.0, -1.285, 0, -2.356, 0.0, 1.571, 0.785, 0.04, 0.04]
 
@@ -41,11 +38,12 @@ class Panda:
       urdf_file = os.path.join(os.path.dirname(__file__), "..", "..",
                                "OMG-Planner", "bullet", "models", "panda",
                                "panda_gripper.urdf")
-      self._body_id = self._p.loadURDF(urdf_file,
-                                       basePosition=self._base_position,
-                                       baseOrientation=self._base_orientation,
-                                       useFixedBase=True,
-                                       flags=self._p.URDF_USE_SELF_COLLISION)
+      self._body_id = self._p.loadURDF(
+          urdf_file,
+          basePosition=cfg.ENV.PANDA_BASE_POSITION,
+          baseOrientation=cfg.ENV.PANDA_BASE_ORIENTATION,
+          useFixedBase=True,
+          flags=self._p.URDF_USE_SELF_COLLISION)
 
       self._joint_indices = []
       for j in range(self._p.getNumJoints(self._body_id)):

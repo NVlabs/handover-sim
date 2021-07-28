@@ -4,15 +4,15 @@ import numpy as np
 from mano_pybullet.hand_model import HandModel45
 from mano_pybullet.hand_body_base_joint import HandBody, HandBodyBaseJoint
 
+from handover.envs.config import cfg
+
 
 # TODO(ywchao): add ground-truth motions.
 class MANO():
-  COLLISION_ID = 2**22
 
-  def __init__(self, bullet_client, dex_ycb, table_height):
+  def __init__(self, bullet_client, dex_ycb):
     self._p = bullet_client
     self._dex_ycb = dex_ycb
-    self._table_height = table_height
 
     self._models_dir = os.path.join(os.path.dirname(__file__), "..", "data",
                                     "mano_v1_2", "models")
@@ -38,7 +38,7 @@ class MANO():
     self._q = pose[:, 0:48].copy()
     self._t = pose[:, 48:51].copy()
 
-    self._t[self._sid:self._eid + 1, 2] += self._table_height
+    self._t[self._sid:self._eid + 1, 2] += cfg.ENV.TABLE_HEIGHT
 
     self._frame = 0
     self._num_frames = len(self._q)
@@ -61,8 +61,8 @@ class MANO():
 
       for j in range(4, 50, 3):
         self._p.setCollisionFilterGroupMask(self._body.body_id, j,
-                                            self.COLLISION_ID,
-                                            self.COLLISION_ID)
+                                            cfg.ENV.COLLISION_ID_MANO,
+                                            cfg.ENV.COLLISION_ID_MANO)
     else:
       assert self._body._model.is_left_hand == (self._mano_side == 'left')
       assert self._body._model._betas == self._mano_betas

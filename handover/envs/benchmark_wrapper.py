@@ -1,6 +1,7 @@
 import numpy as np
 
 from handover.envs.handover_env import HandoverEnv
+from handover.envs.config import cfg
 
 
 class HandoverStatusEnv(HandoverEnv):
@@ -13,17 +14,13 @@ class HandoverStatusEnv(HandoverEnv):
 
     self._is_draw_goal = is_draw_goal
 
-    self._contact_force_threshold = 0.0
+    self._goal_center = cfg.BENCHMARK.GOAL_CENTER
+    self._goal_radius = cfg.BENCHMARK.GOAL_RADIUS
 
-    self._goal_center = [0.61, -0.20, 1.25]
-    self._goal_radius = 0.15
-    self._goal_color = [0.85, 0.19, 0.21, 0.5]
+    self._success_step_thresh = (cfg.BENCHMARK.SUCCESS_TIME_THRESH /
+                                 self._time_step)
 
-    self._success_time_threshold = 0.1
-    self._success_step_threshold = self._success_time_threshold / self._time_step
-
-    self._max_episode_time = 13.0
-    self._max_episode_steps = self._max_episode_time / self._time_step
+    self._max_episode_steps = cfg.BENCHMARK.MAX_EPISODE_TIME / self._time_step
 
   @property
   def goal_center(self):
@@ -44,9 +41,10 @@ class HandoverStatusEnv(HandoverEnv):
 
     if hard_reset:
       if self._is_draw_goal:
-        visual_id = self._p.createVisualShape(self._p.GEOM_SPHERE,
-                                              radius=self._goal_radius,
-                                              rgbaColor=self._goal_color)
+        visual_id = self._p.createVisualShape(
+            self._p.GEOM_SPHERE,
+            radius=self._goal_radius,
+            rgbaColor=cfg.BENCHMARK.GOAL_COLOR)
         self._goal = self._p.createMultiBody(baseMass=0.0,
                                              baseVisualShapeIndex=visual_id,
                                              basePosition=self._goal_center)
@@ -90,7 +88,7 @@ class HandoverStatusEnv(HandoverEnv):
       pts = self._p.getContactPoints(bodyA=self._mano.body_id,
                                      bodyB=self._panda.body_id)
       for x in pts:
-        if x[9] > self._contact_force_threshold:
+        if x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH:
           status += self._FAILURE_ROBOT_HUMAN_CONTACT
           break
 
@@ -106,18 +104,18 @@ class HandoverStatusEnv(HandoverEnv):
       pts_static_ycb = [x for x in pts if x[2] in self._static_ycb_body_id]
 
       pts_panda_link_id = [
-          x[4] for x in pts_panda if x[9] > self._contact_force_threshold
+          x[4] for x in pts_panda if x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH
       ]
       is_contact_panda_fingers = set(
           self._panda.LINK_ID_FINGERS).issubset(pts_panda_link_id)
       is_contact_table = any(
-          [x[9] > self._contact_force_threshold for x in pts_table])
+          [x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH for x in pts_table])
       is_contact_static_ycb = any(
-          [x[9] > self._contact_force_threshold for x in pts_static_ycb])
+          [x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH for x in pts_static_ycb])
 
       pos, _ = self._ycb.get_base_state(
           self._ycb.ycb_ids[self._ycb.ycb_grasp_ind])
-      is_below_table = pos[6] < self._table.HEIGHT
+      is_below_table = pos[6] < cfg.ENV.TABLE_HEIGHT
 
       if not is_contact_panda_fingers and (is_contact_table or
                                            is_contact_static_ycb or
@@ -146,7 +144,7 @@ class HandoverStatusEnv(HandoverEnv):
 
     self._success_step_counter += 1
 
-    if self._success_step_counter >= self._success_step_threshold:
+    if self._success_step_counter >= self._success_step_thresh:
       return 1
     else:
       return 0
