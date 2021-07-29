@@ -1,6 +1,7 @@
 import numpy as np
 import pybullet
 
+from handover.utils.cmd import set_config_from_args
 from handover.envs.handover_env import HandoverEnv
 
 scene_id = 105
@@ -46,6 +47,8 @@ num_action_repeat = 130
 
 
 def main():
+  set_config_from_args()
+
   env = HandoverEnv(is_render=True)
 
   while True:

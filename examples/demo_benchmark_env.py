@@ -1,6 +1,7 @@
 import pybullet
 import numpy as np
 
+from handover.utils.cmd import set_config_from_args
 from handover.envs.benchmark_wrapper import HandoverBenchmarkEnv
 
 from demo_trajectory import start_conf, traj, num_action_repeat
@@ -58,6 +59,8 @@ class Policy():
 
 
 def main():
+  set_config_from_args()
+
   env = HandoverBenchmarkEnv(setup, split, is_render=True, is_draw_goal=True)
 
   pi = Policy(env)
