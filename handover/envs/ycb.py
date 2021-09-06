@@ -42,10 +42,6 @@ class YCB():
     }
     self._base_orientation = [0, 0, 0, 1]
 
-    self._translation_gain_p = [0.2] * 3
-    self._translation_gain_d = [1.0] * 3
-    self._rotation_gain_p = 1.0
-
     self._body_id = {}
 
   @property
@@ -134,17 +130,19 @@ class YCB():
       if self._released and o == self._ycb_grasp_ind:
         continue
       q, t = self.get_target_position(self._frame, o)
-      self._p.setJointMotorControlArray(self._body_id[i], [0, 1, 2],
-                                        self._p.POSITION_CONTROL,
-                                        targetPositions=t,
-                                        positionGains=self._translation_gain_p,
-                                        velocityGains=self._translation_gain_d)
+      self._p.setJointMotorControlArray(
+          self._body_id[i], [0, 1, 2],
+          self._p.POSITION_CONTROL,
+          targetPositions=t,
+          positionGains=cfg.ENV.YCB_TRANSLATION_GAIN_P,
+          velocityGains=cfg.ENV.YCB_TRANSLATION_GAIN_D)
       # targetVelocity and velocityGain seem not to have any effect here.
-      self._p.setJointMotorControlMultiDof(self._body_id[i],
-                                           3,
-                                           self._p.POSITION_CONTROL,
-                                           targetPosition=q,
-                                           positionGain=self._rotation_gain_p)
+      self._p.setJointMotorControlMultiDof(
+          self._body_id[i],
+          3,
+          self._p.POSITION_CONTROL,
+          targetPosition=q,
+          positionGain=cfg.ENV.YCB_ROTATION_GAIN_P)
 
   def release(self):
     self._p.setJointMotorControlArray(
