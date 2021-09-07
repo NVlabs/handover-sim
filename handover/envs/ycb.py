@@ -135,14 +135,16 @@ class YCB():
           self._p.POSITION_CONTROL,
           targetPositions=t,
           positionGains=cfg.ENV.YCB_TRANSLATION_GAIN_P,
-          velocityGains=cfg.ENV.YCB_TRANSLATION_GAIN_D)
+          velocityGains=cfg.ENV.YCB_TRANSLATION_GAIN_D,
+          forces=cfg.ENV.YCB_TRANSLATION_FORCE)
       # targetVelocity and velocityGain seem not to have any effect here.
       self._p.setJointMotorControlMultiDof(
           self._body_id[i],
           3,
           self._p.POSITION_CONTROL,
           targetPosition=q,
-          positionGain=cfg.ENV.YCB_ROTATION_GAIN_P)
+          positionGain=cfg.ENV.YCB_ROTATION_GAIN_P,
+          force=cfg.ENV.YCB_ROTATION_FORCE)
 
   def release(self):
     self._p.setJointMotorControlArray(
