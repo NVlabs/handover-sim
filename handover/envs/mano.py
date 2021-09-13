@@ -8,7 +8,7 @@ from handover.envs.config import cfg
 
 
 # TODO(ywchao): add ground-truth motions.
-class MANO():
+class MANO:
 
   def __init__(self, bullet_client, dex_ycb):
     self._p = bullet_client

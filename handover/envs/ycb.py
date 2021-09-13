@@ -5,7 +5,7 @@ from handover.envs.config import cfg
 
 
 # TODO(ywchao): add ground-truth motions.
-class YCB():
+class YCB:
   _CLASSES = {
        1: '002_master_chef_can',
        2: '003_cracker_box',

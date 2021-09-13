@@ -9,7 +9,7 @@ from scipy.spatial.transform import Slerp
 from scipy import interpolate
 
 
-class DexYCB():
+class DexYCB:
   _SUBJECTS = [
       '20200709-subject-01',
       '20200813-subject-02',

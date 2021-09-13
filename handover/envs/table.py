@@ -3,7 +3,7 @@ import os
 from handover.envs.config import cfg
 
 
-class Table():
+class Table:
 
   def __init__(self, bullet_client):
     self._p = bullet_client
