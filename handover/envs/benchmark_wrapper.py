@@ -103,11 +103,11 @@ class HandoverStatusEnv(HandoverEnv):
       pts_table = [x for x in pts if x[2] == self._table.body_id]
       pts_static_ycb = [x for x in pts if x[2] in self._static_ycb_body_id]
 
-      pts_panda_link_id = [
+      panda_link_ind = [
           x[4] for x in pts_panda if x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH
       ]
       is_contact_panda_fingers = set(
-          self._panda.LINK_ID_FINGERS).issubset(pts_panda_link_id)
+          self._panda.LINK_IND_FINGERS).issubset(panda_link_ind)
       is_contact_table = any(
           [x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH for x in pts_table])
       is_contact_static_ycb = any(
@@ -133,7 +133,8 @@ class HandoverStatusEnv(HandoverEnv):
         self._success_step_counter = 0
       return 0
 
-    pos = self._p.getLinkState(self._panda.body_id, self._panda.LINK_ID_HAND)[4]
+    pos = self._p.getLinkState(self._panda.body_id,
+                               self._panda.LINK_IND_HAND)[4]
     dist = np.linalg.norm(np.array(pos, dtype=np.float32) - self._goal_center)
     is_within_goal = dist < self._goal_radius
 

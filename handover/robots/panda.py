@@ -11,8 +11,8 @@ from handover.envs.config import cfg
 
 
 class Panda:
-  LINK_ID_HAND = 7
-  LINK_ID_FINGERS = (8, 9)
+  LINK_IND_HAND = 7
+  LINK_IND_FINGERS = (8, 9)
 
   def __init__(self, bullet_client):
     self._p = bullet_client
