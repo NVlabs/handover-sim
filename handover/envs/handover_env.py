@@ -3,6 +3,7 @@ import pybullet
 import pybullet_utils.bullet_client as bullet_client
 import pybullet_data
 import time
+import numpy as np
 
 from handover.envs.config import cfg
 from handover.envs.dex_ycb import DexYCB
@@ -10,6 +11,7 @@ from handover.envs.table import Table
 from handover.robots.panda import Panda
 from handover.envs.ycb import YCB
 from handover.envs.mano import MANO
+from handover.utils.transform3d import get_t3d_from_qt
 
 
 class HandoverEnv(gym.Env):
@@ -68,7 +70,7 @@ class HandoverEnv(gym.Env):
     if self._is_render:
       self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 1)
 
-    self._release_step_counter = 0
+    self._reset_release()
 
     return None
 
@@ -89,15 +91,55 @@ class HandoverEnv(gym.Env):
     self._p.stepSimulation()
 
     if not self._ycb.released:
-      pts = self._p.getContactPoints(
-          bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
-          bodyB=self._panda.body_id)
-      if any([x[9] > cfg.ENV.RELEASE_FORCE_THRESH for x in pts]):
-        self._release_step_counter += 1
-      else:
-        if self._release_step_counter != 0:
-          self._release_step_counter = 0
-      if self._release_step_counter >= self._release_step_thresh:
+      if self._check_release():
         self._ycb.release()
 
     return None, None, False, {}
+
+  def _reset_release(self):
+    self._release_step_counter_passive = 0
+    self._release_step_counter_active = 0
+
+  def _check_release(self):
+    pts = self._p.getContactPoints(
+        bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
+        bodyB=self._panda.body_id)
+
+    pts = tuple([x for x in pts if x[9] > cfg.ENV.RELEASE_FORCE_THRESH])
+
+    c = []
+    for link_index in self._panda.LINK_IND_FINGERS:
+      position = [x[6] for x in pts if x[4] == link_index]
+
+      if len(position) == 0:
+        c.append(False)
+      else:
+        pos, orn = self._p.getLinkState(self._panda.body_id, link_index)[4:6]
+        t3d = get_t3d_from_qt(orn, pos)
+        t3d = t3d.inverse()
+        position = np.array(position, dtype=np.float32)
+        position = t3d.transform_points(position)
+
+        c_region = (
+            (position[:, 0] > cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE[0]) &
+            (position[:, 0] < cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE[1]) &
+            (position[:, 1] > cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE[0]) &
+            (position[:, 1] < cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE[1]) &
+            (position[:, 2] > cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE[0]) &
+            (position[:, 2] < cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE[1]))
+        c.append(np.any(c_region))
+
+    if not any(c) and len(pts) > 0:
+      self._release_step_counter_passive += 1
+    else:
+      if self._release_step_counter_passive != 0:
+        self._release_step_counter_passive = 0
+
+    if all(c):
+      self._release_step_counter_active += 1
+    else:
+      if self._release_step_counter_active != 0:
+        self._release_step_counter_active = 0
+
+    return (self._release_step_counter_passive >= self._release_step_thresh or
+            self._release_step_counter_active >= self._release_step_thresh)
