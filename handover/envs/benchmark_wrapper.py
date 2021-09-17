@@ -9,10 +9,8 @@ class HandoverStatusEnv(HandoverEnv):
   _FAILURE_OBJECT_DROP = -2
   _FAILURE_TIMEOUT = -4
 
-  def __init__(self, is_render=False, is_draw_goal=False):
+  def __init__(self, is_render=False):
     super().__init__(is_render=is_render)
-
-    self._is_draw_goal = is_draw_goal
 
     self._goal_center = cfg.BENCHMARK.GOAL_CENTER
     self._goal_radius = cfg.BENCHMARK.GOAL_RADIUS
@@ -39,15 +37,14 @@ class HandoverStatusEnv(HandoverEnv):
     if self._is_render:
       self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 0)
 
-    if hard_reset:
-      if self._is_draw_goal:
-        visual_id = self._p.createVisualShape(
-            self._p.GEOM_SPHERE,
-            radius=self._goal_radius,
-            rgbaColor=cfg.BENCHMARK.GOAL_COLOR)
-        self._goal = self._p.createMultiBody(baseMass=0.0,
-                                             baseVisualShapeIndex=visual_id,
-                                             basePosition=self._goal_center)
+    if hard_reset and cfg.BENCHMARK.IS_DRAW_GOAL:
+      visual_id = self._p.createVisualShape(self._p.GEOM_SPHERE,
+                                            radius=self._goal_radius,
+                                            rgbaColor=cfg.BENCHMARK.GOAL_COLOR)
+      self._body_id_goal = self._p.createMultiBody(
+          baseMass=0.0,
+          baseVisualShapeIndex=visual_id,
+          basePosition=self._goal_center)
 
     if self._is_render:
       self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 1)
@@ -154,8 +151,8 @@ class HandoverStatusEnv(HandoverEnv):
 class HandoverBenchmarkEnv(HandoverStatusEnv):
   _EVAL_SKIP_OBJECT = [0, 15]
 
-  def __init__(self, setup, split, is_render=False, is_draw_goal=False):
-    super().__init__(is_render=is_render, is_draw_goal=is_draw_goal)
+  def __init__(self, setup, split, is_render=False):
+    super().__init__(is_render=is_render)
 
     self._setup = setup
     self._split = split
