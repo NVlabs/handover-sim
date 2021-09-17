@@ -67,10 +67,13 @@ class HandoverEnv(gym.Env):
     self._ycb.reset(scene_id)
     self._mano.reset(scene_id)
 
+    if hard_reset and cfg.ENV.IS_DRAW_RELEASE:
+      self._release_draw_reset()
+
     if self._is_render:
       self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 1)
 
-    self._reset_release()
+    self._release_reset()
 
     return None
 
@@ -90,17 +93,19 @@ class HandoverEnv(gym.Env):
 
     self._p.stepSimulation()
 
-    if not self._ycb.released:
-      if self._check_release():
-        self._ycb.release()
+    if not self._ycb.released and self._release_check():
+      self._ycb.release()
+
+    if cfg.ENV.IS_DRAW_RELEASE:
+      self._release_draw_step()
 
     return None, None, False, {}
 
-  def _reset_release(self):
+  def _release_reset(self):
     self._release_step_counter_passive = 0
     self._release_step_counter_active = 0
 
-  def _check_release(self):
+  def _release_check(self):
     pts = self._p.getContactPoints(
         bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]],
         bodyB=self._panda.body_id)
@@ -143,3 +148,77 @@ class HandoverEnv(gym.Env):
 
     return (self._release_step_counter_passive >= self._release_step_thresh or
             self._release_step_counter_active >= self._release_step_thresh)
+
+  def _release_draw_reset(self):
+    try:
+      self._release_contact_center
+      self._release_contact_half_extents
+      self._release_contact_vertices
+    except AttributeError:
+      self._release_contact_center = np.array([[
+          sum(cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE) / 2,
+          sum(cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE) / 2,
+          sum(cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE) / 2
+      ]],
+                                              dtype=np.float32)
+      self._release_contact_half_extents = [
+          (cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE[1] -
+           cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE[0]) / 2,
+          (cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE[1] -
+           cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE[0]) / 2,
+          (cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE[1] -
+           cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE[0]) / 2
+      ]
+      vertices = []
+      for x in cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE:
+        for y in cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE:
+          for z in cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE:
+            vertices.append([x, y, z])
+      self._release_contact_vertices = np.array(vertices, dtype=np.float32)
+
+    self._body_id_release_contact_region = {
+        k: None for k in self._panda.LINK_IND_FINGERS
+    }
+    self._body_id_release_contact_vertices = {
+        k: [None for _ in range(len(self._release_contact_vertices))
+           ] for k in self._panda.LINK_IND_FINGERS
+    }
+
+    for link_index in self._panda.LINK_IND_FINGERS:
+      pos, orn = self._p.getLinkState(self._panda.body_id, link_index)[4:6]
+      t3d = get_t3d_from_qt(orn, pos)
+      center = t3d.transform_points(self._release_contact_center)[0]
+      vertices = t3d.transform_points(self._release_contact_vertices)
+
+      visual_id = self._p.createVisualShape(
+          self._p.GEOM_BOX,
+          halfExtents=self._release_contact_half_extents,
+          rgbaColor=cfg.ENV.RELEASE_CONTACT_REGION_COLOR)
+      self._body_id_release_contact_region[
+          link_index] = self._p.createMultiBody(baseMass=0.0,
+                                                baseVisualShapeIndex=visual_id,
+                                                basePosition=center,
+                                                baseOrientation=orn)
+      visual_id = self._p.createVisualShape(
+          self._p.GEOM_SPHERE,
+          radius=cfg.ENV.RELEASE_CONTACT_VERTEX_RADIUS,
+          rgbaColor=cfg.ENV.RELEASE_CONTACT_VERTEX_COLOR)
+      for i in range(len(vertices)):
+        self._body_id_release_contact_vertices[link_index][
+            i] = self._p.createMultiBody(baseMass=0.0,
+                                         baseVisualShapeIndex=visual_id,
+                                         basePosition=vertices[i])
+
+  def _release_draw_step(self):
+    for link_index in self._panda.LINK_IND_FINGERS:
+      pos, orn = self._p.getLinkState(self._panda.body_id, link_index)[4:6]
+      t3d = get_t3d_from_qt(orn, pos)
+      center = t3d.transform_points(self._release_contact_center)[0]
+      vertices = t3d.transform_points(self._release_contact_vertices)
+
+      self._p.resetBasePositionAndOrientation(
+          self._body_id_release_contact_region[link_index], center, orn)
+      for i in range(len(vertices)):
+        self._p.resetBasePositionAndOrientation(
+            self._body_id_release_contact_vertices[link_index][i], vertices[i],
+            [0, 0, 0, 1])
