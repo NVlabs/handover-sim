@@ -33,10 +33,12 @@ This code is tested with Python 3.8 on Linux.
     cd ..
     ```
 
-4. Compile assets:
+4. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip the file:
 
     ```Shell
-    ./handover/data/compile_assets.sh
+    cd handover/data
+    unzip mano_v1_2.zip
+    cd ../..
     ```
 
 5. Download the DexYCB dataset.
@@ -76,20 +78,10 @@ This code is tested with Python 3.8 on Linux.
         python handover/data/cache_dex_ycb_data.py
         ```
 
-6. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip the file:
+6. Compile assets:
 
     ```Shell
-    cd handover/data
-    unzip mano_v1_2.zip
-    cd ../..
-    ```
-
-7. Compile MANO assets:
-
-    ```Shell
-    cd handover/data
-    python compile_mano_assets.py
-    cd ../..
+    ./handover/data/compile_assets.sh
     ```
 
 ### Running Examples

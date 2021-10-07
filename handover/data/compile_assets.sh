@@ -6,3 +6,5 @@ cd $DIR
 python compile_table_assets.py
 
 python compile_ycb_assets.py
+
+python compile_mano_assets.py
