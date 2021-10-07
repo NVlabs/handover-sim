@@ -27,68 +27,62 @@ ycb_classes = [
 urdf_str = \
 """<?xml version="1.0"?>
 <robot name="model_normalized">
-  <link name="world">
+  <link name="link0">
     <inertial>
       <mass value="0"/>
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
     </inertial>
   </link>
-  <joint name="world_base1" type="prismatic">
-    <parent link="world"/>
-    <child link="base1"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+  <link name="link1">
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+  <joint name="joint1" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="link0"/>
+    <child link="link1"/>
     <axis xyz="1 0 0"/>
     <limit lower="-1000" upper="1000"/>
   </joint>
-  <link name="base1">
+  <link name="link2">
     <inertial>
       <mass value="0"/>
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
     </inertial>
   </link>
-  <joint name="base1_base2" type="prismatic">
-    <parent link="base1"/>
-    <child link="base2"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+  <joint name="joint2" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="link1"/>
+    <child link="link2"/>
     <axis xyz="0 1 0"/>
     <limit lower="-1000" upper="1000"/>
   </joint>
-  <link name="base2">
+  <link name="link3">
     <inertial>
       <mass value="0"/>
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
     </inertial>
   </link>
-  <joint name="base2_base3" type="prismatic">
-    <parent link="base2"/>
-    <child link="base3"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+  <joint name="joint3" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="link2"/>
+    <child link="link3"/>
     <axis xyz="0 0 1"/>
     <limit lower="-1000" upper="1000"/>
   </joint>
-  <link name="base3">
-    <inertial>
-      <mass value="0"/>
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
-    </inertial>
-  </link>
-  <joint name="base3_base_link" type="spherical">
-    <parent link="base3"/>
-    <child link="base_link"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-  <link name="base_link">
+  <link name="link4">
     <contact>
       <lateral_friction value="0.9"/>
     </contact>
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.5"/>
       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
     </inertial>
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <mesh filename="model_normalized.obj" scale="1 1 1"/>
       </geometry>
@@ -97,12 +91,18 @@ urdf_str = \
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <mesh filename="model_normalized_convex.obj" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
+  <joint name="join4" type="spherical">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="link3"/>
+    <child link="link4"/>
+    <axis xyz="0 0 0"/>
+  </joint>
 </robot>
 """
 
