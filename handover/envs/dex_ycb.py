@@ -23,7 +23,7 @@ class DexYCB:
       '20201022-subject-10',
   ]
 
-  _NUM_SEQUENCES = 1000
+  NUM_SEQUENCES = 1000
 
   def __init__(self, is_preload_from_raw=True):
     self._is_preload_from_raw = is_preload_from_raw
@@ -41,7 +41,7 @@ class DexYCB:
       self._scene_data = self.preload_from_raw()
     else:
       self._scene_data = {
-          scene_id: None for scene_id in range(self._NUM_SEQUENCES)
+          scene_id: None for scene_id in range(self.NUM_SEQUENCES)
       }
 
   def preload_from_raw(self):
@@ -158,7 +158,7 @@ class DexYCB:
 
         scene_id += 1
 
-    assert len(scene_data) == self._NUM_SEQUENCES
+    assert len(scene_data) == self.NUM_SEQUENCES
 
     return scene_data
 

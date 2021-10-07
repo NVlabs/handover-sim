@@ -84,6 +84,14 @@ This code is tested with Python 3.8 on Linux.
     cd ../..
     ```
 
+7. Compile MANO assets:
+
+    ```Shell
+    cd handover/data
+    python compile_mano_assets.py
+    cd ../..
+    ```
+
 ### Running Examples
 
 1. Running a handover environment:
