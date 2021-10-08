@@ -153,7 +153,8 @@ def main():
 
       robot = ET.Element('robot', name='mano')
 
-      # Follows `HandBodyBaseJoint._make_body()` in mano_pybullet/mano_pybullet/hand_body_base_joint.py.
+      # Follow `HandBodyBaseJoint._make_body()` in
+      # `mano_pybullet/mano_pybullet/hand_body_base_joint.py`.
       robot.append(create_link('link0', 0))
 
       robot.append(create_link('link1', 0))
