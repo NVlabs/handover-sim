@@ -13,16 +13,10 @@ This code is tested with Python 3.8 on Linux.
     cd handover-sim
     ```
 
-2. Install Python package and dependencies:
+2. Install `handover-sim` as a Python package:
 
     ```Shell
-    # Install handover-sim
     pip install -e .
-
-    # Install mano_pybullet
-    cd mano_pybullet
-    pip install -e .
-    cd ..
     ```
 
 3. Download data from OMG-Planner:
