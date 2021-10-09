@@ -14,7 +14,9 @@ __C = edict()
 
 cfg = __C
 
-# Environment parameters.
+# ---------------------------------------------------------------------------- #
+# Environment options
+# ---------------------------------------------------------------------------- #
 __C.ENV = edict()
 
 __C.ENV.TIME_STEP = 0.001
@@ -36,6 +38,10 @@ __C.ENV.YCB_ROTATION_GAIN_P = 1.0
 __C.ENV.YCB_ROTATION_GAIN_D = 0.0
 __C.ENV.YCB_ROTATION_FORCE = (5.0,) * 3
 
+# MANO loader choice
+#   Valid options: ('MANO_PYBULLET', 'URDF')
+__C.ENV.MANO_LOADER = 'MANO_PYBULLET'
+
 __C.ENV.COLLISION_ID_TABLE = 2**0
 __C.ENV.COLLISION_ID_YCB = lambda i: 2**i
 __C.ENV.COLLISION_ID_MANO = 2**22
@@ -48,7 +54,9 @@ __C.ENV.RELEASE_CONTACT_REGION_COLOR = [0.85, 0.19, 0.21, 0.5]
 __C.ENV.RELEASE_CONTACT_VERTEX_RADIUS = 0.001
 __C.ENV.RELEASE_CONTACT_VERTEX_COLOR = [0.85, 0.19, 0.21, 1.0]
 
-# Benchmark parameters.
+# ---------------------------------------------------------------------------- #
+# Benchmark options
+# ---------------------------------------------------------------------------- #
 __C.BENCHMARK = edict()
 
 __C.BENCHMARK.CONTACT_FORCE_THRESH = 0.0

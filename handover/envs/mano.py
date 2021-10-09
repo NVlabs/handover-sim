@@ -5,6 +5,7 @@ from mano_pybullet.hand_model import HandModel45
 from mano_pybullet.hand_body_base_joint import HandBody, HandBodyBaseJoint
 
 from handover.envs.config import cfg
+from handover.envs.mano_hand_body import HandBodyBaseJointURDF
 
 
 # TODO(ywchao): add ground-truth motions.
@@ -28,6 +29,7 @@ class MANO:
 
   def reset(self, scene_id):
     scene_data = self._dex_ycb.get_scene_data(scene_id)
+    self._subject = scene_data['name'].split('/')[0]
     self._mano_side = scene_data['mano_sides'][0]
     self._mano_betas = scene_data['mano_betas'][0]
     pose = scene_data['pose_m'][:, 0]
@@ -54,10 +56,21 @@ class MANO:
                           models_dir=self._models_dir,
                           betas=self._mano_betas)
       flags = HandBody.FLAG_DEFAULT & ~HandBody.FLAG_USE_SELF_COLLISION
-      self._body = HandBodyBaseJoint(self._p,
-                                     model,
-                                     flags=flags,
-                                     shape_betas=model._betas)
+      if cfg.ENV.MANO_LOADER == 'MANO_PYBULLET':
+        self._body = HandBodyBaseJoint(self._p,
+                                       model,
+                                       flags=flags,
+                                       shape_betas=model._betas)
+      if cfg.ENV.MANO_LOADER == 'URDF':
+        urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
+                                 "assets",
+                                 "{}_{}".format(self._subject,
+                                                self._mano_side), "mano.urdf")
+        self._body = HandBodyBaseJointURDF(self._p,
+                                           model,
+                                           urdf_file,
+                                           flags=flags,
+                                           shape_betas=model._betas)
 
       for j in range(4, 50, 3):
         self._p.setCollisionFilterGroupMask(self._body.body_id, j,
