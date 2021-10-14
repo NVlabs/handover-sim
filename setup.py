@@ -9,13 +9,14 @@ class develop(_develop):
 
   def run(self):
     # The current implementation requires a dependency of pybullet with version
-    # >=3.0.9 and <=3.1.2, due to a memory issue on `resetSimulation()` with EGL:
+    # >=3.0.9 and <=3.1.2, due to a memory issue on `resetSimulation()` when EGL
+    # is in used:
     # * https://github.com/bulletphysics/bullet3/issues/3285
     # * https://github.com/bulletphysics/bullet3/commit/910c20334f9f435b292fd1d51ec2b57bfa90eda9
     #
     # This is a hack to pip install pybullet==3.1.2 with numpy enabled, since
-    # listing it under `install_requires` will not trigger a numpy build if numpy
-    # has not been installed already:
+    # listing it under `install_requires` will not trigger a numpy build if
+    # numpy has not been installed already:
     # * https://stackoverflow.com/questions/40831794/call-another-setup-py-in-setup-py
     # * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
     # * https://niteo.co/blog/setuptools-run-custom-code-in-setup-py

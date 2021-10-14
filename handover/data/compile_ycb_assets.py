@@ -97,7 +97,7 @@ urdf_str = \
       </geometry>
     </collision>
   </link>
-  <joint name="join4" type="spherical">
+  <joint name="joint4" type="spherical">
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <parent link="link3"/>
     <child link="link4"/>
