@@ -11,7 +11,7 @@ from handover.envs.dex_ycb import DexYCB
 
 mano_sides = ('right', 'left')
 
-models_dir = os.path.join("mano_v1_2", "models")
+models_dir = os.path.join(os.path.dirname(__file__), "mano_v1_2", "models")
 
 asset_root = os.path.join(os.path.dirname(__file__), "assets")
 
