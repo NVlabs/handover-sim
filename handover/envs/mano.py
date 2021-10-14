@@ -68,12 +68,12 @@ class MANO:
           'flags': HandBody.FLAG_DEFAULT & ~HandBody.FLAG_USE_SELF_COLLISION,
           'shape_betas': model._betas,
       }
-      if cfg.ENV.MANO_LOADER == 'MANO_PYBULLET':
+      if cfg.ENV.MANO_LOADER == 'mano_pybullet':
         self._body = HandBodyBaseJoint(self._p,
                                        model,
                                        control_params=control_params,
                                        **kwargs)
-      if cfg.ENV.MANO_LOADER == 'URDF':
+      if cfg.ENV.MANO_LOADER == 'urdf':
         urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
                                  "assets",
                                  "{}_{}".format(self._subject,

@@ -39,8 +39,8 @@ __C.ENV.YCB_ROTATION_GAIN_D = 0.0
 __C.ENV.YCB_ROTATION_FORCE = (5.0,) * 3
 
 # MANO loader choice
-#   Valid options: ('MANO_PYBULLET', 'URDF')
-__C.ENV.MANO_LOADER = 'MANO_PYBULLET'
+#   Valid options: ('mano_pybullet', 'urdf')
+__C.ENV.MANO_LOADER = 'mano_pybullet'
 
 __C.ENV.MANO_TRANSLATION_GAIN_P = (0.2,) * 3
 __C.ENV.MANO_TRANSLATION_GAIN_D = (1.0,) * 3
