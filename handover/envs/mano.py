@@ -55,12 +55,24 @@ class MANO:
       model = HandModel45(left_hand=self._mano_side == 'left',
                           models_dir=self._models_dir,
                           betas=self._mano_betas)
-      flags = HandBody.FLAG_DEFAULT & ~HandBody.FLAG_USE_SELF_COLLISION
+      control_params = {
+          'translation_gain_p': cfg.ENV.MANO_TRANSLATION_GAIN_P,
+          'translation_gain_d': cfg.ENV.MANO_TRANSLATION_GAIN_D,
+          'rotation_gain_p': cfg.ENV.MANO_ROTATION_GAIN_P,
+          'rotation_gain_d': cfg.ENV.MANO_ROTATION_GAIN_D,
+          'joint_gain_p': cfg.ENV.MANO_JOINT_GAIN_P,
+          'joint_gain_d': cfg.ENV.MANO_JOINT_GAIN_D,
+          'joint_force': cfg.ENV.MANO_JOINT_FORCE,
+      }
+      kwargs = {
+          'flags': HandBody.FLAG_DEFAULT & ~HandBody.FLAG_USE_SELF_COLLISION,
+          'shape_betas': model._betas,
+      }
       if cfg.ENV.MANO_LOADER == 'MANO_PYBULLET':
         self._body = HandBodyBaseJoint(self._p,
                                        model,
-                                       flags=flags,
-                                       shape_betas=model._betas)
+                                       control_params=control_params,
+                                       **kwargs)
       if cfg.ENV.MANO_LOADER == 'URDF':
         urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
                                  "assets",
@@ -69,8 +81,8 @@ class MANO:
         self._body = HandBodyBaseJointURDF(self._p,
                                            model,
                                            urdf_file,
-                                           flags=flags,
-                                           shape_betas=model._betas)
+                                           control_params=control_params,
+                                           **kwargs)
 
       for j in range(4, 50, 3):
         self._p.setCollisionFilterGroupMask(self._body.body_id, j,

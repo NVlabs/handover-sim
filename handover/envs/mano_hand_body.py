@@ -12,13 +12,21 @@ from mano_pybullet.hand_body_base_joint import HandBodyBaseJoint
 class HandBodyBaseJointURDF(HandBodyBaseJoint):
   """Rigid multi-link hand body with base joints (URDF loader)."""
 
-  def __init__(self, client, hand_model, urdf_file, **kwargs):
+  def __init__(self, client, hand_model, urdf_file, control_params={},
+               **kwargs):
     """Constructor.
 
     Args:
       client: pybullet client.
       hand_model: Rigid hand model.
       urdf_file: Path to the URDF file.
+      control_params: Control parameters.
+        translation_gain_p: (list of float) Translation position gain.
+        translation_gain_d: (list of float) Translation velocity gain.
+        rotation_gain_p: (float) Rotation position gain.
+        joint_gain_p: (float) Joint position gain.
+        joint_gain_d: (float) Joint velocity gain.
+        joint_force: (float) Joint maximum motor force.
       kwargs: Keyward arguments.
         flags: Configuration flags (default: FLAG_DEFAULT).
         shape_betas: A numpy array of shape [10] containing the MANO shape beta
@@ -26,7 +34,10 @@ class HandBodyBaseJointURDF(HandBodyBaseJoint):
     """
     self._urdf_file = urdf_file
 
-    super().__init__(client, hand_model, **kwargs)
+    super().__init__(client,
+                     hand_model,
+                     control_params=control_params,
+                     **kwargs)
 
   def _make_body(self):
     joints = self._model.joints
