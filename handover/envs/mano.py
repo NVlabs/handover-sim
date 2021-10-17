@@ -59,7 +59,6 @@ class MANO:
           'translation_gain_p': cfg.ENV.MANO_TRANSLATION_GAIN_P,
           'translation_gain_d': cfg.ENV.MANO_TRANSLATION_GAIN_D,
           'rotation_gain_p': cfg.ENV.MANO_ROTATION_GAIN_P,
-          'rotation_gain_d': cfg.ENV.MANO_ROTATION_GAIN_D,
           'joint_gain_p': cfg.ENV.MANO_JOINT_GAIN_P,
           'joint_gain_d': cfg.ENV.MANO_JOINT_GAIN_D,
           'joint_force': cfg.ENV.MANO_JOINT_FORCE,
