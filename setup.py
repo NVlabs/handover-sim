@@ -31,7 +31,7 @@ class develop(_develop):
 
     _develop.run(self)
 
-    # Ideally, one should be able to also install the dependant Python packages
+    # Ideally, one should be able to also install the dependent Python packages
     # resided in submodules with one pip install run from the main repo. This is
     # possible using `install_requires` with file URLs:
     # * https://stackoverflow.com/questions/28113862/how-to-install-a-dependency-from-a-submodule-in-python
