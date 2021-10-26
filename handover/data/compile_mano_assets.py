@@ -119,11 +119,11 @@ def make_link_mesh(collision, link_index, model):
   return vertices, faces
 
 
-def make_link_mesh_filename(collision, link_name):
+def make_link_mesh_filename(collision, mesh_name):
   if collision:
-    return os.path.join("meshes", "collision", link_name)
+    return os.path.join("meshes", "collision", "{}.obj".format(mesh_name))
   else:
-    return os.path.join("meshes", "visual", link_name)
+    return os.path.join("meshes", "visual", "{}.obj".format(mesh_name))
 
 
 def main():
@@ -174,19 +174,28 @@ def main():
           create_joint('joint4', 'spherical', [0, 0, 0], [0, 0, 0], 'link3',
                        'link4', [0, 0, 0], [+1, -1]))
 
+      link_counter = 4
+      mesh_counter = 0
+
       meshes = []
 
       joints = model.joints
 
+      link_name = 'link{:d}'.format(link_counter + 1)
+      joint_name = 'joint{:d}'.format(link_counter + 1)
+      parent = 'link{:d}'.format(link_counter)
       mass = 0.2
-      visual_filename = make_link_mesh_filename(False, "link5.obj")
-      collision_filename = make_link_mesh_filename(True, "link5.obj")
+      visual_filename = make_link_mesh_filename(
+          False, "mesh{:d}".format(mesh_counter + 1))
+      collision_filename = make_link_mesh_filename(
+          True, "mesh{:d}".format(mesh_counter + 1))
       meshes.append(
           (make_link_mesh(False, 0,
                           model), os.path.join(urdf_dir, visual_filename)))
       meshes.append(
           (make_link_mesh(True, 0,
                           model), os.path.join(urdf_dir, collision_filename)))
+      mesh_counter += 1
       shape_rpy = Rot.from_matrix(joints[0].basis.T).as_euler('xyz').astype(
           np.float64)
       xyz = joints[0].origin
@@ -194,7 +203,7 @@ def main():
       rpy = Rot.from_matrix(mat).as_euler('xyz').astype(np.float64)
       axis = [0, 0, 0]
       robot.append(
-          create_link('link5',
+          create_link(link_name,
                       mass,
                       inertial_xyz=[0, 0, 0],
                       inertial_rpy=[0, 0, 0],
@@ -205,17 +214,17 @@ def main():
                       collision_xyz=[0, 0, 0],
                       collision_rpy=shape_rpy))
       robot.append(
-          create_joint('joint5', 'fixed', xyz, rpy, 'link4', 'link5', axis,
+          create_joint(joint_name, 'fixed', xyz, rpy, parent, link_name, axis,
                        [+1, -1]))
-      link_mapping = {0: 4}
+      link_mapping = {0: link_counter}
+      link_counter += 1
 
-      counter = 5
       for i, j in model.kintree_table.T[1:]:
         parent_index = link_mapping[i]
         for k, (axis, limits) in enumerate(zip(joints[j].axes,
                                                joints[j].limits)):
-          link_name = 'link{:d}'.format(counter + 1)
-          joint_name = 'joint{:d}'.format(counter + 1)
+          link_name = 'link{:d}'.format(link_counter + 1)
+          joint_name = 'joint{:d}'.format(link_counter + 1)
           parent = 'link{:d}'.format(parent_index + 1)
           if k != len(joints[j].axes) - 1:
             mass = 0
@@ -225,13 +234,14 @@ def main():
           else:
             mass = 0.02
             visual_filename = make_link_mesh_filename(
-                False, "link{}.obj".format(counter + 1))
+                False, "mesh{:d}".format(mesh_counter + 1))
             collision_filename = make_link_mesh_filename(
-                True, "link{}.obj".format(counter + 1))
+                True, "mesh{:d}".format(mesh_counter + 1))
             meshes.append((make_link_mesh(False, j, model),
                            os.path.join(urdf_dir, visual_filename)))
             meshes.append((make_link_mesh(True, j, model),
                            os.path.join(urdf_dir, collision_filename)))
+            mesh_counter += 1
             shape_rpy = Rot.from_matrix(
                 joints[j].basis.T).as_euler('xyz').astype(np.float64)
           if k == 0:
@@ -256,8 +266,8 @@ def main():
           robot.append(
               create_joint(joint_name, 'revolute', xyz, rpy, parent, link_name,
                            axis, [+1, -1]))
-          parent_index = counter
-          counter += 1
+          parent_index = link_counter
+          link_counter += 1
         link_mapping[j] = parent_index
 
       urdf_str = minidom.parseString(
