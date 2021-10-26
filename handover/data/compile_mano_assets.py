@@ -57,12 +57,12 @@ def create_link(name,
   ET.SubElement(inertial, 'mass', value=num_list_to_string(mass))
   ET.SubElement(inertial,
                 'inertia',
-                ixx='0',
+                ixx='0' if mass == 0 else '1',
                 ixy='0',
                 ixz='0',
-                iyy='0',
+                iyy='0' if mass == 0 else '1',
                 iyz='0',
-                izz='0')
+                izz='0' if mass == 0 else '1')
 
   if visual_filename is not None:
     visual = ET.SubElement(link, 'visual')
