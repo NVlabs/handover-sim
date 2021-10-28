@@ -83,7 +83,7 @@ class MANO:
                                            control_params=control_params,
                                            **kwargs)
 
-      for j in range(4, 50, 3):
+      for j in range(self._p.getNumJoints(self._body.body_id)):
         self._p.setCollisionFilterGroupMask(self._body.body_id, j,
                                             cfg.ENV.COLLISION_ID_MANO,
                                             cfg.ENV.COLLISION_ID_MANO)
