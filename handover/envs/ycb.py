@@ -173,7 +173,7 @@ class YCB:
     t = self._t[frame, obj_id] - self._base_position[self._ycb_ids[obj_id]]
     return q, t
 
-  def get_base_state(self, ycb_id, is_table_frame=False):
+  def get_base_state(self, ycb_id):
     state_trans = self._p.getJointStates(self._body_id[ycb_id], [0, 1, 2])
     state_rot = self._p.getJointStateMultiDof(self._body_id[ycb_id], 3)
     pos_trans = [s[0] for s in state_trans]
@@ -181,8 +181,6 @@ class YCB:
     pos_trans = [
         s + self._base_position[ycb_id][i] for i, s, in enumerate(pos_trans)
     ]
-    if is_table_frame:
-      pos_trans[2] -= cfg.ENV.TABLE_HEIGHT
     pos = state_rot[0] + tuple(pos_trans)
     vel = state_rot[1] + tuple(vel_trans)
     return pos, vel
