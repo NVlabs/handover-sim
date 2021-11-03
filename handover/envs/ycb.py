@@ -174,13 +174,16 @@ class YCB:
     return q, t
 
   def get_base_state(self, ycb_id):
-    state_trans = self._p.getJointStates(self._body_id[ycb_id], [0, 1, 2])
-    state_rot = self._p.getJointStateMultiDof(self._body_id[ycb_id], 3)
-    pos_trans = [s[0] for s in state_trans]
-    vel_trans = [s[1] for s in state_trans]
-    pos_trans = [
-        s + self._base_position[ycb_id][i] for i, s, in enumerate(pos_trans)
-    ]
-    pos = state_rot[0] + tuple(pos_trans)
-    vel = state_rot[1] + tuple(vel_trans)
+    state_t = self._p.getJointStates(self._body_id[ycb_id], [0, 1, 2])
+    state_q = self._p.getJointStateMultiDof(self._body_id[ycb_id], 3)
+
+    pos_t, vel_t, _, _ = zip(*state_t)
+    pos_t = tuple(
+        [s + self._base_position[ycb_id][i] for i, s, in enumerate(pos_t)])
+    pos_q = state_q[0]
+    vel_q = state_q[1]
+
+    pos = pos_q + pos_t
+    vel = vel_q + vel_t
+
     return pos, vel
