@@ -73,6 +73,30 @@ urdf_str = \
     <limit lower="-1000" upper="1000"/>
   </joint>
   <link name="link4">
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+  <joint name="joint4" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="link3"/>
+    <child link="link4"/>
+    <axis xyz="1 0 0"/>
+  </joint>
+  <link name="link5">
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+  <joint name="joint5" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="link4"/>
+    <child link="link5"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="link6">
     <contact>
       <lateral_friction value="0.9"/>
     </contact>
@@ -97,11 +121,11 @@ urdf_str = \
       </geometry>
     </collision>
   </link>
-  <joint name="joint4" type="spherical">
+  <joint name="joint6" type="continuous">
     <origin xyz="0 0 0" rpy="0 0 0"/>
-    <parent link="link3"/>
-    <child link="link4"/>
-    <axis xyz="0 0 0"/>
+    <parent link="link5"/>
+    <child link="link6"/>
+    <axis xyz="0 0 1"/>
   </joint>
 </robot>
 """

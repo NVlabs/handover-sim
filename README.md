@@ -13,13 +13,20 @@ This code is tested with Python 3.8 on Linux.
     cd handover-sim
     ```
 
-2. Install `handover-sim` as a Python package:
+2. Install `easysim`:
+
+    ```Shell
+    git clone ssh://git@gitlab-master.nvidia.com:12051/ychao/easysim.git
+    pip install -e ./easysim
+    ```
+
+3. Install `handover-sim` as a Python package:
 
     ```Shell
     pip install -e .
     ```
 
-3. Download data from OMG-Planner:
+4. Download data from OMG-Planner:
 
     ```Shell
     cd OMG-Planner
@@ -27,7 +34,7 @@ This code is tested with Python 3.8 on Linux.
     cd ..
     ```
 
-4. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip the file:
+5. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip the file:
 
     ```Shell
     cd handover/data
@@ -35,7 +42,7 @@ This code is tested with Python 3.8 on Linux.
     cd ../..
     ```
 
-5. Download the DexYCB dataset.
+6. Download the DexYCB dataset.
 
     **Option 1**: Download cached dataset: **(recommended)**
 
@@ -72,7 +79,7 @@ This code is tested with Python 3.8 on Linux.
         python handover/data/cache_dex_ycb_data.py
         ```
 
-6. Compile assets:
+7. Compile assets:
 
     ```Shell
     ./handover/data/compile_assets.sh

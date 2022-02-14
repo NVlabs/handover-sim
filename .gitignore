@@ -3,7 +3,6 @@
 handover.egg-info
 
 handover/data/assets
-handover/data/dex-ycb-cache_20210423.tar.gz
 handover/data/dex-ycb-cache
 handover/data/mano_v1_2.zip
 handover/data/mano_v1_2

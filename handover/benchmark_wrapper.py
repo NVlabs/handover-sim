@@ -1,7 +1,6 @@
 import numpy as np
 
 from handover.handover_env import HandoverEnv
-from handover.config import cfg
 
 
 class HandoverStatusEnv(HandoverEnv):
@@ -9,61 +8,33 @@ class HandoverStatusEnv(HandoverEnv):
   _FAILURE_OBJECT_DROP = -2
   _FAILURE_TIMEOUT = -4
 
-  def __init__(self, is_render=False):
-    super().__init__(is_render=is_render)
+  def init(self):
+    super().init()
 
-    self._goal_center = cfg.BENCHMARK.GOAL_CENTER
-    self._goal_radius = cfg.BENCHMARK.GOAL_RADIUS
-
-    self._success_step_thresh = (cfg.BENCHMARK.SUCCESS_TIME_THRESH /
-                                 self._time_step)
-
-    self._max_episode_steps = cfg.BENCHMARK.MAX_EPISODE_TIME / self._time_step
+    self._success_step_thresh = self.cfg.BENCHMARK.SUCCESS_TIME_THRESH / self.cfg.SIM.TIME_STEP
+    self._max_episode_steps = self.cfg.BENCHMARK.MAX_EPISODE_TIME / self.cfg.SIM.TIME_STEP
 
   @property
   def goal_center(self):
-    return self._goal_center
+    return self.cfg.BENCHMARK.GOAL_CENTER
 
   @property
   def goal_radius(self):
-    return self._goal_radius
+    return self.cfg.BENCHMARK.GOAL_RADIUS
 
-  def reset(self, scene_id, hard_reset=False):
-    if self._p is None:
-      hard_reset = True
+  def pre_reset(self, env_ids, scene_id):
+    super().pre_reset(env_ids, scene_id)
 
-    observation = super().reset(scene_id, hard_reset=hard_reset)
-
-    if self._is_render:
-      self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 0)
-
-    if hard_reset and cfg.BENCHMARK.IS_DRAW_GOAL:
-      visual_id = self._p.createVisualShape(self._p.GEOM_SPHERE,
-                                            radius=self._goal_radius,
-                                            rgbaColor=cfg.BENCHMARK.GOAL_COLOR)
-      self._body_id_goal = self._p.createMultiBody(
-          baseMass=0.0,
-          baseVisualShapeIndex=visual_id,
-          basePosition=self._goal_center)
-
-    if self._is_render:
-      self._p.configureDebugVisualizer(self._p.COV_ENABLE_RENDERING, 1)
-
-    self._static_ycb_body_id = [
-        self._ycb.body_id[y]
-        for y in self._ycb.body_id
-        if y != self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]
-    ]
+    if self.cfg.BENCHMARK.IS_DRAW_GOAL:
+      raise NotImplementedError
 
     self._elapsed_steps = 0
 
     self._dropped = False
     self._success_step_counter = 0
 
-    return observation
-
-  def step(self, action):
-    observation, reward, done, info = super().step(action)
+  def post_step(self, action):
+    observation, reward, done, info = super().post_step(action)
 
     self._elapsed_steps += 1
 
@@ -81,11 +52,18 @@ class HandoverStatusEnv(HandoverEnv):
   def check_status(self):
     status = 0
 
-    if self._mano.body_id is not None:
-      pts = self._p.getContactPoints(bodyA=self._mano.body_id,
-                                     bodyB=self._panda.body_id)
-      for x in pts:
-        if x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH:
+    if self._mano.body is not None:
+      contact = self.contact[0]
+
+      contact_1 = contact[(contact['body_id_a'] == self._mano.body.contact_id) &
+                          (contact['body_id_b'] == self._panda.body.contact_id)]
+      contact_2 = contact[(contact['body_id_a'] == self._panda.body.contact_id)
+                          &
+                          (contact['body_id_b'] == self._mano.body.contact_id)]
+      contact = np.concatenate((contact_1, contact_2))
+
+      for x in contact:
+        if x['force'] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH:
           status += self._FAILURE_ROBOT_HUMAN_CONTACT
           break
 
@@ -93,30 +71,48 @@ class HandoverStatusEnv(HandoverEnv):
       return status
 
     if not self._dropped:
-      pts = self._p.getContactPoints(
-          bodyA=self._ycb.body_id[self._ycb.ycb_ids[self._ycb.ycb_grasp_ind]])
+      contact = self.contact[0]
+      contact_1 = contact[contact['body_id_a'] ==
+                          self._ycb.grasped_body.contact_id]
+      contact_2 = contact[contact['body_id_b'] ==
+                          self._ycb.grasped_body.contact_id]
+      contact_2[['body_id_a',
+                 'body_id_b']] = contact_2[['body_id_b', 'body_id_a']]
+      contact_2[['link_id_a',
+                 'link_id_b']] = contact_2[['link_id_b', 'link_id_a']]
+      contact_2[['position_a_world', 'position_b_world'
+                ]] = contact_2[['position_b_world', 'position_a_world']]
+      contact_2[['position_a_link', 'position_b_link'
+                ]] = contact_2[['position_b_link', 'position_a_link']]
+      contact_2['normal']['x'] *= -1
+      contact_2['normal']['y'] *= -1
+      contact_2['normal']['z'] *= -1
+      contact = np.concatenate((contact_1, contact_2))
 
-      pts_panda = [x for x in pts if x[2] == self._panda.body_id]
-      pts_table = [x for x in pts if x[2] == self._table.body_id]
-      pts_static_ycb = [x for x in pts if x[2] in self._static_ycb_body_id]
+      contact_panda = contact[contact['body_id_b'] ==
+                              self._panda.body.contact_id]
+      contact_table = contact[contact['body_id_b'] ==
+                              self._table.body.contact_id]
+      contact_non_grasped_ycb = contact[np.any([
+          contact['body_id_b'] == x.contact_id
+          for x in self._ycb.non_grasped_bodies
+      ],
+                                               axis=0)]
 
-      panda_link_ind = [
-          x[4] for x in pts_panda if x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH
-      ]
-      is_contact_panda_fingers = set(
+      panda_link_ind = contact_panda['link_id_b'][
+          contact_panda['force'] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH]
+      contact_panda_fingers = set(
           self._panda.LINK_IND_FINGERS).issubset(panda_link_ind)
-      is_contact_table = any(
-          [x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH for x in pts_table])
-      is_contact_static_ycb = any(
-          [x[9] > cfg.BENCHMARK.CONTACT_FORCE_THRESH for x in pts_static_ycb])
+      contact_table = np.any(
+          contact_table['force'] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH)
+      contact_non_grasped_ycb = np.any(contact_non_grasped_ycb['force'] >
+                                       self.cfg.BENCHMARK.CONTACT_FORCE_THRESH)
 
-      pos, _ = self._ycb.get_base_state(
-          self._ycb.ycb_ids[self._ycb.ycb_grasp_ind])
-      is_below_table = pos[6] < cfg.ENV.TABLE_HEIGHT
+      is_below_table = self._ycb.grasped_body.link_state[0][
+          6, 2] < self.cfg.ENV.TABLE_HEIGHT
 
-      if not is_contact_panda_fingers and (is_contact_table or
-                                           is_contact_static_ycb or
-                                           is_below_table):
+      if not contact_panda_fingers and (contact_table or contact_non_grasped_ycb
+                                        or is_below_table):
         self._dropped = True
 
     if self._dropped:
@@ -125,15 +121,14 @@ class HandoverStatusEnv(HandoverEnv):
     if status < 0:
       return status
 
-    if not is_contact_panda_fingers:
+    if not contact_panda_fingers:
       if self._success_step_counter != 0:
         self._success_step_counter = 0
       return 0
 
-    pos = self._p.getLinkState(self._panda.body_id,
-                               self._panda.LINK_IND_HAND)[4]
-    dist = np.linalg.norm(np.array(pos, dtype=np.float32) - self._goal_center)
-    is_within_goal = dist < self._goal_radius
+    pos = self._panda.body.link_state[0][self._panda.LINK_IND_HAND, 0:3].numpy()
+    dist = np.linalg.norm(pos - self.goal_center)
+    is_within_goal = dist < self.goal_radius
 
     if not is_within_goal:
       if self._success_step_counter != 0:
@@ -151,50 +146,47 @@ class HandoverStatusEnv(HandoverEnv):
 class HandoverBenchmarkEnv(HandoverStatusEnv):
   _EVAL_SKIP_OBJECT = [0, 15]
 
-  def __init__(self, setup, split, is_render=False):
-    super().__init__(is_render=is_render)
-
-    self._setup = setup
-    self._split = split
+  def init(self):
+    super().init()
 
     # TODO(ywchao): move scene_ids calculation to dex_ycb.py.
     # Seen subjects, camera views, grasped objects.
-    if self._setup == 's0':
-      if self._split == 'train':
+    if self.cfg.BENCHMARK.SETUP == 's0':
+      if self.cfg.BENCHMARK.SPLIT == 'train':
         subject_ind = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         sequence_ind = [i for i in range(100) if i % 5 != 4]
-      if self._split == 'val':
+      if self.cfg.BENCHMARK.SPLIT == 'val':
         subject_ind = [0, 1]
         sequence_ind = [i for i in range(100) if i % 5 == 4]
-      if self._split == 'test':
+      if self.cfg.BENCHMARK.SPLIT == 'test':
         subject_ind = [2, 3, 4, 5, 6, 7, 8, 9]
         sequence_ind = [i for i in range(100) if i % 5 == 4]
 
     # Unseen subjects.
-    if self._setup == 's1':
-      if self._split == 'train':
+    if self.cfg.BENCHMARK.SETUP == 's1':
+      if self.cfg.BENCHMARK.SPLIT == 'train':
         raise NotImplementedError
-      if self._split == 'val':
+      if self.cfg.BENCHMARK.SPLIT == 'val':
         raise NotImplementedError
-      if self._split == 'test':
+      if self.cfg.BENCHMARK.SPLIT == 'test':
         raise NotImplementedError
 
     # Unseen handedness.
-    if self._setup == 's2':
-      if self._split == 'train':
+    if self.cfg.BENCHMARK.SETUP == 's2':
+      if self.cfg.BENCHMARK.SPLIT == 'train':
         raise NotImplementedError
-      if self._split == 'val':
+      if self.cfg.BENCHMARK.SPLIT == 'val':
         raise NotImplementedError
-      if self._split == 'test':
+      if self.cfg.BENCHMARK.SPLIT == 'test':
         raise NotImplementedError
 
     # Unseen grasped objects.
-    if self._setup == 's3':
-      if self._split == 'train':
+    if self.cfg.BENCHMARK.SETUP == 's3':
+      if self.cfg.BENCHMARK.SPLIT == 'train':
         raise NotImplementedError
-      if self._split == 'val':
+      if self.cfg.BENCHMARK.SPLIT == 'val':
         raise NotImplementedError
-      if self._split == 'test':
+      if self.cfg.BENCHMARK.SPLIT == 'test':
         raise NotImplementedError
 
     self._scene_ids = []
@@ -208,12 +200,14 @@ class HandoverBenchmarkEnv(HandoverStatusEnv):
   def num_scenes(self):
     return len(self._scene_ids)
 
-  def reset(self, idx=None, scene_id=None, hard_reset=False):
+  def pre_reset(self, env_ids, idx=None, scene_id=None):
     if scene_id is None:
       scene_id = self._scene_ids[idx]
     else:
       assert scene_id in self._scene_ids
 
-    observation = super().reset(scene_id, hard_reset=hard_reset)
+    super().pre_reset(env_ids, scene_id)
 
+  def post_reset(self, env_ids, idx=None, scene_id=None):
+    observation = super().post_reset(env_ids, scene_id)
     return observation

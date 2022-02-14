@@ -1,7 +1,7 @@
 import numpy as np
 import pybullet
 
-from handover.cmd import set_config_from_args
+from handover.config import get_config_from_args
 from handover.handover_env import HandoverEnv
 
 scene_id = 105
@@ -47,12 +47,14 @@ num_action_repeat = 130
 
 
 def main():
-  set_config_from_args()
+  cfg = get_config_from_args()
 
-  env = HandoverEnv(is_render=True)
+  cfg.SIM.RENDER = True
+
+  env = HandoverEnv(cfg)
 
   while True:
-    env.reset(scene_id)
+    env.reset(scene_id=scene_id)
 
     for _ in range(3000):
       action = start_conf
@@ -68,12 +70,13 @@ def main():
       action[-2:] = 0.0
       env.step(action)
 
-    pos = pybullet.getLinkState(env._panda.body_id, env._panda.LINK_IND_HAND)[4]
+    pos = env._panda.body.link_state[0][env._panda.LINK_IND_HAND][0:3]
     for i in range(10):
-      pos = (pos[0], pos[1] - 0.03, pos[2])
-      action = np.array(pybullet.calculateInverseKinematics(
-          env._panda.body_id, env._panda.LINK_IND_HAND, pos),
-                        dtype=np.float32)
+      pos[1] -= 0.03
+      action = pybullet.calculateInverseKinematics(env._panda.body.contact_id,
+                                                   env._panda.LINK_IND_HAND - 1,
+                                                   pos)
+      action = np.asanyarray(action, dtype=np.float32)
       action[-2:] = 0.0
       for _ in range(num_action_repeat):
         env.step(action)

@@ -171,10 +171,18 @@ def main():
                        'link3', [0, 0, 1], [+1, -1]))
       robot.append(create_link('link4', 0))
       robot.append(
-          create_joint('joint4', 'spherical', [0, 0, 0], [0, 0, 0], 'link3',
-                       'link4', [0, 0, 0], [+1, -1]))
+          create_joint('joint4', 'continuous', [0, 0, 0], [0, 0, 0], 'link3',
+                       'link4', [1, 0, 0], [+1, -1]))
+      robot.append(create_link('link5', 0))
+      robot.append(
+          create_joint('joint5', 'continuous', [0, 0, 0], [0, 0, 0], 'link4',
+                       'link5', [0, 1, 0], [+1, -1]))
+      robot.append(create_link('link6', 0))
+      robot.append(
+          create_joint('joint6', 'continuous', [0, 0, 0], [0, 0, 0], 'link5',
+                       'link6', [0, 0, 1], [+1, -1]))
 
-      link_counter = 4
+      link_counter = 6
       mesh_counter = 0
 
       meshes = []

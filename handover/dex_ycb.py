@@ -99,6 +99,13 @@ class DexYCB:
         q, t = self.transform(q, t, tag_R_inv, tag_t_inv)
         q, t = self.resample(q, t)
 
+        shape_q = q.shape
+        q = q.reshape(-1, 4)
+        q = Rot.from_quat(q).as_euler('XYZ').astype(np.float32)
+        q = q.reshape(*shape_q[:2], 3)
+        # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
+        q = np.unwrap(q, axis=0)
+
         pose_y = np.dstack((q, t))
 
         # Process MANO pose.
@@ -137,13 +144,24 @@ class DexYCB:
 
         i = np.any(q != 0.0, axis=2)
         q_i = q[i]
-        q_i = q_i.reshape(-1, 4)
-        q_i = Rot.from_quat(q_i).as_rotvec().astype(np.float32)
-        q_i = q_i.reshape(-1, 48)
+        q_i_full = q_i.reshape(-1, 4)
+        q_i_full = Rot.from_quat(q_i_full).as_rotvec().astype(np.float32)
+        q_i_full = q_i_full.reshape(-1, 48)
         q = np.zeros((len(q), 1, 48), dtype=q.dtype)
-        q[i] = q_i
+        q[i] = q_i_full
 
         pose_m = np.dstack((q, t))
+
+        q_i_base = q_i[:, 0:4]
+        q_i_base = Rot.from_quat(q_i_base).as_euler('XYZ').astype(np.float32)
+        # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
+        q_i_base = q_i_base.reshape(-1, 1, 3)
+        q_i_base = np.unwrap(q_i_base, axis=0)
+        q_i_base = q_i_base.reshape(-1, 3)
+        base_euler = np.zeros((len(q), 1, 3), dtype=q.dtype)
+        base_euler[i] = q_i_base
+
+        pose_m = np.dstack((pose_m, base_euler))
 
         scene_data[scene_id] = {
             'name': name,

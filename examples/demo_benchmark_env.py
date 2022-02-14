@@ -1,8 +1,7 @@
-import pybullet
 import numpy as np
+import pybullet
 
-from handover.cmd import set_config_from_args
-from handover.config import cfg
+from handover.config import get_config_from_args
 from handover.benchmark_wrapper import HandoverBenchmarkEnv
 
 from demo_trajectory import start_conf, traj, num_action_repeat
@@ -42,17 +41,18 @@ class Policy():
 
   def back(self):
     back = []
-    pos = pybullet.getLinkState(self._env._panda.body_id,
-                                self._env._panda.LINK_IND_HAND)[4]
+    pos = self._env._panda.body.link_state[0][
+        self._env._panda.LINK_IND_HAND][0:3]
     pos = np.array(pos, dtype=np.float32)
     vec = self._env.goal_center - pos
     step = (vec / np.linalg.norm(vec)) * 0.03
     num_steps = int(np.ceil(np.linalg.norm(vec) / 0.03))
-    for i in range(num_steps):
+    for _ in range(num_steps):
       pos += step
-      conf = np.array(pybullet.calculateInverseKinematics(
-          self._env._panda.body_id, self._env._panda.LINK_IND_HAND, pos),
-                      dtype=np.float32)
+      conf = pybullet.calculateInverseKinematics(
+          self._env._panda.body.contact_id, self._env._panda.LINK_IND_HAND - 1,
+          pos)
+      conf = np.asanyarray(conf, dtype=np.float32)
       conf[-2:] = 0.0
       back.append(conf)
 
@@ -60,11 +60,15 @@ class Policy():
 
 
 def main():
-  set_config_from_args()
+  cfg = get_config_from_args()
 
-  cfg.BENCHMARK.IS_DRAW_GOAL = True
+  cfg.SIM.RENDER = True
+  cfg.BENCHMARK.SETUP = setup
+  cfg.BENCHMARK.SPLIT = split
+  # TODO(ywchao):
+  # cfg.BENCHMARK.IS_DRAW_GOAL = True
 
-  env = HandoverBenchmarkEnv(setup, split, is_render=True)
+  env = HandoverBenchmarkEnv(cfg)
 
   pi = Policy(env)
 

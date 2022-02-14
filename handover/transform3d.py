@@ -1,7 +1,7 @@
 """
 
 Derived from:
-https://github.com/facebookresearch/pytorch3d/blob/a0d76a7080e263e2244abd67eb8ddf6667194b25/pytorch3d/transforms/transform3d.py
+https://github.com/facebookresearch/pytorch3d/blob/bcee361d048f14b3d1fbfa2c3e498d64c06a7612/pytorch3d/transforms/transform3d.py
 """
 
 import numpy as np
@@ -79,7 +79,7 @@ def _broadcast_bmm(a, b):
 
 def get_t3d_from_qt(q, t, dtype=np.float32):
   R = Rot.from_quat(q).as_matrix().astype(dtype)
-  t = np.array(t, dtype=dtype)
+  t = np.asanyarray(t, dtype=dtype)
   mat = np.eye(4, dtype=dtype)
   if R.ndim == 2:
     mat[:3, :3] = R
