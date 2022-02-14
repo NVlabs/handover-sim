@@ -1,8 +1,8 @@
 import numpy as np
 import pybullet
 
-from handover.utils.cmd import set_config_from_args
-from handover.envs.handover_env import HandoverEnv
+from handover.cmd import set_config_from_args
+from handover.handover_env import HandoverEnv
 
 scene_id = 105
 

@@ -1,7 +1,7 @@
 import numpy as np
 
-from handover.envs.handover_env import HandoverEnv
-from handover.envs.config import cfg
+from handover.handover_env import HandoverEnv
+from handover.config import cfg
 
 
 class HandoverStatusEnv(HandoverEnv):

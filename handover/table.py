@@ -1,6 +1,6 @@
 import os
 
-from handover.envs.config import cfg
+from handover.config import cfg
 
 
 class Table:
@@ -8,7 +8,7 @@ class Table:
   def __init__(self, bullet_client):
     self._p = bullet_client
 
-    urdf_file = os.path.join(os.path.dirname(__file__), "..", "data", "assets",
+    urdf_file = os.path.join(os.path.dirname(__file__), "data", "assets",
                              "table", "table.urdf")
     self._body_id = self._p.loadURDF(
         urdf_file,

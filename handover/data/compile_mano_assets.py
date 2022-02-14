@@ -7,7 +7,7 @@ from mano_pybullet.mesh_utils import filter_mesh, save_mesh_obj
 from scipy.spatial.transform import Rotation as Rot
 from xml.dom import minidom
 
-from handover.envs.dex_ycb import DexYCB
+from handover.dex_ycb import DexYCB
 
 mano_sides = ('right', 'left')
 

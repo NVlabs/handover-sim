@@ -1,9 +1,9 @@
 import pybullet
 import numpy as np
 
-from handover.utils.cmd import set_config_from_args
-from handover.envs.config import cfg
-from handover.envs.benchmark_wrapper import HandoverBenchmarkEnv
+from handover.cmd import set_config_from_args
+from handover.config import cfg
+from handover.benchmark_wrapper import HandoverBenchmarkEnv
 
 from demo_trajectory import start_conf, traj, num_action_repeat
 

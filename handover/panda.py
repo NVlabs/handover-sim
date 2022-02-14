@@ -7,7 +7,7 @@ https://github.com/liruiw/OMG-Planner/blob/dcbbb8279570cd62cf7388bf393c8b3e2d568
 
 import os
 
-from handover.envs.config import cfg
+from handover.config import cfg
 
 
 class Panda:
@@ -35,8 +35,8 @@ class Panda:
 
   def reset(self):
     if self._body_id is None:
-      urdf_file = os.path.join(os.path.dirname(__file__), "..", "..",
-                               "OMG-Planner", "bullet", "models", "panda",
+      urdf_file = os.path.join(os.path.dirname(__file__), "..", "OMG-Planner",
+                               "bullet", "models", "panda",
                                "panda_gripper.urdf")
       self._body_id = self._p.loadURDF(
           urdf_file,

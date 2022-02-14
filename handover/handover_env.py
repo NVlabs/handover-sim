@@ -5,13 +5,13 @@ import pybullet_data
 import time
 import numpy as np
 
-from handover.envs.config import cfg
-from handover.envs.dex_ycb import DexYCB
-from handover.envs.table import Table
-from handover.robots.panda import Panda
-from handover.envs.ycb import YCB
-from handover.envs.mano import MANO
-from handover.utils.transform3d import get_t3d_from_qt
+from handover.config import cfg
+from handover.dex_ycb import DexYCB
+from handover.table import Table
+from handover.panda import Panda
+from handover.ycb import YCB
+from handover.mano import MANO
+from handover.transform3d import get_t3d_from_qt
 
 
 class HandoverEnv(gym.Env):

@@ -1,4 +1,4 @@
-from handover.envs.dex_ycb import DexYCB
+from handover.dex_ycb import DexYCB
 
 
 def main():

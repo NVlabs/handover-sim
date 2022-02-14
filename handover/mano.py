@@ -4,8 +4,8 @@ import numpy as np
 from mano_pybullet.hand_model import HandModel45
 from mano_pybullet.hand_body_base_joint import HandBody, HandBodyBaseJoint
 
-from handover.envs.config import cfg
-from handover.envs.mano_hand_body import HandBodyBaseJointURDF
+from handover.config import cfg
+from handover.mano_hand_body import HandBodyBaseJointURDF
 
 
 # TODO(ywchao): add ground-truth motions.
@@ -15,7 +15,7 @@ class MANO:
     self._p = bullet_client
     self._dex_ycb = dex_ycb
 
-    self._models_dir = os.path.join(os.path.dirname(__file__), "..", "data",
+    self._models_dir = os.path.join(os.path.dirname(__file__), "data",
                                     "mano_v1_2", "models")
 
     self._body = None
@@ -73,8 +73,7 @@ class MANO:
                                        control_params=control_params,
                                        **kwargs)
       if cfg.ENV.MANO_LOADER == 'urdf':
-        urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
-                                 "assets",
+        urdf_file = os.path.join(os.path.dirname(__file__), "data", "assets",
                                  "{}_{}".format(self._subject,
                                                 self._mano_side), "mano.urdf")
         self._body = HandBodyBaseJointURDF(self._p,

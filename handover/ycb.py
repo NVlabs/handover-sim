@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-from handover.envs.config import cfg
+from handover.config import cfg
 
 
 # TODO(ywchao): add ground-truth motions.
@@ -77,9 +77,8 @@ class YCB:
 
     if self._body_id == {}:
       for i in self._ycb_ids:
-        urdf_file = os.path.join(os.path.dirname(__file__), "..", "data",
-                                 "assets", self._CLASSES[i],
-                                 "model_normalized.urdf")
+        urdf_file = os.path.join(os.path.dirname(__file__), "data", "assets",
+                                 self._CLASSES[i], "model_normalized.urdf")
         self._body_id[i] = self._p.loadURDF(
             urdf_file,
             basePosition=self._base_position[i],

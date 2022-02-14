@@ -1,6 +1,6 @@
 import argparse
 
-from handover.envs.config import merge_cfg_from_file, merge_cfg_from_list
+from handover.config import merge_cfg_from_file, merge_cfg_from_list
 
 
 def parse_config_args():

@@ -32,7 +32,7 @@ class DexYCB:
     self._time_step_raw = 0.04
     self._time_step_resample = 0.001
 
-    self._cache_dir = os.path.join(os.path.dirname(__file__), "..", "data",
+    self._cache_dir = os.path.join(os.path.dirname(__file__), "data",
                                    "dex-ycb-cache")
     self._meta_file_str = os.path.join(self._cache_dir, "meta_{:03d}.json")
     self._pose_file_str = os.path.join(self._cache_dir, "pose_{:03d}.npz")
@@ -54,9 +54,8 @@ class DexYCB:
     # Load MANO model.
     mano = {}
     for k, name in zip(('right', 'left'), ('RIGHT', 'LEFT')):
-      mano_file = os.path.join(os.path.dirname(__file__), "..", "data",
-                               "mano_v1_2", "models",
-                               "MANO_{}.pkl".format(name))
+      mano_file = os.path.join(os.path.dirname(__file__), "data", "mano_v1_2",
+                               "models", "MANO_{}.pkl".format(name))
       with open(mano_file, 'rb') as f:
         mano[k] = pickle.load(f, encoding='latin1')
 

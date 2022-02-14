@@ -12,7 +12,11 @@ from mano_pybullet.hand_body_base_joint import HandBodyBaseJoint
 class HandBodyBaseJointURDF(HandBodyBaseJoint):
   """Rigid multi-link hand body with base joints (URDF loader)."""
 
-  def __init__(self, client, hand_model, urdf_file, control_params={},
+  def __init__(self,
+               client,
+               hand_model,
+               urdf_file,
+               control_params={},
                **kwargs):
     """Constructor.
 
