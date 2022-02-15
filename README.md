@@ -1,106 +1,151 @@
-# Handover-Sim
+Python Project Template
+=======================
 
-### Prerequisites
+Follow these steps to create a new Python project from this project template:
 
-This code is tested with Python 3.8 on Linux.
+1. Create a new project in Gitlab by selecting the "+" ("New...") dropdown menu item from the top toolbar.
+1. Select "New project/repository" from the menu items.
+1. Select the "Create from template" button.
+1. Select the "Group" tab and next to the "Python Project" hit the green "Use template" button.
+1. Name your project with title case (e.g. `My Awesome Project`).
+1. Select `srl` as the URL, not `srl/templates`.
+1. Use underscores not hyphens in the project slug (e.g. `my_awesome_project`).
+1. Give it a short description.
+1. Select "Public" for the visibility level.
+1. Clone your new project to your local machine.
+1. Find and replace the place holder names with your project's name (see below).
+1. To enable continuous integration (CI) for your project, rename the `.gitlab-ci-template.yml` file to `.gitlab-ci.yml` and message @roflaherty to add your project to the runner list.
+1. Remove this section of the `README.md` file.
+1. Commit and push your changes!
 
-### Installation
+The template uses "Python Project Template" as a stand in name for your project. Do the following find and replaces with your project name.
 
-1. Clone the repo with `--recursive` and and cd into it:
+*  `__Python_Project_Template__` -> replace with title case (e.g. `My Awesome Project`)
+*  `__python_project_template__` -> replace with snake case (e.g. `my_awesome_project`)
+*  `__python-project-template__` -> replace with kebab case (e.g. `my-awesome-project`)
 
-    ```Shell
-    git clone --recursive ssh://git@gitlab-master.nvidia.com:12051/ychao/handover-sim.git
-    cd handover-sim
-    ```
+Additionally, rename:
 
-2. Install `easysim`:
+* the folder `src/__python_project_template__` (e.g. `src/my_awesome_project`)
+* the file `tests/__python_project_template___version_test.py` (e.g. `tests/my_awesome_project_version_test.py`)
 
-    ```Shell
-    git clone ssh://git@gitlab-master.nvidia.com:12051/ychao/easysim.git
-    pip install -e ./easysim
-    ```
 
-3. Install `handover-sim` as a Python package:
+***********************************************************************
 
-    ```Shell
-    pip install -e .
-    ```
+**REMOVE THE ABOVE SECTION IN YOUR PROJECT AND EDIT THE CONTENT BELOW**
 
-4. Download data from OMG-Planner:
+***********************************************************************
 
-    ```Shell
-    cd OMG-Planner
-    ./download_data.sh
-    cd ..
-    ```
 
-5. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip the file:
 
-    ```Shell
-    cd handover/data
-    unzip mano_v1_2.zip
-    cd ../..
-    ```
+# __Python_Project_Template__
 
-6. Download the DexYCB dataset.
+(Add project description here)
 
-    **Option 1**: Download cached dataset: **(recommended)**
+See the documentation for a complete description, [__Python_Project_Template__ Documentation](https://srl.gitlab-master-pages.nvidia.com/__python_project_template__/).
 
-    ```Shell
-    cd handover/data
-    # Download dex-ycb-cache_20210423.tar.gz from https://drive.google.com/file/d/1M2SZ5kLZuKy4aUrDuXllvTOyXy8OKLq4.
-    tar -zxvf dex-ycb-cache_20210423.tar.gz
-    cd ../..
-    ```
+## Installation
 
-    **Option 2**: Download full dataset and cache the data:
+### Install from SRL's PYPI package registry
+SRL uploads its Python packages to the following package registry project (https://gitlab-master.nvidia.com/srl/pypi).
+See the project for additional information on how to use it.
 
-    1.  Download the DexYCB dataset from the [DexYCB project site](https://dex-ycb.github.io).
+To quickly install this package using pip run the following command.
 
-    2. Set the environment variable for dataset path:
+```bash
+pip install --extra-index-url https://<username>:<token>@gitlab-master.nvidia.com/api/v4/projects/39931/packages/pypi/simple nvidia-__python-project-template__
+```
 
-        ```Shell
-        export DEX_YCB_DIR=/path/to/dex-ycb
-        ```
+Where `username` is your Gitlab username, and `token` is a [Gitlab personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) with `read_api` scope.
 
-        `$DEX_YCB_DIR` should be a folder with the following structure:
+Configure your `pip.conf` file to use `pip` with the SRL PYPI package registry without having to use the `--extra-index-url` option.
+Follow the configuration instructions [here](https://gitlab-master.nvidia.com/srl/pypi#configuring).
 
-        ```Shell
-        ├── 20200709-subject-01/
-        ├── 20200813-subject-02/
-        ├── ...
-        ├── calibration/
-        └── models/
-        ```
+### Install from source in editable mode
+To install the package for development, first clone the repo and install with pip's editable mode.
+It is recommended to install the package into a virtual environment.
 
-    3. Cache the dataset:
+```bash
+git clone ssh://git@gitlab-master.nvidia.com:12051/srl/__python_project_template__.git
+cd __python_project_template__
+virtualenv venv
+source venv/bin/activate
+pip install -e ".[ci,dev]"
+```
 
-        ```Shell
-        python handover/data/cache_dex_ycb_data.py
-        ```
 
-7. Compile assets:
+## Dev Ops
 
-    ```Shell
-    ./handover/data/compile_assets.sh
-    ```
+### Format code
+```bash
+black .
+```
 
-### Running Examples
+### Sort imports
+```bash
+isort .
+```
 
-1. Running a handover environment:
+### Lint files
+```bash
+flake8  .
+```
 
-    ```Shell
-    python examples/demo_handover_env.py
-    ```
+### Type check files
+```bash
+mypy .
+```
 
-2. Running a planned trajectory:
+### Run tests
+```bash
+pytest .
+```
 
-    ```Shell
-    python examples/demo_trajectory.py
-    ```
+### Produce coverage report
+```bash
+pytest --cov-report=term --cov-report=html:./_coverage --cov=src/ tests/
+```
+View coverage report at `./_coverage/index.html`
 
-3. Running a benchmark environment:
+### Generate documentation
+```bash
+sphinx-build -a -b html docs _build/docs
+```
 
-    ```Shell
-    python examples/demo_benchmark_env.py
-    ```
+**View from local computer**
+
+View documentation at file:///<__python_project_template__ root>/_build/docs/index.html
+
+**View from remote computer**
+
+Start an HTML web server on the remote machine from the `_build/docs` folder.
+```
+cd <__python_project_template__ root>/_build/docs
+python3 -m http.server 8080
+```
+
+View documentation at http://<remote computer IP>:8080
+
+**View from Gitlab (if CI is generating documentation)**
+
+https://srl.gitlab-master-pages.nvidia.com/__python_project_template__/
+
+### Create wheel package distribution file
+```bash
+# New way (using PEP 517)
+python -m build
+
+# Old way
+python setup.py sdist bdist_wheel
+```
+
+### Upload wheel package distribution file to SRL PYPI server
+Short command (if configuration is set up properly as stated [here](https://gitlab-master.nvidia.com/srl/pypi#configuring))
+```bash
+twine upload -r gitlab <path to wheel file>
+```
+
+Full command
+```bash
+twine upload --repository-url https://<username>:<token>@gitlab-master.nvidia.com/api/v4/projects/39931/packages/pypi/simple <path to wheel file>
+```

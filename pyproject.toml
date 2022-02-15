@@ -1,0 +1,54 @@
+# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm>=6.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 100
+extend-exclude = "deprecated/"
+
+# See the `setuptools_scm` documentation for the description of the schemes used below.
+# https://pypi.org/project/setuptools-scm/
+# NOTE: If these values are updated, they need to be also updated in `srl/__init__.py`.
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+local_scheme = "dirty-tag"
+
+[tool.isort]
+# Multi line output mode 3 is used to conform with Black. See
+# https://github.com/PyCQA/isort#multi-line-output-modes
+multi_line_output = 3
+profile = "black"
+import_heading_stdlib = "Standard Library"
+import_heading_thirdparty = "Third Party"
+import_heading_firstparty = "SRL"
+import_heading_localfolder = "Local Folder"
+line_length = 100
+
+[tool.pytest.ini_options]
+norecursedirs = [".git", ".venv", "deprecated", "dist"]
+python_files = ["*_test.py"]
+
+[tool.mypy]
+disallow_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
+warn_unused_ignores = true
+exclude = [
+	"venv",
+]
+
+[[tool.mypy.overrides]]
+module = [
+	"importlib.metadata",
+	"setuptools",
+	"setuptools_scm",
+]
+ignore_missing_imports = true

@@ -6,15 +6,4 @@
 # disclosure or distribution of this material and related documentation
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
-"""__Python_Project_Template__ package setuptools."""
-
-# NOTE (roflaherty): This file is still needed to allow the package to be
-# installed in editable mode.
-#
-# References:
-# * https://setuptools.pypa.io/en/latest/setuptools.html#setup-cfg-only-projects
-
-# Third Party
-import setuptools
-
-setuptools.setup()
+"""__Python_Project_Template__ test package."""

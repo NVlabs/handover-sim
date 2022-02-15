@@ -6,15 +6,13 @@
 # disclosure or distribution of this material and related documentation
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
-"""__Python_Project_Template__ package setuptools."""
+"""Unit tests for the `__python_project_template__` package version."""
 
-# NOTE (roflaherty): This file is still needed to allow the package to be
-# installed in editable mode.
-#
-# References:
-# * https://setuptools.pypa.io/en/latest/setuptools.html#setup-cfg-only-projects
+# SRL
+import __python_project_template__
 
-# Third Party
-import setuptools
 
-setuptools.setup()
+def test___python_project_template___version() -> None:
+    """Test `__python_project_template__` package version is set."""
+    assert __python_project_template__.__version__ is not None
+    assert __python_project_template__.__version__ != ""
