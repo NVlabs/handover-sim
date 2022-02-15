@@ -10,33 +10,41 @@ import os
 
 
 class Panda:
-  LINK_IND_HAND = 8
-  LINK_IND_FINGERS = (9, 10)
+    LINK_IND_HAND = 8
+    LINK_IND_FINGERS = (9, 10)
 
-  def __init__(self, cfg, scene):
-    self._cfg = cfg
-    self._scene = scene
+    def __init__(self, cfg, scene):
+        self._cfg = cfg
+        self._scene = scene
 
-  def add(self):
-    body = easysim.Body()
-    body.name = 'panda'
-    body.urdf_file = os.path.join(os.path.dirname(__file__), "..",
-                                  "OMG-Planner", "bullet", "models", "panda",
-                                  "panda_gripper.urdf")
-    body.initial_base_position = self._cfg.ENV.PANDA_BASE_POSITION + self._cfg.ENV.PANDA_BASE_ORIENTATION
-    body.use_fixed_base = True
-    body.initial_dof_position = self._cfg.ENV.PANDA_INITIAL_POSITION
-    body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
-    body.dof_position_gain = self._cfg.ENV.PANDA_POSITION_GAIN
-    body.dof_velocity_gain = self._cfg.ENV.PANDA_VELOCITY_GAIN
-    body.dof_max_force = self._cfg.ENV.PANDA_MAX_FORCE
-    self._scene.add_body(body)
+    def add(self):
+        body = easysim.Body()
+        body.name = "panda"
+        body.urdf_file = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "OMG-Planner",
+            "bullet",
+            "models",
+            "panda",
+            "panda_gripper.urdf",
+        )
+        body.initial_base_position = (
+            self._cfg.ENV.PANDA_BASE_POSITION + self._cfg.ENV.PANDA_BASE_ORIENTATION
+        )
+        body.use_fixed_base = True
+        body.initial_dof_position = self._cfg.ENV.PANDA_INITIAL_POSITION
+        body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
+        body.dof_position_gain = self._cfg.ENV.PANDA_POSITION_GAIN
+        body.dof_velocity_gain = self._cfg.ENV.PANDA_VELOCITY_GAIN
+        body.dof_max_force = self._cfg.ENV.PANDA_MAX_FORCE
+        self._scene.add_body(body)
 
-    self._body = body
+        self._body = body
 
-  @property
-  def body(self):
-    return self._body
+    @property
+    def body(self):
+        return self._body
 
-  def step(self, target):
-    self.body.dof_target_position = target
+    def step(self, target):
+        self.body.dof_target_position = target

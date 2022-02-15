@@ -2,13 +2,13 @@ from handover.dex_ycb import DexYCB
 
 
 def main():
-  print('Caching DexYCB data')
+    print("Caching DexYCB data")
 
-  dex_ycb = DexYCB()
-  dex_ycb.save_to_cache()
+    dex_ycb = DexYCB()
+    dex_ycb.save_to_cache()
 
-  print('Done.')
+    print("Done.")
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()
