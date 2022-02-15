@@ -1,12 +1,4 @@
-# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-#
-# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
-# property and proprietary rights in and to this material, related
-# documentation and any modifications thereto. Any use, reproduction,
-# disclosure or distribution of this material and related documentation
-# without an express license agreement from NVIDIA CORPORATION or
-# its affiliates is strictly prohibited.
-"""__Python_Project_Template__ package."""
+"""handover-sim package."""
 
 
 # NOTE (roflaherty): This is inspired by how matplotlib does creates its version value.
@@ -40,7 +32,7 @@ def _get_version() -> str:
             # Third Party
             from importlib_metadata import version  # type: ignore[no-redef]
 
-        this_version = version("nvidia___python_project_template__")
+        this_version = version("handover-sim")
 
     return this_version
 
