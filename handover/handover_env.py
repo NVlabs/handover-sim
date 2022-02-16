@@ -11,7 +11,7 @@ from handover.transform3d import get_t3d_from_qt
 
 class HandoverEnv(easysim.SimulatorEnv):
     def init(self):
-        self._dex_ycb = DexYCB(is_preload_from_raw=False)
+        self._dex_ycb = DexYCB(self.cfg)
         self._table = Table(self.cfg, self.scene)
         self._panda = Panda(self.cfg, self.scene)
         self._ycb = YCB(self.cfg, self.scene, self._dex_ycb)

@@ -22,26 +22,30 @@ class DexYCB:
         "20201015-subject-09",
         "20201022-subject-10",
     ]
+    _TIME_STEP_RAW = 0.04
+    _TIME_STEP_CACHE = 0.001
 
     NUM_SEQUENCES = 1000
 
-    def __init__(self, is_preload_from_raw=True):
-        self._is_preload_from_raw = is_preload_from_raw
-
-        # TODO(ywchao): set time_step_resample from input and modify pose_file accordingly.
-        self._time_step_raw = 0.04
-        self._time_step_resample = 0.001
+    def __init__(self, cfg, save_to_cache=False, preload_from_raw=False):
+        self._cfg = cfg
+        self._save_to_cache = save_to_cache
+        self._preload_from_raw = preload_from_raw
 
         self._cache_dir = os.path.join(os.path.dirname(__file__), "data", "dex-ycb-cache")
         self._meta_file_str = os.path.join(self._cache_dir, "meta_{:03d}.json")
         self._pose_file_str = os.path.join(self._cache_dir, "pose_{:03d}.npz")
 
-        if self._is_preload_from_raw:
-            self._scene_data = self.preload_from_raw()
+        if self._save_to_cache:
+            self._scene_data = self.preload_from_raw(self._TIME_STEP_CACHE)
+            self.save_to_cache()
+
+        if self._preload_from_raw:
+            self._scene_data = self.preload_from_raw(self._cfg.SIM.TIME_STEP)
         else:
             self._scene_data = {scene_id: None for scene_id in range(self.NUM_SEQUENCES)}
 
-    def preload_from_raw(self):
+    def preload_from_raw(self, time_step_resample):
         print("Preloading DexYCB from raw dataset")
 
         # Get raw dataset dir.
@@ -96,7 +100,7 @@ class DexYCB:
                 t = pose["pose_y"][:, :, 4:]
 
                 q, t = self.transform(q, t, tag_R_inv, tag_t_inv)
-                q, t = self.resample(q, t)
+                q, t = self.resample(q, t, time_step_resample)
 
                 shape_q = q.shape
                 q = q.reshape(-1, 4)
@@ -140,7 +144,7 @@ class DexYCB:
                 p[~i] = 0
 
                 q = np.dstack((q, p))
-                q, t = self.resample(q, t)
+                q, t = self.resample(q, t, time_step_resample)
 
                 i = np.any(q != 0.0, axis=2)
                 q_i = q[i]
@@ -203,7 +207,7 @@ class DexYCB:
 
     # http://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Animating_Transformations.html
     # "The approach used for transformation interpolation ... by multiplying the three interpolated matrices together."
-    def resample(self, q, t):
+    def resample(self, q, t, time_step_resample):
         """Resample motion."""
         i = np.any(q != 0, axis=2) | np.any(t != 0, axis=2)
 
@@ -211,9 +215,9 @@ class DexYCB:
 
         num_f, num_o, num_r, _ = q.shape
 
-        assert self._time_step_resample != self._time_step_raw
-        times_key = np.arange(0, num_f * self._time_step_raw, self._time_step_raw)
-        times_int = np.arange(0, num_f * self._time_step_raw, self._time_step_resample)
+        assert time_step_resample != self._TIME_STEP_RAW
+        times_key = np.arange(0, num_f * self._TIME_STEP_RAW, self._TIME_STEP_RAW)
+        times_int = np.arange(0, num_f * self._TIME_STEP_RAW, time_step_resample)
         while times_int[-1] > times_key[-1]:
             times_int = times_int[:-1]
 
@@ -224,8 +228,8 @@ class DexYCB:
             # TODO(ywchao): to be tested with different resample time steps; might need to cut down e_int.
             s_key = np.where(i[:, o])[0][0]
             e_key = np.where(i[:, o])[0][-1]
-            s_int = int(np.round(s_key * self._time_step_raw / self._time_step_resample))
-            e_int = int(np.round(e_key * self._time_step_raw / self._time_step_resample))
+            s_int = int(np.round(s_key * self._TIME_STEP_RAW / time_step_resample))
+            e_int = int(np.round(e_key * self._TIME_STEP_RAW / time_step_resample))
 
             for r in range(num_r):
                 x = q[s_key : e_key + 1, o, r]
@@ -290,14 +294,24 @@ class DexYCB:
         assert os.path.isfile(pose_file), "pose file does not exist: {}".format(pose_file)
         pose = np.load(pose_file)
 
+        # Resample from cache.
+        pose_y = pose["pose_y"]
+        pose_m = pose["pose_m"]
+        if self._cfg.SIM.TIME_STEP != self._TIME_STEP_CACHE:
+            assert self._cfg.SIM.TIME_STEP > self._TIME_STEP_CACHE
+            ind_int = np.arange(0, len(pose_y) * self._TIME_STEP_CACHE, self._cfg.SIM.TIME_STEP)
+            ind_int = np.round(ind_int / self._TIME_STEP_CACHE).astype(np.int64)
+            pose_y = pose_y[ind_int]
+            pose_m = pose_m[ind_int]
+
         scene_data = {
             "name": meta["name"],
             "ycb_ids": meta["ycb_ids"],
             "ycb_grasp_ind": meta["ycb_grasp_ind"],
             "mano_sides": meta["mano_sides"],
             "mano_betas": meta["mano_betas"],
-            "pose_y": pose["pose_y"],
-            "pose_m": pose["pose_m"],
+            "pose_y": pose_y,
+            "pose_m": pose_m,
         }
 
         return scene_data

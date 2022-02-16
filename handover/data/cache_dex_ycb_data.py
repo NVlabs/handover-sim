@@ -1,11 +1,13 @@
+from handover.config import get_config_from_args
 from handover.dex_ycb import DexYCB
 
 
 def main():
     print("Caching DexYCB data")
 
-    dex_ycb = DexYCB()
-    dex_ycb.save_to_cache()
+    cfg = get_config_from_args()
+
+    DexYCB(cfg, save_to_cache=True)
 
     print("Done.")
 

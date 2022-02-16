@@ -7,6 +7,7 @@ from mano_pybullet.mesh_utils import filter_mesh, save_mesh_obj
 from scipy.spatial.transform import Rotation as Rot
 from xml.dom import minidom
 
+from handover.config import get_config_from_args
 from handover.dex_ycb import DexYCB
 
 mano_sides = ("right", "left")
@@ -132,7 +133,9 @@ def make_link_mesh_filename(collision, mesh_name):
 def main():
     print("Compiling MANO assets")
 
-    dex_ycb = DexYCB(is_preload_from_raw=False)
+    cfg = get_config_from_args()
+
+    dex_ycb = DexYCB(cfg)
 
     subjects = []
 
