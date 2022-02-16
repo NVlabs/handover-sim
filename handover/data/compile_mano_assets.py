@@ -173,7 +173,7 @@ def main():
                     "link0",
                     "link1",
                     [1, 0, 0],
-                    [+1, -1],
+                    [-1000, +1000],
                 )
             )
             robot.append(create_link("link2", 0))
@@ -186,7 +186,7 @@ def main():
                     "link1",
                     "link2",
                     [0, 1, 0],
-                    [+1, -1],
+                    [-1000, +1000],
                 )
             )
             robot.append(create_link("link3", 0))
@@ -199,7 +199,7 @@ def main():
                     "link2",
                     "link3",
                     [0, 0, 1],
-                    [+1, -1],
+                    [-1000, +1000],
                 )
             )
             robot.append(create_link("link4", 0))
@@ -346,7 +346,7 @@ def main():
                     )
                     robot.append(
                         create_joint(
-                            joint_name, "revolute", xyz, rpy, parent, link_name, axis, [+1, -1]
+                            joint_name, "revolute", xyz, rpy, parent, link_name, axis, limits
                         )
                     )
                     parent_index = link_counter
