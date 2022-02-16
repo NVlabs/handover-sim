@@ -115,12 +115,12 @@ class HandoverEnv(easysim.SimulatorEnv):
                         )
 
                     is_in_release_region = (
-                        (position[:, 0] > self.cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE[0])
-                        & (position[:, 0] < self.cfg.ENV.RELEASE_FINGER_CONTACT_X_RANGE[1])
-                        & (position[:, 1] > self.cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE[0])
-                        & (position[:, 1] < self.cfg.ENV.RELEASE_FINGER_CONTACT_Y_RANGE[1])
-                        & (position[:, 2] > self.cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE[0])
-                        & (position[:, 2] < self.cfg.ENV.RELEASE_FINGER_CONTACT_Z_RANGE[1])
+                        (position[:, 0] > self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_X[0])
+                        & (position[:, 0] < self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_X[1])
+                        & (position[:, 1] > self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Y[0])
+                        & (position[:, 1] < self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Y[1])
+                        & (position[:, 2] > self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Z[0])
+                        & (position[:, 2] < self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Z[1])
                     )
                     contact_panda_release_region.append(np.any(is_in_release_region))
 
