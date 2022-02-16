@@ -50,8 +50,8 @@ For good practice for Python package management, it is recommended to install th
 
     ```Shell
     cd handover/data
-    # Download dex-ycb-cache_20210423.tar.gz from https://drive.google.com/file/d/1M2SZ5kLZuKy4aUrDuXllvTOyXy8OKLq4.
-    tar -zxvf dex-ycb-cache_20210423.tar.gz
+    # Download dex-ycb-cache_20220216.tar.gz from https://drive.google.com/file/d/1w6qW9be8c3MU_XtrQ1gdOnwUszf75sg7.
+    tar zxvf dex-ycb-cache_20220216.tar.gz
     cd ../..
     ```
 
