@@ -114,6 +114,8 @@ class DexYCB:
                 # Process MANO pose.
                 mano_betas = []
                 root_trans = []
+                comp = []
+                mean = []
                 for s, c in zip(meta["mano_sides"], meta["mano_calib"]):
                     mano_calib_file = os.path.join(
                         raw_dir, "calibration", "mano_{}".format(c), "mano.yml"
@@ -125,7 +127,11 @@ class DexYCB:
                     v = mano[s]["shapedirs"].dot(betas) + mano[s]["v_template"]
                     r = mano[s]["J_regressor"][0].dot(v)[0]
                     root_trans.append(r)
+                    comp.append(mano[s]["hands_components"])
+                    mean.append(mano[s]["hands_mean"])
                 root_trans = np.array(root_trans, dtype=np.float32)
+                comp = np.array(comp, dtype=np.float32)
+                mean = np.array(mean, dtype=np.float32)
 
                 i = np.any(pose["pose_m"] != 0.0, axis=2)
 
@@ -137,7 +143,7 @@ class DexYCB:
                 t[i] -= root_trans
 
                 p = pose["pose_m"][:, :, 3:48]
-                p = np.matmul(p, mano[s]["hands_components"]) + mano[s]["hands_mean"]
+                p = np.einsum("abj,bjk->abk", p, comp) + mean
                 p = p.reshape(-1, 3)
                 p = Rot.from_rotvec(p).as_quat().astype(np.float32)
                 p = p.reshape(-1, 1, 60)
