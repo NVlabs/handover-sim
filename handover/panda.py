@@ -29,11 +29,11 @@ class Panda:
             "panda",
             "panda_gripper.urdf",
         )
+        body.use_fixed_base = True
+        body.use_self_collision = True
         body.initial_base_position = (
             self._cfg.ENV.PANDA_BASE_POSITION + self._cfg.ENV.PANDA_BASE_ORIENTATION
         )
-        body.use_fixed_base = True
-        body.use_self_collision = True
         body.initial_dof_position = self._cfg.ENV.PANDA_INITIAL_POSITION
         body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
         body.dof_position_gain = self._cfg.ENV.PANDA_POSITION_GAIN

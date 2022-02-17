@@ -60,8 +60,8 @@ class MANO:
                 "{}_{}".format(self._subject, self._mano_side),
                 "mano.urdf",
             )
-            body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
             body.use_fixed_base = True
+            body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
             if self._cfg.SIM.SIMULATOR == "bullet":
                 body.link_color = [(0.0, 1.0, 0.0, 1.0)] * 53
             body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_MANO] * 53

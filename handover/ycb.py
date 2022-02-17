@@ -60,8 +60,8 @@ class YCB:
                     self._CLASSES[i],
                     "model_normalized.urdf",
                 )
-                body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
                 body.use_fixed_base = True
+                body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
 
                 q = self._q[self._frame, self._ycb_ids.index(i)]
                 t = self._t[self._frame, self._ycb_ids.index(i)]
