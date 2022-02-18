@@ -62,30 +62,17 @@ class YCB:
                 )
                 body.use_fixed_base = True
                 body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
-
                 q = self._q[self._frame, self._ycb_ids.index(i)]
                 t = self._t[self._frame, self._ycb_ids.index(i)]
                 body.initial_dof_position = t.tolist() + q.tolist()
                 body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-
-                link_collision_filter = [
+                body.link_collision_filter = [
                     self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(i)]
                 ] * 7
-                if i == self._ycb_ids[self._ycb_grasp_ind]:
-                    body.link_collision_filter = [link_collision_filter] * self._cfg.SIM.NUM_ENVS
-                else:
-                    body.link_collision_filter = link_collision_filter
-
                 body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
-
-                dof_max_force = (
+                body.dof_max_force = (
                     self._cfg.ENV.YCB_TRANSLATION_MAX_FORCE + self._cfg.ENV.YCB_ROTATION_MAX_FORCE
                 )
-                if i == self._ycb_ids[self._ycb_grasp_ind]:
-                    body.dof_max_force = [dof_max_force] * self._cfg.SIM.NUM_ENVS
-                else:
-                    body.dof_max_force = dof_max_force
-
                 body.dof_position_gain = (
                     self._cfg.ENV.YCB_TRANSLATION_POSITION_GAIN
                     + self._cfg.ENV.YCB_ROTATION_POSITION_GAIN
@@ -99,20 +86,14 @@ class YCB:
                 self._bodies[i] = body
         else:
             assert [*self._bodies.keys()] == self._ycb_ids
-
-            link_collision_filter = [
+            self.grasped_body.link_collision_filter = [
                 self._cfg.ENV.COLLISION_FILTER_YCB[
                     [*self._CLASSES].index(self._ycb_ids[self._ycb_grasp_ind])
                 ]
             ] * 7
-            self.grasped_body.link_collision_filter = [
-                link_collision_filter
-            ] * self._cfg.SIM.NUM_ENVS
-
-            dof_max_force = (
+            self.grasped_body.dof_max_force = (
                 self._cfg.ENV.YCB_TRANSLATION_MAX_FORCE + self._cfg.ENV.YCB_ROTATION_MAX_FORCE
             )
-            self.grasped_body.dof_max_force = [dof_max_force] * self._cfg.SIM.NUM_ENVS
 
     @property
     def released(self):
@@ -143,10 +124,6 @@ class YCB:
             self._bodies[i].dof_target_position = t.tolist() + q.tolist()
 
     def release(self):
-        dof_max_force = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        self.grasped_body.dof_max_force = [dof_max_force] * self._cfg.SIM.NUM_ENVS
-
-        link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7
-        self.grasped_body.link_collision_filter = [link_collision_filter] * self._cfg.SIM.NUM_ENVS
-
+        self.grasped_body.dof_max_force = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        self.grasped_body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7
         self._released = True
