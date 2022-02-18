@@ -145,7 +145,7 @@ class YCB:
         dof_max_force = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         self.grasped_body.dof_max_force = [dof_max_force] * self._cfg.SIM.NUM_ENVS
 
-        link_collision_filter = [-1 - self._cfg.ENV.COLLISION_FILTER_MANO] * 7
+        link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7
         self.grasped_body.link_collision_filter = [link_collision_filter] * self._cfg.SIM.NUM_ENVS
 
         self._released = True
