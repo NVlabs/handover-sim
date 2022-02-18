@@ -62,6 +62,7 @@ class MANO:
             )
             body.use_fixed_base = True
             body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+            body.initial_dof_velocity = [0.0] * 51
             if self._cfg.SIM.SIMULATOR == "bullet":
                 body.link_color = [(0.0, 1.0, 0.0, 1.0)] * 53
             body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_MANO] * 53

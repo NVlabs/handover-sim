@@ -35,6 +35,7 @@ class Panda:
             self._cfg.ENV.PANDA_BASE_POSITION + self._cfg.ENV.PANDA_BASE_ORIENTATION
         )
         body.initial_dof_position = self._cfg.ENV.PANDA_INITIAL_POSITION
+        body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_PANDA] * 11
         body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
         body.dof_position_gain = self._cfg.ENV.PANDA_POSITION_GAIN

@@ -66,6 +66,7 @@ class YCB:
                 q = self._q[self._frame, self._ycb_ids.index(i)]
                 t = self._t[self._frame, self._ycb_ids.index(i)]
                 body.initial_dof_position = t.tolist() + q.tolist()
+                body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
                 link_collision_filter = [
                     self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(i)]
