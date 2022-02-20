@@ -224,8 +224,7 @@ class DexYCB:
         assert time_step_resample != self._TIME_STEP_RAW
         times_key = np.arange(0, num_f * self._TIME_STEP_RAW, self._TIME_STEP_RAW)
         times_int = np.arange(0, num_f * self._TIME_STEP_RAW, time_step_resample)
-        while times_int[-1] > times_key[-1]:
-            times_int = times_int[:-1]
+        times_int = times_int[times_int <= times_key[-1]]
 
         q_int = np.zeros((len(times_int), num_o, num_r, 4), dtype=np.float32)
         t_int = np.zeros((len(times_int), num_o, 3), dtype=np.float32)
@@ -307,6 +306,7 @@ class DexYCB:
             assert self._cfg.SIM.TIME_STEP > self._TIME_STEP_CACHE
             ind_int = np.arange(0, len(pose_y) * self._TIME_STEP_CACHE, self._cfg.SIM.TIME_STEP)
             ind_int = np.round(ind_int / self._TIME_STEP_CACHE).astype(np.int64)
+            ind_int = ind_int[ind_int < len(pose_y)]
             pose_y = pose_y[ind_int]
             pose_m = pose_m[ind_int]
 
