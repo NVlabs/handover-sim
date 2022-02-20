@@ -83,11 +83,11 @@ def main():
             action[-2:] = 0.0
             env.step(action)
 
-        pos = env._panda.body.link_state[0][env._panda.LINK_IND_HAND][0:3]
+        pos = env.panda.body.link_state[0][env.panda.LINK_IND_HAND][0:3]
         for i in range(10):
             pos[1] -= 0.03
             action = pybullet.calculateInverseKinematics(
-                env._panda.body.contact_id, env._panda.LINK_IND_HAND - 1, pos
+                env.panda.body.contact_id, env.panda.LINK_IND_HAND - 1, pos
             )
             action = np.asanyarray(action, dtype=np.float32)
             action[-2:] = 0.0

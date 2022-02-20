@@ -23,6 +23,18 @@ class HandoverEnv(easysim.SimulatorEnv):
         self._cur_scene_id = None
         self._release_step_thresh = self.cfg.ENV.RELEASE_TIME_THRESH / self.cfg.SIM.TIME_STEP
 
+    @property
+    def panda(self):
+        return self._panda
+
+    @property
+    def ycb(self):
+        return self._ycb
+
+    @property
+    def mano(self):
+        return self._mano
+
     def pre_reset(self, env_ids, scene_id):
         if scene_id != self._cur_scene_id:
             self._ycb.clean()
