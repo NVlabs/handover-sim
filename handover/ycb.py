@@ -124,6 +124,6 @@ class YCB:
             self._bodies[i].dof_target_position = t.tolist() + q.tolist()
 
     def release(self):
-        self.grasped_body.dof_max_force = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         self.grasped_body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7
+        self.grasped_body.dof_max_force = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         self._released = True

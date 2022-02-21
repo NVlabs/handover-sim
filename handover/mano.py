@@ -20,9 +20,9 @@ class MANO:
 
     def reset(self, scene_id):
         scene_data = self._dex_ycb.get_scene_data(scene_id)
-        self._subject = scene_data["name"].split("/")[0]
         self._mano_side = scene_data["mano_sides"][0]
         self._mano_betas = scene_data["mano_betas"][0]
+        self._name = "{}_{}".format(scene_data["name"].split("/")[0], self._mano_side)
         pose = scene_data["pose_m"][:, 0]
 
         self._sid = np.where(np.any(pose != 0, axis=1))[0][0]
@@ -57,7 +57,7 @@ class MANO:
                 os.path.dirname(__file__),
                 "data",
                 "assets",
-                "{}_{}".format(self._subject, self._mano_side),
+                self._name,
                 "mano.urdf",
             )
             body.use_fixed_base = True
