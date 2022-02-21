@@ -17,32 +17,48 @@ class MANO:
         self._model = None
         self._origin = None
         self._body = None
+        self._cur_scene_id = None
+
+    @property
+    def body(self):
+        return self._body
 
     def reset(self, scene_id):
-        scene_data = self._dex_ycb.get_scene_data(scene_id)
-        self._mano_side = scene_data["mano_sides"][0]
-        self._mano_betas = scene_data["mano_betas"][0]
-        self._name = "{}_{}".format(scene_data["name"].split("/")[0], self._mano_side)
-        pose = scene_data["pose_m"][:, 0]
+        if scene_id != self._cur_scene_id:
+            self._clean()
 
-        self._sid = np.where(np.any(pose != 0, axis=1))[0][0]
-        self._eid = np.where(np.any(pose != 0, axis=1))[0][-1]
+            scene_data = self._dex_ycb.get_scene_data(scene_id)
 
-        self._q = pose[:, 0:48].copy()
-        self._t = pose[:, 48:51].copy()
-        self._base_euler = pose[:, 51:54].copy()
+            self._mano_side = scene_data["mano_sides"][0]
+            self._mano_betas = scene_data["mano_betas"][0]
+            self._name = "{}_{}".format(scene_data["name"].split("/")[0], self._mano_side)
 
-        self._t[self._sid : self._eid + 1, 2] += self._cfg.ENV.TABLE_HEIGHT
+            pose = scene_data["pose_m"][:, 0]
+            self._sid = np.where(np.any(pose != 0, axis=1))[0][0]
+            self._eid = np.where(np.any(pose != 0, axis=1))[0][-1]
+            self._q = pose[:, 0:48].copy()
+            self._t = pose[:, 48:51].copy()
+            self._base_euler = pose[:, 51:54].copy()
+            self._t[self._sid : self._eid + 1, 2] += self._cfg.ENV.TABLE_HEIGHT
+            self._num_frames = len(self._q)
+
+            self._cur_scene_id = scene_id
 
         self._frame = 0
-        self._num_frames = len(self._q)
 
         if self._frame == self._sid:
-            self.make()
+            self._make()
         else:
-            self.clean()
+            self._clean()
 
-    def make(self):
+    def _clean(self):
+        if self.body is not None:
+            self._scene.remove_body(self.body)
+            self._model = None
+            self._origin = None
+            self._body = None
+
+    def _make(self):
         if self._body is None:
             self._model = HandModel45(
                 left_hand=self._mano_side == "left",
@@ -88,7 +104,6 @@ class MANO:
                 + self._cfg.ENV.MANO_JOINT_VELOCITY_GAIN
             )
             self._scene.add_body(body)
-
             self._body = body
         else:
             assert self._model.is_left_hand == (self._mano_side == "left")
@@ -97,10 +112,6 @@ class MANO:
         self._reset_from_mano(
             self._t[self._frame], self._q[self._frame], self._base_euler[self._frame]
         )
-
-    @property
-    def body(self):
-        return self._body
 
     def _reset_from_mano(self, trans, mano_pose, base_euler):
         angles, basis = self._model.mano_to_angles(mano_pose)
@@ -112,22 +123,15 @@ class MANO:
         trans = trans + self._origin - basis @ self._origin
         self.body.dof_target_position = trans.tolist() + base_euler.tolist() + angles
 
-    def clean(self):
-        if self.body is not None:
-            self._scene.remove_body(self.body)
-            self._model = None
-            self._origin = None
-            self._body = None
-
     def step(self):
         self._frame += 1
         self._frame = min(self._frame, self._num_frames - 1)
 
         if self._frame == self._sid:
-            self.make()
+            self._make()
         if self._frame > self._sid and self._frame <= self._eid:
             self._set_target_from_mano(
                 self._t[self._frame], self._q[self._frame], self._base_euler[self._frame]
             )
         if self._frame == self._eid + 1:
-            self.clean()
+            self._clean()

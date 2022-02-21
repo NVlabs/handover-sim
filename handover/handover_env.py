@@ -17,10 +17,6 @@ class HandoverEnv(easysim.SimulatorEnv):
         self._ycb = YCB(self.cfg, self.scene, self._dex_ycb)
         self._mano = MANO(self.cfg, self.scene, self._dex_ycb)
 
-        self._table.add()
-        self._panda.add()
-
-        self._cur_scene_id = None
         self._release_step_thresh = self.cfg.ENV.RELEASE_TIME_THRESH / self.cfg.SIM.TIME_STEP
 
     @property
@@ -36,11 +32,6 @@ class HandoverEnv(easysim.SimulatorEnv):
         return self._mano
 
     def pre_reset(self, env_ids, scene_id):
-        if scene_id != self._cur_scene_id:
-            self._ycb.clean()
-            self._mano.clean()
-            self._cur_scene_id = scene_id
-
         self._ycb.reset(scene_id)
         self._mano.reset(scene_id)
 

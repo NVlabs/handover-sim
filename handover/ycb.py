@@ -33,20 +33,28 @@ class YCB:
         self._dex_ycb = dex_ycb
 
         self._bodies = {}
+        self._cur_scene_id = None
 
     def reset(self, scene_id):
-        scene_data = self._dex_ycb.get_scene_data(scene_id)
-        self._ycb_ids = scene_data["ycb_ids"]
-        self._ycb_grasp_ind = scene_data["ycb_grasp_ind"]
-        pose = scene_data["pose_y"]
+        if scene_id != self._cur_scene_id:
+            for i in [*self._bodies][::-1]:
+                self._scene.remove_body(self._bodies[i])
+                del self._bodies[i]
 
-        self._q = pose[:, :, 0:3].copy()
-        self._t = pose[:, :, 3:6].copy()
+            scene_data = self._dex_ycb.get_scene_data(scene_id)
 
-        self._t[:, :, 2] += self._cfg.ENV.TABLE_HEIGHT
+            self._ycb_ids = scene_data["ycb_ids"]
+            self._ycb_grasp_ind = scene_data["ycb_grasp_ind"]
+
+            pose = scene_data["pose_y"]
+            self._q = pose[:, :, 0:3].copy()
+            self._t = pose[:, :, 3:6].copy()
+            self._t[:, :, 2] += self._cfg.ENV.TABLE_HEIGHT
+            self._num_frames = len(self._q)
+
+            self._cur_scene_id = scene_id
 
         self._frame = 0
-        self._num_frames = len(self._q)
         self._released = False
 
         if self._bodies == {}:
@@ -82,7 +90,6 @@ class YCB:
                     + self._cfg.ENV.YCB_ROTATION_VELOCITY_GAIN
                 )
                 self._scene.add_body(body)
-
                 self._bodies[i] = body
         else:
             assert [*self._bodies.keys()] == self._ycb_ids
@@ -106,11 +113,6 @@ class YCB:
     @property
     def non_grasped_bodies(self):
         return [self._bodies[i] for i in self._ycb_ids if i != self._ycb_ids[self._ycb_grasp_ind]]
-
-    def clean(self):
-        for i in [*self._bodies][::-1]:
-            self._scene.remove_body(self._bodies[i])
-            del self._bodies[i]
 
     def step(self):
         self._frame += 1

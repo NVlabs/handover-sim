@@ -17,7 +17,6 @@ class Panda:
         self._cfg = cfg
         self._scene = scene
 
-    def add(self):
         body = easysim.Body()
         body.name = "panda"
         body.urdf_file = os.path.join(
@@ -42,7 +41,6 @@ class Panda:
         body.dof_velocity_gain = self._cfg.ENV.PANDA_VELOCITY_GAIN
         body.dof_max_force = self._cfg.ENV.PANDA_MAX_FORCE
         self._scene.add_body(body)
-
         self._body = body
 
     @property

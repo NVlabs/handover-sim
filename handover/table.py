@@ -7,7 +7,6 @@ class Table:
         self._cfg = cfg
         self._scene = scene
 
-    def add(self):
         body = easysim.Body()
         body.name = "table"
         body.urdf_file = os.path.join(
@@ -21,7 +20,6 @@ class Table:
             body.link_color = [(1.0, 1.0, 1.0, 1.0)]
         body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_TABLE]
         self._scene.add_body(body)
-
         self._body = body
 
     @property
