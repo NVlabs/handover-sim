@@ -149,7 +149,6 @@ class HandoverBenchmarkEnv(HandoverStatusEnv):
     def init(self):
         super().init()
 
-        # TODO(ywchao): move scene_ids calculation to dex_ycb.py.
         # Seen subjects, camera views, grasped objects.
         if self.cfg.BENCHMARK.SETUP == "s0":
             if self.cfg.BENCHMARK.SPLIT == "train":
@@ -161,47 +160,69 @@ class HandoverBenchmarkEnv(HandoverStatusEnv):
             if self.cfg.BENCHMARK.SPLIT == "test":
                 subject_ind = [2, 3, 4, 5, 6, 7, 8, 9]
                 sequence_ind = [i for i in range(100) if i % 5 == 4]
+            mano_side = ["right", "left"]
 
         # Unseen subjects.
         if self.cfg.BENCHMARK.SETUP == "s1":
             if self.cfg.BENCHMARK.SPLIT == "train":
-                raise NotImplementedError
+                subject_ind = [0, 1, 2, 3, 4, 5, 9]
             if self.cfg.BENCHMARK.SPLIT == "val":
-                raise NotImplementedError
+                subject_ind = [6]
             if self.cfg.BENCHMARK.SPLIT == "test":
-                raise NotImplementedError
+                subject_ind = [7, 8]
+            sequence_ind = [*range(100)]
+            mano_side = ["right", "left"]
 
         # Unseen handedness.
         if self.cfg.BENCHMARK.SETUP == "s2":
             if self.cfg.BENCHMARK.SPLIT == "train":
-                raise NotImplementedError
+                subject_ind = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                mano_side = ["right"]
             if self.cfg.BENCHMARK.SPLIT == "val":
-                raise NotImplementedError
+                subject_ind = [0, 1]
+                mano_side = ["left"]
             if self.cfg.BENCHMARK.SPLIT == "test":
-                raise NotImplementedError
+                subject_ind = [2, 3, 4, 5, 6, 7, 8, 9]
+                mano_side = ["left"]
+            sequence_ind = [*range(100)]
 
         # Unseen grasped objects.
         if self.cfg.BENCHMARK.SETUP == "s3":
+            subject_ind = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             if self.cfg.BENCHMARK.SPLIT == "train":
-                raise NotImplementedError
+                sequence_ind = [i for i in range(100) if i // 5 not in (3, 7, 11, 15, 19)]
             if self.cfg.BENCHMARK.SPLIT == "val":
-                raise NotImplementedError
+                sequence_ind = [i for i in range(100) if i // 5 in (3, 19)]
             if self.cfg.BENCHMARK.SPLIT == "test":
-                raise NotImplementedError
+                sequence_ind = [i for i in range(100) if i // 5 in (7, 11, 15)]
+            mano_side = ["right", "left"]
 
         self._scene_ids = []
         for i in range(1000):
+            if i // 5 % 20 in self._EVAL_SKIP_OBJECT:
+                continue
             if i // 100 in subject_ind and i % 100 in sequence_ind:
-                if i // 5 % 20 in self._EVAL_SKIP_OBJECT:
-                    continue
-                self._scene_ids.append(i)
+                if mano_side == ["right", "left"]:
+                    self._scene_ids.append(i)
+                else:
+                    if i % 5 != 4:
+                        if (
+                            i % 5 in (0, 1)
+                            and mano_side == ["right"]
+                            or i % 5 in (2, 3)
+                            and mano_side == ["left"]
+                        ):
+                            self._scene_ids.append(i)
+                    elif mano_side == self._dex_ycb.load_meta_from_cache(i)["mano_sides"]:
+                        self._scene_ids.append(i)
 
     @property
     def num_scenes(self):
         return len(self._scene_ids)
 
     def pre_reset(self, env_ids, idx=None, scene_id=None):
-        if scene_id is None:
+        if idx is not None:
+            assert scene_id is None
             scene_id = self._scene_ids[idx]
         else:
             assert scene_id in self._scene_ids

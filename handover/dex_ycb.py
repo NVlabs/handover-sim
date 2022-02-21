@@ -290,13 +290,9 @@ class DexYCB:
         return self._scene_data[scene_id]
 
     def load_from_cache(self, scene_id):
-        meta_file = self._meta_file_str.format(scene_id)
-        assert os.path.isfile(meta_file), "meta file does not exist: {}".format(meta_file)
-        with open(meta_file, "r") as f:
-            meta = json.load(f)
+        meta = self.load_meta_from_cache(scene_id)
 
         pose_file = self._pose_file_str.format(scene_id)
-        assert os.path.isfile(pose_file), "pose file does not exist: {}".format(pose_file)
         pose = np.load(pose_file)
 
         # Resample from cache.
@@ -321,3 +317,9 @@ class DexYCB:
         }
 
         return scene_data
+
+    def load_meta_from_cache(self, scene_id):
+        meta_file = self._meta_file_str.format(scene_id)
+        with open(meta_file, "r") as f:
+            meta = json.load(f)
+        return meta
