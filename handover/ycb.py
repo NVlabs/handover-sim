@@ -75,12 +75,12 @@ class YCB:
                 body.initial_dof_position = t.tolist() + q.tolist()
                 body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                 body.link_collision_filter = [
-                    self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(i)]
-                ] * 7
+                    [self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(i)]] * 7
+                ]
                 body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
-                body.dof_max_force = (
+                body.dof_max_force = [
                     self._cfg.ENV.YCB_TRANSLATION_MAX_FORCE + self._cfg.ENV.YCB_ROTATION_MAX_FORCE
-                )
+                ]
                 body.dof_position_gain = (
                     self._cfg.ENV.YCB_TRANSLATION_POSITION_GAIN
                     + self._cfg.ENV.YCB_ROTATION_POSITION_GAIN
@@ -93,13 +93,20 @@ class YCB:
                 self._bodies[i] = body
         else:
             assert [*self._bodies.keys()] == self._ycb_ids
-            self.grasped_body.link_collision_filter = [
-                self._cfg.ENV.COLLISION_FILTER_YCB[
-                    [*self._CLASSES].index(self._ycb_ids[self._ycb_grasp_ind])
+            self.grasped_body.update_attr_array(
+                "link_collision_filter",
+                [0],
+                [
+                    self._cfg.ENV.COLLISION_FILTER_YCB[
+                        [*self._CLASSES].index(self._ycb_ids[self._ycb_grasp_ind])
+                    ]
                 ]
-            ] * 7
-            self.grasped_body.dof_max_force = (
-                self._cfg.ENV.YCB_TRANSLATION_MAX_FORCE + self._cfg.ENV.YCB_ROTATION_MAX_FORCE
+                * 7,
+            )
+            self.grasped_body.update_attr_array(
+                "dof_max_force",
+                [0],
+                self._cfg.ENV.YCB_TRANSLATION_MAX_FORCE + self._cfg.ENV.YCB_ROTATION_MAX_FORCE,
             )
 
     @property
@@ -126,6 +133,8 @@ class YCB:
             self._bodies[i].dof_target_position = t.tolist() + q.tolist()
 
     def release(self):
-        self.grasped_body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7
-        self.grasped_body.dof_max_force = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        self.grasped_body.update_attr_array(
+            "link_collision_filter", [0], [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7
+        )
+        self.grasped_body.update_attr_array("dof_max_force", [0], (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
         self._released = True
