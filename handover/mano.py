@@ -34,8 +34,8 @@ class MANO:
             self._name = "{}_{}".format(scene_data["name"].split("/")[0], self._mano_side)
 
             pose = scene_data["pose_m"][:, 0]
-            self._sid = np.where(np.any(pose != 0, axis=1))[0][0]
-            self._eid = np.where(np.any(pose != 0, axis=1))[0][-1]
+            self._sid = np.nonzero(np.any(pose != 0, axis=1))[0][0]
+            self._eid = np.nonzero(np.any(pose != 0, axis=1))[0][-1]
             self._q = pose[:, 0:48].copy()
             self._t = pose[:, 48:51].copy()
             self._base_euler = pose[:, 51:54].copy()
