@@ -102,10 +102,9 @@ class DexYCB:
                 q, t = self.transform(q, t, tag_R_inv, tag_t_inv)
                 q, t = self.resample(q, t, time_step_resample)
 
-                shape_q = q.shape
                 q = q.reshape(-1, 4)
                 q = Rot.from_quat(q).as_euler("XYZ").astype(np.float32)
-                q = q.reshape(*shape_q[:2], 3)
+                q = q.reshape(*t.shape[:2], 3)
                 # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
                 q = np.unwrap(q, axis=0)
 
@@ -138,15 +137,15 @@ class DexYCB:
                 q = pose["pose_m"][:, :, 0:3]
                 t = pose["pose_m"][:, :, 48:51]
 
-                t[i] += root_trans
+                t[i] += root_trans[np.nonzero(i)[1]]
                 q, t = self.transform(q, t, tag_R_inv, tag_t_inv)
-                t[i] -= root_trans
+                t[i] -= root_trans[np.nonzero(i)[1]]
 
                 p = pose["pose_m"][:, :, 3:48]
                 p = np.einsum("abj,bjk->abk", p, comp) + mean
                 p = p.reshape(-1, 3)
                 p = Rot.from_rotvec(p).as_quat().astype(np.float32)
-                p = p.reshape(-1, 1, 60)
+                p = p.reshape(*t.shape[:2], 60)
                 p[~i] = 0
 
                 q = np.dstack((q, p))
@@ -157,19 +156,18 @@ class DexYCB:
                 q_i_full = q_i.reshape(-1, 4)
                 q_i_full = Rot.from_quat(q_i_full).as_rotvec().astype(np.float32)
                 q_i_full = q_i_full.reshape(-1, 48)
-                q = np.zeros((len(q), 1, 48), dtype=q.dtype)
+                q = np.zeros((*q.shape[:2], 48), dtype=q.dtype)
                 q[i] = q_i_full
 
                 pose_m = np.dstack((q, t))
 
-                q_i_base = q_i[:, 0:4]
-                q_i_base = Rot.from_quat(q_i_base).as_euler("XYZ").astype(np.float32)
-                # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
-                q_i_base = q_i_base.reshape(-1, 1, 3)
-                q_i_base = np.unwrap(q_i_base, axis=0)
-                q_i_base = q_i_base.reshape(-1, 3)
-                base_euler = np.zeros((len(q), 1, 3), dtype=q.dtype)
-                base_euler[i] = q_i_base
+                base_euler = np.zeros((*q.shape[:2], 3), dtype=q.dtype)
+                for o in range(q.shape[1]):
+                    q_i_base = q_i[np.nonzero(i)[1] == o, 0:4]
+                    q_i_base = Rot.from_quat(q_i_base).as_euler("XYZ").astype(np.float32)
+                    # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
+                    q_i_base = np.unwrap(q_i_base, axis=0)
+                    base_euler[i[:, o], o] = q_i_base
 
                 pose_m = np.dstack((pose_m, base_euler))
 
