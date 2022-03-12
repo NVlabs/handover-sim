@@ -52,16 +52,16 @@ class HandoverStatusEnv(HandoverEnv):
     def check_status(self):
         status = 0
 
-        if self._mano.body is not None:
+        if self.mano.body is not None:
             contact = self.contact[0]
 
             contact_1 = contact[
-                (contact["body_id_a"] == self._mano.body.contact_id)
-                & (contact["body_id_b"] == self._panda.body.contact_id)
+                (contact["body_id_a"] == self.mano.body.contact_id)
+                & (contact["body_id_b"] == self.panda.body.contact_id)
             ]
             contact_2 = contact[
-                (contact["body_id_a"] == self._panda.body.contact_id)
-                & (contact["body_id_b"] == self._mano.body.contact_id)
+                (contact["body_id_a"] == self.panda.body.contact_id)
+                & (contact["body_id_b"] == self.mano.body.contact_id)
             ]
             contact = np.concatenate((contact_1, contact_2))
 
@@ -70,13 +70,13 @@ class HandoverStatusEnv(HandoverEnv):
                     status += self._FAILURE_ROBOT_HUMAN_CONTACT
                     break
 
-        if not self._ycb.released:
+        if not self.ycb.released:
             return status
 
         if not self._dropped:
             contact = self.contact[0]
-            contact_1 = contact[contact["body_id_a"] == self._ycb.grasped_body.contact_id]
-            contact_2 = contact[contact["body_id_b"] == self._ycb.grasped_body.contact_id]
+            contact_1 = contact[contact["body_id_a"] == self.ycb.grasped_body.contact_id]
+            contact_2 = contact[contact["body_id_b"] == self.ycb.grasped_body.contact_id]
             contact_2[["body_id_a", "body_id_b"]] = contact_2[["body_id_b", "body_id_a"]]
             contact_2[["link_id_a", "link_id_b"]] = contact_2[["link_id_b", "link_id_a"]]
             contact_2[["position_a_world", "position_b_world"]] = contact_2[
@@ -90,11 +90,11 @@ class HandoverStatusEnv(HandoverEnv):
             contact_2["normal"]["z"] *= -1
             contact = np.concatenate((contact_1, contact_2))
 
-            contact_panda = contact[contact["body_id_b"] == self._panda.body.contact_id]
-            contact_table = contact[contact["body_id_b"] == self._table.body.contact_id]
+            contact_panda = contact[contact["body_id_b"] == self.panda.body.contact_id]
+            contact_table = contact[contact["body_id_b"] == self.table.body.contact_id]
             contact_non_grasped_ycb = contact[
                 np.any(
-                    [contact["body_id_b"] == x.contact_id for x in self._ycb.non_grasped_bodies],
+                    [contact["body_id_b"] == x.contact_id for x in self.ycb.non_grasped_bodies],
                     axis=0,
                 )
             ]
@@ -102,13 +102,13 @@ class HandoverStatusEnv(HandoverEnv):
             panda_link_ind = contact_panda["link_id_b"][
                 contact_panda["force"] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH
             ]
-            contact_panda_fingers = set(self._panda.LINK_IND_FINGERS).issubset(panda_link_ind)
+            contact_panda_fingers = set(self.panda.LINK_IND_FINGERS).issubset(panda_link_ind)
             contact_table = np.any(contact_table["force"] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH)
             contact_non_grasped_ycb = np.any(
                 contact_non_grasped_ycb["force"] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH
             )
 
-            is_below_table = self._ycb.grasped_body.link_state[0][6, 2] < self.cfg.ENV.TABLE_HEIGHT
+            is_below_table = self.ycb.grasped_body.link_state[0][6, 2] < self.cfg.ENV.TABLE_HEIGHT
 
             if not contact_panda_fingers and (
                 contact_table or contact_non_grasped_ycb or is_below_table
@@ -126,7 +126,7 @@ class HandoverStatusEnv(HandoverEnv):
                 self._success_step_counter = 0
             return 0
 
-        pos = self._panda.body.link_state[0][self._panda.LINK_IND_HAND, 0:3].numpy()
+        pos = self.panda.body.link_state[0][self.panda.LINK_IND_HAND, 0:3].numpy()
         dist = np.linalg.norm(pos - self.goal_center)
         is_within_goal = dist < self.goal_radius
 

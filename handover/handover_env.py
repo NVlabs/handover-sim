@@ -20,6 +20,10 @@ class HandoverEnv(easysim.SimulatorEnv):
         self._release_step_thresh = self.cfg.ENV.RELEASE_TIME_THRESH / self.cfg.SIM.TIME_STEP
 
     @property
+    def table(self):
+        return self._table
+
+    @property
     def panda(self):
         return self._panda
 
@@ -32,8 +36,8 @@ class HandoverEnv(easysim.SimulatorEnv):
         return self._mano
 
     def pre_reset(self, env_ids, scene_id):
-        self._ycb.reset(scene_id)
-        self._mano.reset(scene_id)
+        self.ycb.reset(scene_id)
+        self.mano.reset(scene_id)
 
         self._release_reset()
         if self.cfg.ENV.IS_DRAW_RELEASE:
@@ -43,13 +47,13 @@ class HandoverEnv(easysim.SimulatorEnv):
         return None
 
     def pre_step(self, action):
-        self._panda.step(action)
-        self._ycb.step()
-        self._mano.step()
+        self.panda.step(action)
+        self.ycb.step()
+        self.mano.step()
 
     def post_step(self, action):
-        if not self._ycb.released and self._release_check():
-            self._ycb.release()
+        if not self.ycb.released and self._release_check():
+            self.ycb.release()
 
         if self.cfg.ENV.IS_DRAW_RELEASE:
             self._release_draw_step()
@@ -66,16 +70,16 @@ class HandoverEnv(easysim.SimulatorEnv):
         contact = contact[contact["force"] > self.cfg.ENV.RELEASE_FORCE_THRESH]
 
         if len(contact) == 0:
-            contact_panda_release_region = [False] * len(self._panda.LINK_IND_FINGERS)
+            contact_panda_release_region = [False] * len(self.panda.LINK_IND_FINGERS)
             contact_panda_body = False
         else:
             contact_1 = contact[
-                (contact["body_id_a"] == self._ycb.grasped_body.contact_id)
-                & (contact["body_id_b"] == self._panda.body.contact_id)
+                (contact["body_id_a"] == self.ycb.grasped_body.contact_id)
+                & (contact["body_id_b"] == self.panda.body.contact_id)
             ]
             contact_2 = contact[
-                (contact["body_id_a"] == self._panda.body.contact_id)
-                & (contact["body_id_b"] == self._ycb.grasped_body.contact_id)
+                (contact["body_id_a"] == self.panda.body.contact_id)
+                & (contact["body_id_b"] == self.ycb.grasped_body.contact_id)
             ]
             contact_2[["body_id_a", "body_id_b"]] = contact_2[["body_id_b", "body_id_a"]]
             contact_2[["link_id_a", "link_id_b"]] = contact_2[["link_id_b", "link_id_a"]]
@@ -93,15 +97,15 @@ class HandoverEnv(easysim.SimulatorEnv):
             contact_panda_body = len(contact) > 0
             contact_panda_release_region = []
 
-            for link_index in self._panda.LINK_IND_FINGERS:
+            for link_index in self.panda.LINK_IND_FINGERS:
                 contact_link = contact[contact["link_id_b"] == link_index]
 
                 if len(contact_link) == 0:
                     contact_panda_release_region.append(False)
                 else:
                     if np.any(np.isnan(contact_link["position_b_link"]["x"])):
-                        pos = self._panda.body.link_state[0][link_index, 0:3]
-                        orn = self._panda.body.link_state[0][link_index, 3:7]
+                        pos = self.panda.body.link_state[0][link_index, 0:3]
+                        orn = self.panda.body.link_state[0][link_index, 3:7]
                         t3d = get_t3d_from_qt(orn, pos)
                         t3d = t3d.inverse()
                         position = (
