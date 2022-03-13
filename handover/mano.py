@@ -129,7 +129,7 @@ class MANO:
 
         if self._frame == self._sid:
             self._make()
-        if self._frame > self._sid and self._frame <= self._eid:
+        if self._frame >= self._sid and self._frame <= self._eid:
             self._set_target_from_mano(
                 self._t[self._frame], self._q[self._frame], self._base_euler[self._frame]
             )
