@@ -1,8 +1,6 @@
-import os
 import numpy as np
 import easysim
-
-from mano_pybullet.hand_model import HandModel45
+import os
 
 
 # TODO(ywchao): add ground-truth motions.
@@ -12,10 +10,6 @@ class MANO:
         self._scene = scene
         self._dex_ycb = dex_ycb
 
-        self._models_dir = os.path.join(os.path.dirname(__file__), "data", "mano_v1_2", "models")
-
-        self._model = None
-        self._origin = None
         self._body = None
         self._cur_scene_id = None
 
@@ -29,18 +23,16 @@ class MANO:
 
             scene_data = self._dex_ycb.get_scene_data(scene_id)
 
-            self._mano_side = scene_data["mano_sides"][0]
-            self._mano_betas = scene_data["mano_betas"][0]
-            self._name = "{}_{}".format(scene_data["name"].split("/")[0], self._mano_side)
+            self._name = "{}_{}".format(
+                scene_data["name"].split("/")[0], scene_data["mano_sides"][0]
+            )
 
             pose = scene_data["pose_m"][:, 0]
             self._sid = np.nonzero(np.any(pose != 0, axis=1))[0][0]
             self._eid = np.nonzero(np.any(pose != 0, axis=1))[0][-1]
-            self._q = pose[:, 0:48].copy()
-            self._t = pose[:, 48:51].copy()
-            self._base_euler = pose[:, 51:54].copy()
-            self._t[self._sid : self._eid + 1, 2] += self._cfg.ENV.TABLE_HEIGHT
-            self._num_frames = len(self._q)
+            self._pose = pose.copy()
+            self._pose[self._sid : self._eid + 1, 2] += self._cfg.ENV.TABLE_HEIGHT
+            self._num_frames = len(self._pose)
 
             self._cur_scene_id = scene_id
 
@@ -54,19 +46,10 @@ class MANO:
     def _clean(self):
         if self.body is not None:
             self._scene.remove_body(self.body)
-            self._model = None
-            self._origin = None
             self._body = None
 
     def _make(self):
         if self._body is None:
-            self._model = HandModel45(
-                left_hand=self._mano_side == "left",
-                models_dir=self._models_dir,
-                betas=self._mano_betas,
-            )
-            self._origin = self._model.origins(self._mano_betas)[0]
-
             body = easysim.Body()
             body.name = "mano"
             body.urdf_file = os.path.join(
@@ -105,23 +88,8 @@ class MANO:
             )
             self._scene.add_body(body)
             self._body = body
-        else:
-            assert self._model.is_left_hand == (self._mano_side == "left")
-            assert self._model._betas == self._mano_betas
 
-        self._reset_from_mano(
-            self._t[self._frame], self._q[self._frame], self._base_euler[self._frame]
-        )
-
-    def _reset_from_mano(self, trans, mano_pose, base_euler):
-        angles, basis = self._model.mano_to_angles(mano_pose)
-        trans = trans + self._origin - basis @ self._origin
-        self.body.initial_dof_position = trans.tolist() + base_euler.tolist() + angles
-
-    def _set_target_from_mano(self, trans, mano_pose, base_euler):
-        angles, basis = self._model.mano_to_angles(mano_pose)
-        trans = trans + self._origin - basis @ self._origin
-        self.body.dof_target_position = trans.tolist() + base_euler.tolist() + angles
+        self.body.initial_dof_position = self._pose[self._frame]
 
     def step(self):
         self._frame += 1
@@ -130,8 +98,6 @@ class MANO:
         if self._frame == self._sid:
             self._make()
         if self._frame >= self._sid and self._frame <= self._eid:
-            self._set_target_from_mano(
-                self._t[self._frame], self._q[self._frame], self._base_euler[self._frame]
-            )
+            self.body.dof_target_position = self._pose[self._frame]
         if self._frame == self._eid + 1:
             self._clean()

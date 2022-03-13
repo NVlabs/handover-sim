@@ -46,11 +46,9 @@ class YCB:
             self._ycb_ids = scene_data["ycb_ids"]
             self._ycb_grasp_ind = scene_data["ycb_grasp_ind"]
 
-            pose = scene_data["pose_y"]
-            self._q = pose[:, :, 0:3].copy()
-            self._t = pose[:, :, 3:6].copy()
-            self._t[:, :, 2] += self._cfg.ENV.TABLE_HEIGHT
-            self._num_frames = len(self._q)
+            self._pose = scene_data["pose_y"].copy()
+            self._pose[:, :, 2] += self._cfg.ENV.TABLE_HEIGHT
+            self._num_frames = len(self._pose)
 
             self._cur_scene_id = scene_id
 
@@ -70,9 +68,7 @@ class YCB:
                 )
                 body.use_fixed_base = True
                 body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
-                q = self._q[self._frame, self._ycb_ids.index(i)]
-                t = self._t[self._frame, self._ycb_ids.index(i)]
-                body.initial_dof_position = t.tolist() + q.tolist()
+                body.initial_dof_position = self._pose[self._frame, self._ycb_ids.index(i)]
                 body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                 body.link_collision_filter = [
                     [self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(i)]] * 7
@@ -126,11 +122,7 @@ class YCB:
         self._frame = min(self._frame, self._num_frames - 1)
 
         for i in self._ycb_ids:
-            if self.released and i == self._ycb_ids[self._ycb_grasp_ind]:
-                continue
-            q = self._q[self._frame, self._ycb_ids.index(i)]
-            t = self._t[self._frame, self._ycb_ids.index(i)]
-            self._bodies[i].dof_target_position = t.tolist() + q.tolist()
+            self._bodies[i].dof_target_position = self._pose[self._frame, self._ycb_ids.index(i)]
 
     def release(self):
         self.grasped_body.update_attr_array(

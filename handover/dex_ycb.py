@@ -7,6 +7,7 @@ import json
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 from scipy import interpolate
+from mano_pybullet.hand_model import HandModel45
 
 
 class DexYCB:
@@ -31,6 +32,10 @@ class DexYCB:
         self._cfg = cfg
         self._save_to_cache = save_to_cache
         self._preload_from_raw = preload_from_raw
+
+        self._models_dir = os.path.join(os.path.dirname(__file__), "data", "mano_v1_2", "models")
+        self._models = {}
+        self._origins = {}
 
         self._cache_dir = os.path.join(os.path.dirname(__file__), "data", "dex-ycb-cache")
         self._meta_file_str = os.path.join(self._cache_dir, "meta_{:03d}.json")
@@ -108,7 +113,7 @@ class DexYCB:
                 # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
                 q = np.unwrap(q, axis=0)
 
-                pose_y = np.dstack((q, t))
+                pose_y = np.dstack((t, q))
 
                 # Process MANO pose.
                 mano_betas = []
@@ -143,33 +148,54 @@ class DexYCB:
 
                 p = pose["pose_m"][:, :, 3:48]
                 p = np.einsum("abj,bjk->abk", p, comp) + mean
-                p = p.reshape(-1, 3)
-                p = Rot.from_rotvec(p).as_quat().astype(np.float32)
-                p = p.reshape(*t.shape[:2], 60)
-                p[~i] = 0
+                p[~i] = 0.0
 
+                q_i = q[i]
+                q_i = Rot.from_quat(q_i).as_rotvec().astype(np.float32)
+                q = np.zeros((*q.shape[:2], 3), dtype=q.dtype)
+                q[i] = q_i
                 q = np.dstack((q, p))
+                for o, (s, b) in enumerate(zip(meta["mano_sides"], mano_betas)):
+                    k = "{}_{}".format(n, s)
+                    if k not in self._models:
+                        self._models[k] = HandModel45(
+                            left_hand=s == "left", models_dir=self._models_dir, betas=b
+                        )
+                        self._origins[k] = self._models[k].origins(b)[0]
+                    sid = np.nonzero(np.any(q[:, o] != 0, axis=1))[0][0]
+                    eid = np.nonzero(np.any(q[:, o] != 0, axis=1))[0][-1]
+                    for f in range(sid, eid + 1):
+                        mano_pose = q[f, o]
+                        trans = t[f, o]
+                        angles, basis = self._models[k].mano_to_angles(mano_pose)
+                        trans = trans + self._origins[k] - basis @ self._origins[k]
+                        q[f, o, 3:] = angles
+                        t[f, o] = trans
+                q_i = q[i]
+                q_i = q_i.reshape(-1, 3)
+                q_i = Rot.from_rotvec(q_i).as_quat().astype(np.float32)
+                q_i = q_i.reshape(-1, 64)
+                q = np.zeros((*q.shape[:2], 64), dtype=q.dtype)
+                q[i] = q_i
+
                 q, t = self.resample(q, t, time_step_resample)
 
                 i = np.any(q != 0.0, axis=2)
                 q_i = q[i]
-                q_i_full = q_i.reshape(-1, 4)
+                q_i_full = q_i[:, 4:64].reshape(-1, 4)
                 q_i_full = Rot.from_quat(q_i_full).as_rotvec().astype(np.float32)
-                q_i_full = q_i_full.reshape(-1, 48)
+                q_i_full = q_i_full.reshape(-1, 45)
                 q = np.zeros((*q.shape[:2], 48), dtype=q.dtype)
-                q[i] = q_i_full
+                q[i, 3:48] = q_i_full
 
-                pose_m = np.dstack((q, t))
-
-                base_euler = np.zeros((*q.shape[:2], 3), dtype=q.dtype)
                 for o in range(q.shape[1]):
                     q_i_base = q_i[np.nonzero(i)[1] == o, 0:4]
                     q_i_base = Rot.from_quat(q_i_base).as_euler("XYZ").astype(np.float32)
                     # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
                     q_i_base = np.unwrap(q_i_base, axis=0)
-                    base_euler[i[:, o], o] = q_i_base
+                    q[i[:, o], o, 0:3] = q_i_base
 
-                pose_m = np.dstack((pose_m, base_euler))
+                pose_m = np.dstack((t, q))
 
                 scene_data[scene_id] = {
                     "name": name,
@@ -292,10 +318,10 @@ class DexYCB:
 
         pose_file = self._pose_file_str.format(scene_id)
         pose = np.load(pose_file)
-
-        # Resample from cache.
         pose_y = pose["pose_y"]
         pose_m = pose["pose_m"]
+
+        # Resample from cache.
         if self._cfg.SIM.TIME_STEP != self._TIME_STEP_CACHE:
             assert self._cfg.SIM.TIME_STEP > self._TIME_STEP_CACHE
             ind_int = np.arange(0, len(pose_y) * self._TIME_STEP_CACHE, self._cfg.SIM.TIME_STEP)
