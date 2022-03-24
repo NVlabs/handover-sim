@@ -169,12 +169,15 @@ class DexYCB:
                         trans = t[f, o]
                         angles, basis = self._models[k].mano_to_angles(mano_pose)
                         trans = trans + self._origins[k] - basis @ self._origins[k]
-                        q[f, o, 3:] = angles
+                        q[f, o, 3:48] = angles
                         t[f, o] = trans
                 q_i = q[i]
-                q_i = q_i.reshape(-1, 3)
-                q_i = Rot.from_rotvec(q_i).as_quat().astype(np.float32)
-                q_i = q_i.reshape(-1, 64)
+                q_i_base = q_i[:, 0:3]
+                q_i_pose = q_i[:, 3:48].reshape(-1, 3)
+                q_i_base = Rot.from_rotvec(q_i_base).as_quat().astype(np.float32)
+                q_i_pose = Rot.from_euler("XYZ", q_i_pose).as_quat().astype(np.float32)
+                q_i_pose = q_i_pose.reshape(-1, 60)
+                q_i = np.hstack((q_i_base, q_i_pose))
                 q = np.zeros((*q.shape[:2], 64), dtype=q.dtype)
                 q[i] = q_i
 
@@ -182,18 +185,15 @@ class DexYCB:
 
                 i = np.any(q != 0.0, axis=2)
                 q_i = q[i]
-                q_i_full = q_i[:, 4:64].reshape(-1, 4)
-                q_i_full = Rot.from_quat(q_i_full).as_rotvec().astype(np.float32)
-                q_i_full = q_i_full.reshape(-1, 45)
                 q = np.zeros((*q.shape[:2], 48), dtype=q.dtype)
-                q[i, 3:48] = q_i_full
-
                 for o in range(q.shape[1]):
-                    q_i_base = q_i[np.nonzero(i)[1] == o, 0:4]
-                    q_i_base = Rot.from_quat(q_i_base).as_euler("XYZ").astype(np.float32)
+                    q_i_o = q_i[np.nonzero(i)[1] == o]
+                    q_i_o = q_i_o.reshape(-1, 4)
+                    q_i_o = Rot.from_quat(q_i_o).as_euler("XYZ").astype(np.float32)
+                    q_i_o = q_i_o.reshape(-1, 48)
                     # https://math.stackexchange.com/questions/463748/getting-cumulative-euler-angle-from-a-single-quaternion
-                    q_i_base = np.unwrap(q_i_base, axis=0)
-                    q[i[:, o], o, 0:3] = q_i_base
+                    q_i_o[:, 0:3] = np.unwrap(q_i_o[:, 0:3], axis=0)
+                    q[i[:, o], o] = q_i_o
 
                 pose_m = np.dstack((t, q))
 
