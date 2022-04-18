@@ -74,12 +74,12 @@ class HandoverEnv(easysim.SimulatorEnv):
             contact_panda_body = False
         else:
             contact_1 = contact[
-                (contact["body_id_a"] == self.ycb.grasped_body.contact_id)
-                & (contact["body_id_b"] == self.panda.body.contact_id)
+                (contact["body_id_a"] == self.ycb.grasped_body.contact_id[0])
+                & (contact["body_id_b"] == self.panda.body.contact_id[0])
             ]
             contact_2 = contact[
-                (contact["body_id_a"] == self.panda.body.contact_id)
-                & (contact["body_id_b"] == self.ycb.grasped_body.contact_id)
+                (contact["body_id_a"] == self.panda.body.contact_id[0])
+                & (contact["body_id_b"] == self.ycb.grasped_body.contact_id[0])
             ]
             contact_2[["body_id_a", "body_id_b"]] = contact_2[["body_id_b", "body_id_a"]]
             contact_2[["link_id_a", "link_id_b"]] = contact_2[["link_id_b", "link_id_a"]]

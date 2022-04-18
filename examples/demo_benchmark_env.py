@@ -49,7 +49,7 @@ class Policy:
         for _ in range(num_steps):
             pos += step
             conf = pybullet.calculateInverseKinematics(
-                self._env.panda.body.contact_id, self._env.panda.LINK_IND_HAND - 1, pos
+                self._env.panda.body.contact_id[0], self._env.panda.LINK_IND_HAND - 1, pos
             )
             conf = np.asanyarray(conf, dtype=np.float32)
             conf[-2:] = 0.0

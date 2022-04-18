@@ -56,12 +56,12 @@ class HandoverStatusEnv(HandoverEnv):
             contact = self.contact[0]
 
             contact_1 = contact[
-                (contact["body_id_a"] == self.mano.body.contact_id)
-                & (contact["body_id_b"] == self.panda.body.contact_id)
+                (contact["body_id_a"] == self.mano.body.contact_id[0])
+                & (contact["body_id_b"] == self.panda.body.contact_id[0])
             ]
             contact_2 = contact[
-                (contact["body_id_a"] == self.panda.body.contact_id)
-                & (contact["body_id_b"] == self.mano.body.contact_id)
+                (contact["body_id_a"] == self.panda.body.contact_id[0])
+                & (contact["body_id_b"] == self.mano.body.contact_id[0])
             ]
             contact = np.concatenate((contact_1, contact_2))
 
@@ -75,8 +75,8 @@ class HandoverStatusEnv(HandoverEnv):
 
         if not self._dropped:
             contact = self.contact[0]
-            contact_1 = contact[contact["body_id_a"] == self.ycb.grasped_body.contact_id]
-            contact_2 = contact[contact["body_id_b"] == self.ycb.grasped_body.contact_id]
+            contact_1 = contact[contact["body_id_a"] == self.ycb.grasped_body.contact_id[0]]
+            contact_2 = contact[contact["body_id_b"] == self.ycb.grasped_body.contact_id[0]]
             contact_2[["body_id_a", "body_id_b"]] = contact_2[["body_id_b", "body_id_a"]]
             contact_2[["link_id_a", "link_id_b"]] = contact_2[["link_id_b", "link_id_a"]]
             contact_2[["position_a_world", "position_b_world"]] = contact_2[
@@ -90,11 +90,11 @@ class HandoverStatusEnv(HandoverEnv):
             contact_2["normal"]["z"] *= -1
             contact = np.concatenate((contact_1, contact_2))
 
-            contact_panda = contact[contact["body_id_b"] == self.panda.body.contact_id]
-            contact_table = contact[contact["body_id_b"] == self.table.body.contact_id]
+            contact_panda = contact[contact["body_id_b"] == self.panda.body.contact_id[0]]
+            contact_table = contact[contact["body_id_b"] == self.table.body.contact_id[0]]
             contact_non_grasped_ycb = contact[
                 np.any(
-                    [contact["body_id_b"] == x.contact_id for x in self.ycb.non_grasped_bodies],
+                    [contact["body_id_b"] == x.contact_id[0] for x in self.ycb.non_grasped_bodies],
                     axis=0,
                 )
             ]

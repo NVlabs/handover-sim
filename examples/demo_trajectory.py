@@ -87,7 +87,7 @@ def main():
         for i in range(10):
             pos[1] -= 0.03
             action = pybullet.calculateInverseKinematics(
-                env.panda.body.contact_id, env.panda.LINK_IND_HAND - 1, pos
+                env.panda.body.contact_id[0], env.panda.LINK_IND_HAND - 1, pos
             )
             action = np.asanyarray(action, dtype=np.float32)
             action[-2:] = 0.0
