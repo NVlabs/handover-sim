@@ -1,5 +1,6 @@
 import easysim
 import os
+import torch
 
 
 # TODO(ywchao): add ground-truth motions.
@@ -91,7 +92,7 @@ class YCB:
             assert [*self._bodies.keys()] == self._ycb_ids
             self.grasped_body.update_attr_array(
                 "link_collision_filter",
-                [0],
+                torch.tensor([0]),
                 [
                     self._cfg.ENV.COLLISION_FILTER_YCB[
                         [*self._CLASSES].index(self._ycb_ids[self._ycb_grasp_ind])
@@ -101,7 +102,7 @@ class YCB:
             )
             self.grasped_body.update_attr_array(
                 "dof_max_force",
-                [0],
+                torch.tensor([0]),
                 self._cfg.ENV.YCB_TRANSLATION_MAX_FORCE + self._cfg.ENV.YCB_ROTATION_MAX_FORCE,
             )
 
@@ -126,7 +127,11 @@ class YCB:
 
     def release(self):
         self.grasped_body.update_attr_array(
-            "link_collision_filter", [0], [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7
+            "link_collision_filter",
+            torch.tensor([0]),
+            [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7,
         )
-        self.grasped_body.update_attr_array("dof_max_force", [0], (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+        self.grasped_body.update_attr_array(
+            "dof_max_force", torch.tensor([0]), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        )
         self._released = True
