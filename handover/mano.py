@@ -49,9 +49,9 @@ class MANO:
             self._body = None
 
     def _make(self):
-        if self._body is None:
+        if self.body is None:
             body = easysim.Body()
-            body.name = "mano"
+            body.name = self._name
             body.urdf_file = os.path.join(
                 os.path.dirname(__file__),
                 "data",
@@ -61,6 +61,7 @@ class MANO:
             )
             body.use_fixed_base = True
             body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+            body.initial_dof_position = self._pose[self._frame]
             body.initial_dof_velocity = [0.0] * 51
             if self._cfg.SIM.SIMULATOR == "bullet":
                 body.link_color = [(0.0, 1.0, 0.0, 1.0)] * 53
@@ -88,8 +89,6 @@ class MANO:
             )
             self._scene.add_body(body)
             self._body = body
-
-        self.body.initial_dof_position = self._pose[self._frame]
 
     def step(self):
         self._frame += 1
