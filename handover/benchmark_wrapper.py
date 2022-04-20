@@ -74,9 +74,12 @@ class HandoverStatusEnv(HandoverEnv):
             return status
 
         if not self._dropped:
+            ycb_id_grasp = self.ycb.ids[0]
+            ycb_id_other = self.ycb.ids[1:]
+
             contact = self.contact[0]
-            contact_1 = contact[contact["body_id_a"] == self.ycb.grasped_body.contact_id[0]]
-            contact_2 = contact[contact["body_id_b"] == self.ycb.grasped_body.contact_id[0]]
+            contact_1 = contact[contact["body_id_a"] == self.ycb.bodies[ycb_id_grasp].contact_id[0]]
+            contact_2 = contact[contact["body_id_b"] == self.ycb.bodies[ycb_id_grasp].contact_id[0]]
             contact_2[["body_id_a", "body_id_b"]] = contact_2[["body_id_b", "body_id_a"]]
             contact_2[["link_id_a", "link_id_b"]] = contact_2[["link_id_b", "link_id_a"]]
             contact_2[["position_a_world", "position_b_world"]] = contact_2[
@@ -92,9 +95,12 @@ class HandoverStatusEnv(HandoverEnv):
 
             contact_panda = contact[contact["body_id_b"] == self.panda.body.contact_id[0]]
             contact_table = contact[contact["body_id_b"] == self.table.body.contact_id[0]]
-            contact_non_grasped_ycb = contact[
+            contact_ycb_other = contact[
                 np.any(
-                    [contact["body_id_b"] == x.contact_id[0] for x in self.ycb.non_grasped_bodies],
+                    [
+                        contact["body_id_b"] == self.ycb.bodies[i].contact_id[0]
+                        for i in ycb_id_other
+                    ],
                     axis=0,
                 )
             ]
@@ -104,15 +110,15 @@ class HandoverStatusEnv(HandoverEnv):
             ]
             contact_panda_fingers = set(self.panda.LINK_IND_FINGERS).issubset(panda_link_ind)
             contact_table = np.any(contact_table["force"] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH)
-            contact_non_grasped_ycb = np.any(
-                contact_non_grasped_ycb["force"] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH
+            contact_ycb_other = np.any(
+                contact_ycb_other["force"] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH
             )
 
-            is_below_table = self.ycb.grasped_body.link_state[0][6, 2] < self.cfg.ENV.TABLE_HEIGHT
+            is_below_table = (
+                self.ycb.bodies[ycb_id_grasp].link_state[0, 6, 2] < self.cfg.ENV.TABLE_HEIGHT
+            )
 
-            if not contact_panda_fingers and (
-                contact_table or contact_non_grasped_ycb or is_below_table
-            ):
+            if not contact_panda_fingers and (contact_table or contact_ycb_other or is_below_table):
                 self._dropped = True
 
         if self._dropped:

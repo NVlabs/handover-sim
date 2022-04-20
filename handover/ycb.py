@@ -1,3 +1,4 @@
+import numpy as np
 import easysim
 import os
 import torch
@@ -36,18 +37,34 @@ class YCB:
         self._bodies = {}
         self._cur_scene_id = None
 
+    @property
+    def bodies(self):
+        return self._bodies
+
     def reset(self, scene_id):
         if scene_id != self._cur_scene_id:
-            for i in [*self._bodies][::-1]:
-                self._scene.remove_body(self._bodies[i])
-                del self._bodies[i]
+            for i in [*self.bodies][::-1]:
+                self._scene.remove_body(self.bodies[i])
+                del self.bodies[i]
 
             scene_data = self._dex_ycb.get_scene_data(scene_id)
 
-            self._ycb_ids = scene_data["ycb_ids"]
-            self._ycb_grasp_ind = scene_data["ycb_grasp_ind"]
+            ycb_ids = scene_data["ycb_ids"]
+            ycb_grasp_ind = scene_data["ycb_grasp_ind"]
+            pose = scene_data["pose_y"]
+            if scene_data["ycb_grasp_ind"] != 0:
+                ycb_ids = (
+                    [ycb_ids[ycb_grasp_ind]]
+                    + ycb_ids[:ycb_grasp_ind]
+                    + ycb_ids[ycb_grasp_ind + 1 :]
+                )
+                pose = pose[
+                    :, np.r_[ycb_grasp_ind, :ycb_grasp_ind, ycb_grasp_ind + 1 : pose.shape[1]]
+                ]
 
-            self._pose = scene_data["pose_y"].copy()
+            self._ids = ycb_ids
+
+            self._pose = pose.copy()
             self._pose[:, :, 2] += self._cfg.ENV.TABLE_HEIGHT
             self._num_frames = len(self._pose)
 
@@ -56,8 +73,8 @@ class YCB:
         self._frame = 0
         self._released = False
 
-        if self._bodies == {}:
-            for i in self._ycb_ids:
+        if self.bodies == {}:
+            for i in self.ids:
                 body = easysim.Body()
                 body.name = f"ycb_{i:02d}"
                 body.urdf_file = os.path.join(
@@ -69,7 +86,7 @@ class YCB:
                 )
                 body.use_fixed_base = True
                 body.initial_base_position = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
-                body.initial_dof_position = self._pose[self._frame, self._ycb_ids.index(i)]
+                body.initial_dof_position = self._pose[self._frame, self.ids.index(i)]
                 body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                 body.link_collision_filter = [
                     [self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(i)]] * 7
@@ -89,49 +106,39 @@ class YCB:
                 self._scene.add_body(body)
                 self._bodies[i] = body
         else:
-            assert [*self._bodies.keys()] == self._ycb_ids
-            self.grasped_body.update_attr_array(
+            self.bodies[self.ids[0]].update_attr_array(
                 "link_collision_filter",
                 torch.tensor([0]),
-                [
-                    self._cfg.ENV.COLLISION_FILTER_YCB[
-                        [*self._CLASSES].index(self._ycb_ids[self._ycb_grasp_ind])
-                    ]
-                ]
-                * 7,
+                [self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(self.ids[0])]] * 7,
             )
-            self.grasped_body.update_attr_array(
+            self.bodies[self.ids[0]].update_attr_array(
                 "dof_max_force",
                 torch.tensor([0]),
                 self._cfg.ENV.YCB_TRANSLATION_MAX_FORCE + self._cfg.ENV.YCB_ROTATION_MAX_FORCE,
             )
 
     @property
+    def ids(self):
+        return self._ids
+
+    @property
     def released(self):
         return self._released
-
-    @property
-    def grasped_body(self):
-        return self._bodies[self._ycb_ids[self._ycb_grasp_ind]]
-
-    @property
-    def non_grasped_bodies(self):
-        return [self._bodies[i] for i in self._ycb_ids if i != self._ycb_ids[self._ycb_grasp_ind]]
 
     def step(self):
         self._frame += 1
         self._frame = min(self._frame, self._num_frames - 1)
 
-        for i in self._ycb_ids:
-            self._bodies[i].dof_target_position = self._pose[self._frame, self._ycb_ids.index(i)]
+        for i in self.ids:
+            self.bodies[i].dof_target_position = self._pose[self._frame, self.ids.index(i)]
 
     def release(self):
-        self.grasped_body.update_attr_array(
+        self.bodies[self.ids[0]].update_attr_array(
             "link_collision_filter",
             torch.tensor([0]),
             [self._cfg.ENV.COLLISION_FILTER_YCB_RELEASE] * 7,
         )
-        self.grasped_body.update_attr_array(
+        self.bodies[self.ids[0]].update_attr_array(
             "dof_max_force", torch.tensor([0]), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         )
         self._released = True
