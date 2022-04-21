@@ -61,7 +61,6 @@ class Policy:
 def main():
     cfg = get_config_from_args()
 
-    cfg.SIM.RENDER = True
     cfg.BENCHMARK.SETUP = setup
     cfg.BENCHMARK.SPLIT = split
     # TODO(ywchao):

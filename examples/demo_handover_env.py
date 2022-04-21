@@ -9,8 +9,6 @@ scene_id = 105
 def main():
     cfg = get_config_from_args()
 
-    cfg.SIM.RENDER = True
-
     env = HandoverEnv(cfg)
 
     while True:

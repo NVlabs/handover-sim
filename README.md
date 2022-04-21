@@ -92,17 +92,20 @@ For good practice for Python package management, it is recommended to install th
 1. Running a handover environment:
 
     ```Shell
-    python examples/demo_handover_env.py
+    python examples/demo_handover_env.py \
+      SIM.RENDER True
     ```
 
 2. Running a planned trajectory:
 
     ```Shell
-    python examples/demo_trajectory.py
+    python examples/demo_trajectory.py \
+      SIM.RENDER True
     ```
 
 3. Running a benchmark environment:
 
     ```Shell
-    python examples/demo_benchmark_env.py
+    python examples/demo_benchmark_env.py \
+      SIM.RENDER True
     ```

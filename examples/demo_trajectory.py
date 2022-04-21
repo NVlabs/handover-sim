@@ -62,8 +62,6 @@ num_action_repeat = 130
 def main():
     cfg = get_config_from_args()
 
-    cfg.SIM.RENDER = True
-
     env = HandoverEnv(cfg)
 
     while True:
