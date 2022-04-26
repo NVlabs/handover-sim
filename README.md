@@ -36,7 +36,7 @@ For good practice for Python package management, it is recommended to install th
     cd ..
     ```
 
-5. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip the file:
+5. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip with:
 
     ```Shell
     cd handover/data
@@ -44,20 +44,25 @@ For good practice for Python package management, it is recommended to install th
     cd ../..
     ```
 
+    This will extract a folder `handover/data/mano_v1_2/`.
+
 6. Download the DexYCB dataset.
 
     **Option 1**: Download cached dataset: **(recommended)**
 
-    ```Shell
-    cd handover/data
-    # Download dex-ycb-cache_20220216.tar.gz from https://drive.google.com/file/d/1w6qW9be8c3MU_XtrQ1gdOnwUszf75sg7.
-    tar zxvf dex-ycb-cache_20220216.tar.gz
-    cd ../..
-    ```
+    1. Download [`dex-ycb-cache-20220323.tar.gz`](https://drive.google.com/uc?export=download&id=1Jqe2iqI7inoEdE3BL4vEs25eT5M7aUHd) (507M) and place the file under `handover/data`. Extract with:
+
+        ```Shell
+        cd handover/data
+        tar zxvf dex-ycb-cache-20220323.tar.gz
+        cd ../..
+        ```
+
+        This will extract a folder `handover/data/dex-ycb-cache/`.
 
     **Option 2**: Download full dataset and cache the data:
 
-    1.  Download the DexYCB dataset from the [DexYCB project site](https://dex-ycb.github.io).
+    1. Download the DexYCB dataset from the [DexYCB project site](https://dex-ycb.github.io).
 
     2. Set the environment variable for dataset path:
 
@@ -81,11 +86,15 @@ For good practice for Python package management, it is recommended to install th
         python handover/data/cache_dex_ycb_data.py
         ```
 
+        The cached dataset will be saved to `handover/data/dex-ycb-cache/`.
+
 7. Compile assets:
 
     ```Shell
     ./handover/data/compile_assets.sh
     ```
+
+    The compiled assets will be saved to `handover/data/assets/`.
 
 ## Running Examples
 
