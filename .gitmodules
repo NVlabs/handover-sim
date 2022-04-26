@@ -1,7 +1,3 @@
-[submodule "OMG-Planner"]
-	path = OMG-Planner
-	url = ssh://git@gitlab-master.nvidia.com:12051/ychao/OMG-Planner.git
-	branch = handover-sim
 [submodule "mano_pybullet"]
 	path = mano_pybullet
 	url = ssh://git@gitlab-master.nvidia.com:12051/ychao/mano_pybullet.git
