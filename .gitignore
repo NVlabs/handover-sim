@@ -63,6 +63,7 @@ venv*/*
 
 handover/data/mano_v1_2.zip
 handover/data/mano_v1_2
+handover/data/assets-3rd-party-20220425.tar.gz
 handover/data/assets
 handover/data/dex-ycb-cache-20220323.tar.gz
 handover/data/dex-ycb-cache

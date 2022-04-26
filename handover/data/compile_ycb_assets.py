@@ -107,7 +107,7 @@ urdf_str = """<?xml version="1.0"?>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="model_normalized.obj" scale="1 1 1"/>
+        <mesh filename="textured_simple.obj" scale="1 1 1"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -129,8 +129,7 @@ urdf_str = """<?xml version="1.0"?>
 </robot>
 """
 
-src_root = os.path.join("..", "..", "..", "..", "OMG-Planner", "data", "objects")
-trg_root = os.path.join(os.path.dirname(__file__), "assets")
+asset_root = os.path.join(os.path.dirname(__file__), "assets")
 
 
 def main():
@@ -138,30 +137,15 @@ def main():
 
     for x in ycb_classes:
         print("{}".format(x))
-        src_dir = os.path.join(src_root, x)
-        trg_dir = os.path.join(trg_root, x)
-        os.makedirs(trg_dir, exist_ok=True)
+        urdf_dir = os.path.join(asset_root, x)
+        os.makedirs(urdf_dir, exist_ok=True)
 
-        obj_files = (
-            "model_normalized.obj",
-            "model_normalized_convex.obj",
-            "textured_simple.obj.mtl",
-            "texture_map.png",
-        )
-        for y in obj_files:
-            src_obj = os.path.join(src_dir, y)
-            trg_obj = os.path.join(trg_dir, y)
-            if not os.path.isfile(trg_obj):
-                os.symlink(src_obj, trg_obj)
-            else:
-                assert os.readlink(trg_obj) == src_obj
-
-        trg_urdf = os.path.join(trg_dir, "model_normalized.urdf")
-        if not os.path.isfile(trg_urdf):
-            with open(trg_urdf, "w") as f:
+        urdf_file = os.path.join(urdf_dir, "model_normalized.urdf")
+        if not os.path.isfile(urdf_file):
+            with open(urdf_file, "w") as f:
                 f.write(urdf_str)
         else:
-            with open(trg_urdf, "r") as f:
+            with open(urdf_file, "r") as f:
                 assert f.read() == urdf_str
 
     print("Done.")

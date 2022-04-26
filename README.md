@@ -28,15 +28,7 @@ For good practice for Python package management, it is recommended to install th
     pip install -e .
     ```
 
-4. Download data from OMG-Planner:
-
-    ```Shell
-    cd OMG-Planner
-    ./download_data.sh
-    cd ..
-    ```
-
-5. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip with:
+4. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip with:
 
     ```Shell
     cd handover/data
@@ -45,6 +37,26 @@ For good practice for Python package management, it is recommended to install th
     ```
 
     This will extract a folder `handover/data/mano_v1_2/`.
+
+5. Compile assets.
+
+    1. Download [`assets-3rd-party.tar.gz`](https://drive.google.com/uc?export=download&id=1nZqyzWDCaZqGglptkQKusDpTboTNpT4-) (155M) and place the file under `handover/data`. Extract with:
+
+        ```Shell
+        cd handover/data
+        tar zxvf assets-3rd-party.tar.gz
+        cd ../..
+        ```
+
+        This will extract a folder `handover/data/assets/` with 3rd party assets. See [handover/data/README.md](./handover/data/README.md) for the source of these assets.
+
+    2. Compile assets:
+
+        ```Shell
+        ./handover/data/compile_assets.sh
+        ```
+
+        The compiled assets will be saved to `handover/data/assets/`.
 
 6. Download the DexYCB dataset.
 
@@ -87,14 +99,6 @@ For good practice for Python package management, it is recommended to install th
         ```
 
         The cached dataset will be saved to `handover/data/dex-ycb-cache/`.
-
-7. Compile assets:
-
-    ```Shell
-    ./handover/data/compile_assets.sh
-    ```
-
-    The compiled assets will be saved to `handover/data/assets/`.
 
 ## Running Examples
 

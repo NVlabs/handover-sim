@@ -20,13 +20,7 @@ class Panda:
         body = easysim.Body()
         body.name = "panda"
         body.urdf_file = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "OMG-Planner",
-            "bullet",
-            "models",
-            "panda",
-            "panda_gripper.urdf",
+            os.path.dirname(__file__), "data", "assets", "franka_panda", "panda_gripper.urdf"
         )
         body.use_fixed_base = True
         body.use_self_collision = True

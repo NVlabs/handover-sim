@@ -1,0 +1,71 @@
+## assets
+
+`assets/` will be generated during installation and will contain the below two classes of assets:
+
+1. Downloaded 3rd party assets. Source of each file is shown below.
+    - YCB objects.
+        - `002_master_chef_can/`
+            - `textured_simple.obj`: [3D models](https://drive.google.com/uc?export=download&id=1gmcDD-5bkJfcMKLZb3zGgH_HUFbulQWu) of the [YCB-Video dataset](https://rse-lab.cs.washington.edu/projects/posecnn/).
+            - `textured_simple.obj.mtl`: [3D models](https://drive.google.com/uc?export=download&id=1gmcDD-5bkJfcMKLZb3zGgH_HUFbulQWu) of the [YCB-Video dataset](https://rse-lab.cs.washington.edu/projects/posecnn/).
+            - `texture_map.png`: [3D models](https://drive.google.com/uc?export=download&id=1gmcDD-5bkJfcMKLZb3zGgH_HUFbulQWu) of the [YCB-Video dataset](https://rse-lab.cs.washington.edu/projects/posecnn/).
+            - `model_normalized_convex.obj`: [data file](https://drive.google.com/uc?export=download&id=1tHPAQ2aPdkp8cwtFP4gs4wdcP02jfGpH) of [OMG-Planner](https://github.com/liruiw/OMG-Planner).
+        - `003_cracker_box/` (see above)
+        - `004_sugar_box/` (see above)
+        - `005_tomato_soup_can/` (see above)
+        - `006_mustard_bottle/` (see above)
+        - `007_tuna_fish_can/` (see above)
+        - `008_pudding_box/` (see above)
+        - `009_gelatin_box/` (see above)
+        - `010_potted_meat_can/` (see above)
+        - `011_banana/` (see above)
+        - `019_pitcher_base/` (see above)
+        - `021_bleach_cleanser/` (see above)
+        - `024_bowl/` (see above)
+        - `025_mug/` (see above)
+        - `035_power_drill/` (see above)
+        - `036_wood_block/` (see above)
+        - `037_scissors/` (see above)
+        - `040_large_marker/` (see above)
+        - `051_large_clamp/` (see above)
+        - `052_extra_large_clamp/` (see above)
+        - `061_foam_brick/` (see above)
+    - Franka Panda.
+        - `franka_panda/`
+            - `meshes/`: [`meshes/`](https://github.com/liruiw/OMG-Planner/tree/114a0b8c56e3f2418657610473f198004a5fe53d/bullet/models/panda/meshes) from [OMG-Planner](https://github.com/liruiw/OMG-Planner).
+            - `meshes/collision/camera.stl`: [`camera.stl`](https://github.com/liruiw/GA-DDPG/blob/139b28c0b4715071738f334fae5ef07da45bca7c/env/models/panda/meshes/collision/camera.stl) from [GA-DDPG](https://github.com/liruiw/GA-DDPG).
+            - `meshes/visual/camera.DAE`: [`camera.DAE`](https://github.com/liruiw/GA-DDPG/blob/4f01d2aadb8cf81e15e3ab1a84fd4c34f9c38910/env/models/panda/meshes/visual/camera.DAE) from [GA-DDPG](https://github.com/liruiw/GA-DDPG).
+            - `panda_gripper.urdf`: [`panda_gripper.urdf`](https://github.com/liruiw/OMG-Planner/blob/114a0b8c56e3f2418657610473f198004a5fe53d/bullet/models/panda/panda_gripper.urdf) from [OMG-Planner](https://github.com/liruiw/OMG-Planner).
+            - `panda_gripper_hand_camera.urdf`: [`panda_gripper_hand_camera.urdf`](https://github.com/liruiw/GA-DDPG/blob/139b28c0b4715071738f334fae5ef07da45bca7c/env/models/panda/panda_gripper_hand_camera.urdf) from [GA-DDPG](https://github.com/liruiw/GA-DDPG).
+   
+2. Compiled assets.
+    - Table.
+        - `table/`
+            - `table.mtl`: [`table.mtl`](https://github.com/bulletphysics/bullet3/blob/659e869b86e58dd448d4c3c4b823205d0b30f023/examples/pybullet/gym/pybullet_data/table/table.mtl) from [bullet3](https://github.com/bulletphysics/bullet3).
+            - `table.obj`: [`table.obj`](https://github.com/bulletphysics/bullet3/blob/659e869b86e58dd448d4c3c4b823205d0b30f023/examples/pybullet/gym/pybullet_data/table/table.obj) from [bullet3](https://github.com/bulletphysics/bullet3).
+            - `table.png`: [`table.png`](https://github.com/bulletphysics/bullet3/blob/659e869b86e58dd448d4c3c4b823205d0b30f023/examples/pybullet/gym/pybullet_data/table/table.png) from [bullet3](https://github.com/bulletphysics/bullet3).
+            - `table.urdf`: see [compile_table_assets.py](./compile_table_assets.py).
+    - YCB object URDF file.
+        - `model_normalized.urdf` in each YCB object folder: see [compile_ycb_assets.py](./compile_ycb_assets.py).
+    - MANO hands. Compiled with [`mano_pybullet`](TODO) - see [compile_mano_assets.py](./compile_mano_assets.py).
+        - `20200709-subject-01_left/`
+            - `mano.urdf`
+            - `meshes/`
+        - `20200709-subject-01_right/` (see above)
+        - `20200813-subject-02_left/` (see above)
+        - `20200813-subject-02_right/` (see above)
+        - `20200820-subject-03_left/` (see above)
+        - `20200820-subject-03_right/` (see above)
+        - `20200903-subject-04_left/` (see above)
+        - `20200903-subject-04_right/` (see above)
+        - `20200908-subject-05_left/` (see above)
+        - `20200908-subject-05_right/` (see above)
+        - `20200918-subject-06_left/` (see above)
+        - `20200918-subject-06_right/` (see above)
+        - `20200928-subject-07_left/` (see above)
+        - `20200928-subject-07_right/` (see above)
+        - `20201002-subject-08_left/` (see above)
+        - `20201002-subject-08_right/` (see above)
+        - `20201015-subject-09_left/` (see above)
+        - `20201015-subject-09_right/` (see above)
+        - `20201022-subject-10_left/` (see above)
+        - `20201022-subject-10_right/` (see above)
