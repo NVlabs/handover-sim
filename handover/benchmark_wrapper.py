@@ -74,12 +74,14 @@ class HandoverStatusEnv(HandoverEnv):
             return status
 
         if not self._dropped:
-            ycb_id_grasp = self.ycb.ids[0]
-            ycb_id_other = self.ycb.ids[1:]
-
             contact = self.contact[0]
-            contact_1 = contact[contact["body_id_a"] == self.ycb.bodies[ycb_id_grasp].contact_id[0]]
-            contact_2 = contact[contact["body_id_b"] == self.ycb.bodies[ycb_id_grasp].contact_id[0]]
+
+            contact_1 = contact[
+                contact["body_id_a"] == self.ycb.bodies[self.ycb.ids[0]].contact_id[0]
+            ]
+            contact_2 = contact[
+                contact["body_id_b"] == self.ycb.bodies[self.ycb.ids[0]].contact_id[0]
+            ]
             contact_2[["body_id_a", "body_id_b"]] = contact_2[["body_id_b", "body_id_a"]]
             contact_2[["link_id_a", "link_id_b"]] = contact_2[["link_id_b", "link_id_a"]]
             contact_2[["position_a_world", "position_b_world"]] = contact_2[
@@ -99,7 +101,7 @@ class HandoverStatusEnv(HandoverEnv):
                 np.any(
                     [
                         contact["body_id_b"] == self.ycb.bodies[i].contact_id[0]
-                        for i in ycb_id_other
+                        for i in self.ycb.ids[1:]
                     ],
                     axis=0,
                 )
@@ -115,7 +117,7 @@ class HandoverStatusEnv(HandoverEnv):
             )
 
             is_below_table = (
-                self.ycb.bodies[ycb_id_grasp].link_state[0, 6, 2] < self.cfg.ENV.TABLE_HEIGHT
+                self.ycb.bodies[self.ycb.ids[0]].link_state[0, 6, 2] < self.cfg.ENV.TABLE_HEIGHT
             )
 
             if not contact_panda_fingers and (contact_table or contact_ycb_other or is_below_table):
