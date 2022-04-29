@@ -117,7 +117,8 @@ class HandoverStatusEnv(HandoverEnv):
             )
 
             is_below_table = (
-                self.ycb.bodies[self.ycb.ids[0]].link_state[0, 6, 2] < self.cfg.ENV.TABLE_HEIGHT
+                self.ycb.bodies[self.ycb.ids[0]].link_state[0, 6, 2].item()
+                < self.cfg.ENV.TABLE_HEIGHT
             )
 
             if not contact_panda_fingers and (contact_table or contact_ycb_other or is_below_table):

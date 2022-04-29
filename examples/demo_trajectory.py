@@ -17,7 +17,8 @@ start_conf = np.array(
         +0.5870,
         +0.0400,
         +0.0400,
-    ]
+    ],
+    dtype=np.float32,
 )
 
 traj = np.array(
@@ -56,7 +57,11 @@ traj = np.array(
     dtype=np.float32,
 )
 
-num_action_repeat = 130
+time_wait = 3.0
+time_action_repeat = 0.13
+time_close_gripper = 0.2
+back_steps = 10
+back_step_size = 0.03
 
 
 def main():
@@ -67,29 +72,29 @@ def main():
     while True:
         env.reset(scene_id=scene_id)
 
-        for _ in range(3000):
+        for _ in range(int(time_wait / cfg.SIM.TIME_STEP)):
             action = start_conf
             env.step(action)
 
         for i in range(len(traj)):
             action = traj[i]
-            for _ in range(num_action_repeat):
+            for _ in range(int(time_action_repeat / cfg.SIM.TIME_STEP)):
                 env.step(action)
 
-        for _ in range(200):
+        for _ in range(int(time_close_gripper / cfg.SIM.TIME_STEP)):
             action = traj[-1].copy()
-            action[-2:] = 0.0
+            action[7:9] = 0.0
             env.step(action)
 
-        pos = env.panda.body.link_state[0][env.panda.LINK_IND_HAND][0:3]
-        for i in range(10):
-            pos[1] -= 0.03
+        pos = env.panda.body.link_state[0][env.panda.LINK_IND_HAND][0:3].numpy()
+        for i in range(back_steps):
+            pos[1] -= back_step_size
             action = pybullet.calculateInverseKinematics(
                 env.panda.body.contact_id[0], env.panda.LINK_IND_HAND - 1, pos
             )
-            action = np.asanyarray(action, dtype=np.float32)
-            action[-2:] = 0.0
-            for _ in range(num_action_repeat):
+            action = np.array(action, dtype=np.float32)
+            action[7:9] = 0.0
+            for _ in range(int(time_action_repeat / cfg.SIM.TIME_STEP)):
                 env.step(action)
 
 
