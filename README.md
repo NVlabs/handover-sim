@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-This code is tested with Python 3.8 on Linux.
+This code is tested with Python 3.8 on Ubuntu 20.04.
 
 ## Installation
 
@@ -28,7 +28,7 @@ For good practice for Python package management, it is recommended to install th
     pip install -e .
     ```
 
-4. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data`. Unzip with:
+4. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data/`. Unzip with:
 
     ```Shell
     cd handover/data
@@ -40,7 +40,7 @@ For good practice for Python package management, it is recommended to install th
 
 5. Compile assets.
 
-    1. Download [`assets-3rd-party.tar.gz`](https://drive.google.com/uc?export=download&id=1nZqyzWDCaZqGglptkQKusDpTboTNpT4-) (155M) and place the file under `handover/data`. Extract with:
+    1. Download [`assets-3rd-party-20220425.tar.gz`](https://drive.google.com/uc?export=download&id=1nZqyzWDCaZqGglptkQKusDpTboTNpT4-) (155M) and place the file under `handover/data/`. Extract with:
 
         ```Shell
         cd handover/data
@@ -62,7 +62,7 @@ For good practice for Python package management, it is recommended to install th
 
     **Option 1**: Download cached dataset: **(recommended)**
 
-    1. Download [`dex-ycb-cache-20220323.tar.gz`](https://drive.google.com/uc?export=download&id=1Jqe2iqI7inoEdE3BL4vEs25eT5M7aUHd) (507M) and place the file under `handover/data`. Extract with:
+    1. Download [`dex-ycb-cache-20220323.tar.gz`](https://drive.google.com/uc?export=download&id=1Jqe2iqI7inoEdE3BL4vEs25eT5M7aUHd) (507M) and place the file under `handover/data/`. Extract with:
 
         ```Shell
         cd handover/data
