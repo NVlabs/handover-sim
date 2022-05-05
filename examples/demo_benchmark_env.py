@@ -60,8 +60,8 @@ class SimplePolicy(abc.ABC):
             else:
                 if self._back is None:
                     self._back = []
-                    pos = self._env.panda.body.link_state[0][self._env.panda.LINK_IND_HAND][
-                        0:3
+                    pos = self._env.panda.body.link_state[
+                        0, self._env.panda.LINK_IND_HAND, 0:3
                     ].numpy()
                     dpos_goal = self._env.goal_center - pos
                     dpos_step = dpos_goal / np.linalg.norm(dpos_goal) * self._back_step_size

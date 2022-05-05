@@ -104,8 +104,8 @@ class HandoverEnv(easysim.SimulatorEnv):
                     contact_panda_release_region.append(False)
                 else:
                     if np.any(np.isnan(contact_link["position_b_link"]["x"])):
-                        pos = self.panda.body.link_state[0][link_index, 0:3]
-                        orn = self.panda.body.link_state[0][link_index, 3:7]
+                        pos = self.panda.body.link_state[0, link_index, 0:3]
+                        orn = self.panda.body.link_state[0, link_index, 3:7]
                         t3d = get_t3d_from_qt(orn, pos)
                         t3d = t3d.inverse()
                         position = (

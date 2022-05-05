@@ -86,7 +86,7 @@ def main():
             action[7:9] = 0.0
             env.step(action)
 
-        pos = env.panda.body.link_state[0][env.panda.LINK_IND_HAND][0:3].numpy()
+        pos = env.panda.body.link_state[0, env.panda.LINK_IND_HAND, 0:3].numpy()
         for i in range(back_steps):
             pos[1] -= back_step_size
             action = pybullet.calculateInverseKinematics(

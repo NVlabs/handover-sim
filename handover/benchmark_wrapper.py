@@ -135,7 +135,7 @@ class HandoverStatusEnv(HandoverEnv):
                 self._success_step_counter = 0
             return 0
 
-        pos = self.panda.body.link_state[0][self.panda.LINK_IND_HAND, 0:3].numpy()
+        pos = self.panda.body.link_state[0, self.panda.LINK_IND_HAND, 0:3].numpy()
         dist = np.linalg.norm(pos - self.goal_center)
         is_within_goal = dist < self.goal_radius
 
