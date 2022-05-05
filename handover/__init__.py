@@ -1,4 +1,4 @@
-"""handover-sim package."""
+"""Handover-Sim package."""
 
 
 # NOTE (roflaherty): This is inspired by how matplotlib does creates its version value.

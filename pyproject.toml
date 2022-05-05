@@ -11,7 +11,6 @@ local_scheme = "dirty-tag"
 
 [tool.black]
 line-length = 100
-extend-exclude = "deprecated/"
 
 [tool.isort]
 # Multi line output mode 3 is used to conform with Black. See
@@ -41,5 +40,4 @@ module = [
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-norecursedirs = ["OMG-Planner"]
 python_files = ["*_test.py"]

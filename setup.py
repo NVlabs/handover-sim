@@ -1,4 +1,4 @@
-"""handover-sim package setuptools."""
+"""Handover-Sim package setuptools."""
 
 # NOTE (roflaherty): This file is still needed to allow the package to be
 # installed in editable mode.
