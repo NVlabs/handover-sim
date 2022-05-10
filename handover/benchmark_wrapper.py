@@ -38,7 +38,7 @@ class HandoverStatusEnv(HandoverEnv):
 
         self._elapsed_steps += 1
 
-        status = self.check_status()
+        status = self._check_status()
 
         if self._elapsed_steps >= self._max_episode_steps and status != 1:
             status += self._FAILURE_TIMEOUT
@@ -49,7 +49,7 @@ class HandoverStatusEnv(HandoverEnv):
 
         return observation, reward, done, info
 
-    def check_status(self):
+    def _check_status(self):
         status = 0
 
         if self.mano.body is not None:

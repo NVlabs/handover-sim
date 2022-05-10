@@ -7,7 +7,7 @@ def main():
 
     cfg = get_config_from_args()
 
-    DexYCB(cfg, save_to_cache=True)
+    DexYCB(cfg, flags=DexYCB.FLAG_SAVE_TO_CACHE)
 
     print("Done.")
 

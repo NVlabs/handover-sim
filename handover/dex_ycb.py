@@ -11,6 +11,10 @@ from mano_pybullet.hand_model import HandModel45
 
 
 class DexYCB:
+    FLAG_SAVE_TO_CACHE = 1
+    FLAG_PRELOAD_FROM_RAW = 2
+    FLAG_DEFAULT = 0
+
     _SUBJECTS = [
         "20200709-subject-01",
         "20200813-subject-02",
@@ -28,10 +32,9 @@ class DexYCB:
 
     NUM_SEQUENCES = 1000
 
-    def __init__(self, cfg, save_to_cache=False, preload_from_raw=False):
+    def __init__(self, cfg, flags=FLAG_DEFAULT):
         self._cfg = cfg
-        self._save_to_cache = save_to_cache
-        self._preload_from_raw = preload_from_raw
+        self._flags = flags
 
         self._models_dir = os.path.join(os.path.dirname(__file__), "data", "mano_v1_2", "models")
         self._models = {}
@@ -41,20 +44,20 @@ class DexYCB:
         self._meta_file_str = os.path.join(self._cache_dir, "meta_{:03d}.json")
         self._pose_file_str = os.path.join(self._cache_dir, "pose_{:03d}.npz")
 
-        if self._save_to_cache:
-            self._scene_data = self.preload_from_raw(self._TIME_STEP_CACHE)
-            self.save_to_cache()
+        if self._flags & self.FLAG_SAVE_TO_CACHE:
+            self._scene_data = self._preload_from_raw(self._TIME_STEP_CACHE)
+            self._save_to_cache()
 
-        if self._preload_from_raw:
-            self._scene_data = self.preload_from_raw(self._cfg.SIM.TIME_STEP)
+        if self._flags & self.FLAG_PRELOAD_FROM_RAW:
+            self._scene_data = self._preload_from_raw(self._cfg.SIM.TIME_STEP)
         else:
             self._scene_data = {scene_id: None for scene_id in range(self.NUM_SEQUENCES)}
 
-    def preload_from_raw(self, time_step_resample):
+    def _preload_from_raw(self, time_step_resample):
         print("Preloading DexYCB from raw dataset")
 
         # Get raw dataset dir.
-        assert "DEX_YCB_DIR" in os.environ, "environment variable 'DEX_YCB_DIR' is not set"
+        assert "DEX_YCB_DIR" in os.environ, "Environment variable 'DEX_YCB_DIR' is not set"
         raw_dir = os.environ["DEX_YCB_DIR"]
 
         # Load MANO model.
@@ -104,8 +107,8 @@ class DexYCB:
                 q = pose["pose_y"][:, :, :4]
                 t = pose["pose_y"][:, :, 4:]
 
-                q, t = self.transform(q, t, tag_R_inv, tag_t_inv)
-                q, t = self.resample(q, t, time_step_resample)
+                q, t = self._transform(q, t, tag_R_inv, tag_t_inv)
+                q, t = self._resample(q, t, time_step_resample)
 
                 q = q.reshape(-1, 4)
                 q = Rot.from_quat(q).as_euler("XYZ").astype(np.float32)
@@ -143,7 +146,7 @@ class DexYCB:
                 t = pose["pose_m"][:, :, 48:51]
 
                 t[i] += root_trans[np.nonzero(i)[1]]
-                q, t = self.transform(q, t, tag_R_inv, tag_t_inv)
+                q, t = self._transform(q, t, tag_R_inv, tag_t_inv)
                 t[i] -= root_trans[np.nonzero(i)[1]]
 
                 p = pose["pose_m"][:, :, 3:48]
@@ -181,7 +184,7 @@ class DexYCB:
                 q = np.zeros((*q.shape[:2], 64), dtype=q.dtype)
                 q[i] = q_i
 
-                q, t = self.resample(q, t, time_step_resample)
+                q, t = self._resample(q, t, time_step_resample)
 
                 i = np.any(q != 0.0, axis=2)
                 q_i = q[i]
@@ -213,7 +216,7 @@ class DexYCB:
 
         return scene_data
 
-    def transform(self, q, t, tag_R_inv, tag_t_inv):
+    def _transform(self, q, t, tag_R_inv, tag_t_inv):
         """Transforms 6D pose to tag coordinates."""
         q_trans = np.zeros((*q.shape[:2], 4), dtype=q.dtype)
         t_trans = np.zeros(t.shape, dtype=t.dtype)
@@ -237,7 +240,7 @@ class DexYCB:
 
     # http://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Animating_Transformations.html
     # "The approach used for transformation interpolation ... by multiplying the three interpolated matrices together."
-    def resample(self, q, t, time_step_resample):
+    def _resample(self, q, t, time_step_resample):
         """Resample motion."""
         i = np.any(q != 0, axis=2) | np.any(t != 0, axis=2)
 
@@ -278,7 +281,7 @@ class DexYCB:
 
         return q_int, t_int
 
-    def save_to_cache(self):
+    def _save_to_cache(self):
         print("Saving DexYCB to cache: {}".format(self._cache_dir))
         os.makedirs(self._cache_dir, exist_ok=True)
 
@@ -309,11 +312,11 @@ class DexYCB:
 
     def get_scene_data(self, scene_id):
         if self._scene_data[scene_id] is None:
-            self._scene_data[scene_id] = self.load_from_cache(scene_id)
+            self._scene_data[scene_id] = self._load_from_cache(scene_id)
 
         return self._scene_data[scene_id]
 
-    def load_from_cache(self, scene_id):
+    def _load_from_cache(self, scene_id):
         meta = self.load_meta_from_cache(scene_id)
 
         pose_file = self._pose_file_str.format(scene_id)
