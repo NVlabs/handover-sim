@@ -127,4 +127,11 @@ _C.BENCHMARK.SUCCESS_TIME_THRESH = 0.1
 _C.BENCHMARK.MAX_EPISODE_TIME = 13.0
 
 
+_C.BENCHMARK.RESULT_DIR = "results"
+
+_C.BENCHMARK.SAVE_RESULT = False
+
+_C.BENCHMARK.SAVE_HEADLESS_RENDER = False
+
+
 get_config_from_args = easysim.get_config_from_args

@@ -2,11 +2,14 @@ import easysim
 import numpy as np
 
 
-class HandoverStatusWrapper(easysim.SimulatorWrapper):
-    _FAILURE_ROBOT_HUMAN_CONTACT = -1
-    _FAILURE_OBJECT_DROP = -2
-    _FAILURE_TIMEOUT = -4
+class EpisodeStatus:
+    SUCCESS = 1
+    FAILURE_HUMAN_CONTACT = 2
+    FAILURE_OBJECT_DROP = 4
+    FAILURE_TIMEOUT = 8
 
+
+class HandoverStatusWrapper(easysim.SimulatorWrapper):
     def __init__(self, env):
         super().__init__(env)
 
@@ -33,8 +36,8 @@ class HandoverStatusWrapper(easysim.SimulatorWrapper):
 
         status = self._check_status()
 
-        if self._elapsed_steps >= self._max_episode_steps and status != 1:
-            status += self._FAILURE_TIMEOUT
+        if self._elapsed_steps >= self._max_episode_steps and status != EpisodeStatus.SUCCESS:
+            status |= EpisodeStatus.FAILURE_TIMEOUT
 
         done |= status != 0
 
@@ -60,7 +63,7 @@ class HandoverStatusWrapper(easysim.SimulatorWrapper):
 
             for x in contact:
                 if x["force"] > self.cfg.BENCHMARK.CONTACT_FORCE_THRESH:
-                    status += self._FAILURE_ROBOT_HUMAN_CONTACT
+                    status |= EpisodeStatus.FAILURE_HUMAN_CONTACT
                     break
 
         if not self.ycb.released:
@@ -118,9 +121,9 @@ class HandoverStatusWrapper(easysim.SimulatorWrapper):
                 self._dropped = True
 
         if self._dropped:
-            status += self._FAILURE_OBJECT_DROP
+            status |= EpisodeStatus.FAILURE_OBJECT_DROP
 
-        if status < 0:
+        if status != 0:
             return status
 
         if not contact_panda_fingers:
@@ -140,7 +143,7 @@ class HandoverStatusWrapper(easysim.SimulatorWrapper):
         self._success_step_counter += 1
 
         if self._success_step_counter >= self._success_step_thresh:
-            return 1
+            return EpisodeStatus.SUCCESS
         else:
             return 0
 

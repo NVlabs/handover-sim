@@ -36,6 +36,11 @@ class SimplePolicy(abc.ABC):
         self._steps_close_gripper = int(time_close_gripper / self._cfg.SIM.TIME_STEP)
         self._back_step_size = back_step_size
 
+    @property
+    @abc.abstractmethod
+    def name(self):
+        """ """
+
     def reset(self):
         self._done = False
         self._done_frame = None
@@ -88,6 +93,10 @@ class SimplePolicy(abc.ABC):
 
 
 class DemoPolicy(SimplePolicy):
+    @property
+    def name(self):
+        return "demo"
+
     def plan(self, obs):
         i = (obs["frame"] - self._steps_wait) // self._steps_action_repeat
         action = traj[i]
@@ -105,17 +114,17 @@ def main():
 
     env = HandoverBenchmarkWrapper(gym.make(cfg.ENV.ID, cfg=cfg))
 
-    pi = DemoPolicy(cfg)
+    policy = DemoPolicy(cfg)
 
     while True:
         obs = env.reset(scene_id=scene_id)
-        pi.reset()
+        policy.reset()
 
         while True:
-            action = pi.forward(obs)
-            obs, _, done, info = env.step(action)
+            action = policy.forward(obs)
+            obs, _, _, info = env.step(action)
 
-            if done:
+            if info["status"] != 0:
                 print("Done. Status: {:d}".format(info["status"]))
                 break
 
