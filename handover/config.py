@@ -134,4 +134,6 @@ _C.BENCHMARK.SAVE_RESULT = False
 _C.BENCHMARK.SAVE_HEADLESS_RENDER = False
 
 
+get_cfg = easysim.get_cfg
+
 get_config_from_args = easysim.get_config_from_args
