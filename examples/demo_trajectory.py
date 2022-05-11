@@ -18,7 +18,6 @@ start_conf = np.array(
         +0.0400,
         +0.0400,
     ],
-    dtype=np.float32,
 )
 
 traj = np.array(

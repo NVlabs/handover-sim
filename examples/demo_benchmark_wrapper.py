@@ -66,8 +66,8 @@ class SimplePolicy(abc.ABC):
             else:
                 if self._back is None:
                     self._back = []
-                    pos = obs["panda_body"].link_state[0, obs["panda_link_ind_hand"], 0:3].numpy()
-                    dpos_goal = self._cfg.BENCHMARK.GOAL_CENTER - pos
+                    pos = obs["panda_body"].link_state[0, obs["panda_link_ind_hand"], 0:3]
+                    dpos_goal = self._cfg.BENCHMARK.GOAL_CENTER - np.array(pos, dtype=np.float32)
                     dpos_step = dpos_goal / np.linalg.norm(dpos_goal) * self._back_step_size
                     num_steps = int(np.ceil(np.linalg.norm(dpos_goal) / self._back_step_size))
                     for _ in range(num_steps):
