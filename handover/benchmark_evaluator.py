@@ -4,6 +4,7 @@ import logging
 import sys
 import glob
 import numpy as np
+import itertools
 
 from tabulate import tabulate
 
@@ -91,10 +92,14 @@ def evaluate(res_dir):
     result["failure_human_contact"] = np.mean(mask_fail_1)
     result["failure_object_drop"] = np.mean(mask_fail_2)
     result["failure_timeout"] = np.mean(mask_fail_3)
+    result["scene_ids_success"] = np.nonzero(mask_succ)[0]
+    result["scene_ids_failure_human_contact"] = np.nonzero(mask_fail_1)[0]
+    result["scene_ids_failure_object_drop"] = np.nonzero(mask_fail_2)[0]
+    result["scene_ids_failure_timeout"] = np.nonzero(mask_fail_3)[0]
 
     tabular_data = []
     tabular_data += [
-        "{:.2f} ({}/{})".format(
+        "{:.2f} ({:3d}/{:3d})".format(
             100 * result["success_rate"], result["num_success"], result["num_scenes"]
         )
     ]
@@ -102,21 +107,21 @@ def evaluate(res_dir):
     tabular_data += [result["time_plan"]]
     tabular_data += [result["time_total"]]
     tabular_data += [
-        "{:.2f} ({}/{})".format(
+        "{:.2f} ({:3d}/{:3d})".format(
             100 * result["failure_human_contact"],
             result["num_failure_human_contact"],
             result["num_scenes"],
         )
     ]
     tabular_data += [
-        "{:.2f} ({}/{})".format(
+        "{:.2f} ({:3d}/{:3d})".format(
             100 * result["failure_object_drop"],
             result["num_failure_object_drop"],
             result["num_scenes"],
         )
     ]
     tabular_data += [
-        "{:.2f} ({}/{})".format(
+        "{:.2f} ({:3d}/{:3d})".format(
             100 * result["failure_timeout"], result["num_failure_timeout"], result["num_scenes"]
         )
     ]
@@ -142,6 +147,30 @@ def evaluate(res_dir):
     table = header + "\n" + table
 
     logger.info("Evaluation results: \n" + table)
+
+    logger.info("Printing scene ids")
+    n_cols = 20
+    tabular_data = ["{:3d}".format(x) for x in result["scene_ids_success"]]
+    tabular_data = itertools.zip_longest(*[tabular_data[i::n_cols] for i in range(n_cols)])
+    table = tabulate(tabular_data)
+    logger.info("Success ({} scenes): \n".format(result["num_success"]) + table)
+    tabular_data = ["{:3d}".format(x) for x in result["scene_ids_failure_human_contact"]]
+    tabular_data = itertools.zip_longest(*[tabular_data[i::n_cols] for i in range(n_cols)])
+    table = tabulate(tabular_data)
+    logger.info(
+        "Failure - hand contact ({} scenes): \n".format(result["num_failure_human_contact"]) + table
+    )
+    tabular_data = ["{:3d}".format(x) for x in result["scene_ids_failure_object_drop"]]
+    tabular_data = itertools.zip_longest(*[tabular_data[i::n_cols] for i in range(n_cols)])
+    table = tabulate(tabular_data)
+    logger.info(
+        "Failure - object drop ({} scenes): \n".format(result["num_failure_object_drop"]) + table
+    )
+    tabular_data = ["{:3d}".format(x) for x in result["scene_ids_failure_timeout"]]
+    tabular_data = itertools.zip_longest(*[tabular_data[i::n_cols] for i in range(n_cols)])
+    table = tabulate(tabular_data)
+    logger.info("Failure - timeout ({} scenes): \n".format(result["num_failure_timeout"]) + table)
+
     logger.info("Evaluation complete.")
 
     return result
