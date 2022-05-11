@@ -42,3 +42,15 @@ __version__ = _get_version()
 
 # Remove `_get_version` so it is not added as an attribute
 del _get_version
+
+from gym.envs.registration import register
+
+register(
+    id="HandoverBasicEnv-v1",
+    entry_point="handover.handover_env:HandoverBasicEnv",
+)
+
+register(
+    id="HandoverStateEnv-v1",
+    entry_point="handover.handover_env:HandoverStateEnv",
+)

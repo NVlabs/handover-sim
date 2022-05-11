@@ -1,29 +1,20 @@
+import easysim
 import numpy as np
 
-from handover.handover_env import HandoverEnv
 
-
-class HandoverStatusEnv(HandoverEnv):
+class HandoverStatusWrapper(easysim.SimulatorWrapper):
     _FAILURE_ROBOT_HUMAN_CONTACT = -1
     _FAILURE_OBJECT_DROP = -2
     _FAILURE_TIMEOUT = -4
 
-    def init(self):
-        super().init()
+    def __init__(self, env):
+        super().__init__(env)
 
         self._success_step_thresh = self.cfg.BENCHMARK.SUCCESS_TIME_THRESH / self.cfg.SIM.TIME_STEP
         self._max_episode_steps = self.cfg.BENCHMARK.MAX_EPISODE_TIME / self.cfg.SIM.TIME_STEP
 
-    @property
-    def goal_center(self):
-        return self.cfg.BENCHMARK.GOAL_CENTER
-
-    @property
-    def goal_radius(self):
-        return self.cfg.BENCHMARK.GOAL_RADIUS
-
-    def pre_reset(self, env_ids, scene_id):
-        super().pre_reset(env_ids, scene_id)
+    def reset(self, env_ids=None, **kwargs):
+        observation = super().reset(env_ids=env_ids, **kwargs)
 
         if self.cfg.BENCHMARK.IS_DRAW_GOAL:
             raise NotImplementedError
@@ -33,8 +24,10 @@ class HandoverStatusEnv(HandoverEnv):
         self._dropped = False
         self._success_step_counter = 0
 
-    def post_step(self, action):
-        observation, reward, done, info = super().post_step(action)
+        return observation
+
+    def step(self, action):
+        observation, reward, done, info = super().step(action)
 
         self._elapsed_steps += 1
 
@@ -136,8 +129,8 @@ class HandoverStatusEnv(HandoverEnv):
             return 0
 
         pos = self.panda.body.link_state[0, self.panda.LINK_IND_HAND, 0:3].numpy()
-        dist = np.linalg.norm(pos - self.goal_center)
-        is_within_goal = dist < self.goal_radius
+        dist = np.linalg.norm(self.cfg.BENCHMARK.GOAL_CENTER - pos)
+        is_within_goal = dist < self.cfg.BENCHMARK.GOAL_RADIUS
 
         if not is_within_goal:
             if self._success_step_counter != 0:
@@ -152,11 +145,11 @@ class HandoverStatusEnv(HandoverEnv):
             return 0
 
 
-class HandoverBenchmarkEnv(HandoverStatusEnv):
+class HandoverBenchmarkWrapper(HandoverStatusWrapper):
     _EVAL_SKIP_OBJECT = [0, 15]
 
-    def init(self):
-        super().init()
+    def __init__(self, env):
+        super().__init__(env)
 
         # Seen subjects, camera views, grasped objects.
         if self.cfg.BENCHMARK.SETUP == "s0":
@@ -222,22 +215,19 @@ class HandoverBenchmarkEnv(HandoverStatusEnv):
                             and mano_side == ["left"]
                         ):
                             self._scene_ids.append(i)
-                    elif mano_side == self._dex_ycb.load_meta_from_cache(i)["mano_sides"]:
+                    elif mano_side == self.dex_ycb.load_meta_from_cache(i)["mano_sides"]:
                         self._scene_ids.append(i)
 
     @property
     def num_scenes(self):
         return len(self._scene_ids)
 
-    def pre_reset(self, env_ids, idx=None, scene_id=None):
-        if idx is not None:
-            assert scene_id is None
-            scene_id = self._scene_ids[idx]
+    def reset(self, env_ids=None, **kwargs):
+        if "idx" in kwargs:
+            assert "scene_id" not in kwargs
+            kwargs["scene_id"] = self._scene_ids[kwargs["idx"]]
+            del kwargs["idx"]
         else:
-            assert scene_id in self._scene_ids
+            assert kwargs["scene_id"] in self._scene_ids
 
-        super().pre_reset(env_ids, scene_id)
-
-    def post_reset(self, env_ids, idx=None, scene_id=None):
-        observation = super().post_reset(env_ids, scene_id)
-        return observation
+        return super().reset(env_ids=env_ids, **kwargs)

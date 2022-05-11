@@ -98,6 +98,9 @@ _C.ENV.RELEASE_CONTACT_VERTEX_RADIUS = 0.001
 
 _C.ENV.RELEASE_CONTACT_VERTEX_COLOR = [0.85, 0.19, 0.21, 1.0]
 
+
+_C.ENV.ID = "HandoverBasicEnv-v1"
+
 # ---------------------------------------------------------------------------- #
 # Benchmark config
 # ---------------------------------------------------------------------------- #

@@ -6,7 +6,7 @@ import torch
 
 # TODO(ywchao): add ground-truth motions.
 class YCB:
-    _CLASSES = {
+    CLASSES = {
         1: "002_master_chef_can",
         2: "003_cracker_box",
         3: "004_sugar_box",
@@ -81,7 +81,7 @@ class YCB:
                     os.path.dirname(__file__),
                     "data",
                     "assets",
-                    self._CLASSES[i],
+                    self.CLASSES[i],
                     "model_normalized.urdf",
                 )
                 body.use_fixed_base = True
@@ -89,7 +89,7 @@ class YCB:
                 body.initial_dof_position = self._pose[self._frame, self.ids.index(i)]
                 body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                 body.link_collision_filter = [
-                    [self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(i)]] * 7
+                    [self._cfg.ENV.COLLISION_FILTER_YCB[[*self.CLASSES].index(i)]] * 7
                 ]
                 body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
                 body.dof_max_force = [
@@ -109,7 +109,7 @@ class YCB:
             self.bodies[self.ids[0]].update_attr_array(
                 "link_collision_filter",
                 torch.tensor([0]),
-                [self._cfg.ENV.COLLISION_FILTER_YCB[[*self._CLASSES].index(self.ids[0])]] * 7,
+                [self._cfg.ENV.COLLISION_FILTER_YCB[[*self.CLASSES].index(self.ids[0])]] * 7,
             )
             self.bodies[self.ids[0]].update_attr_array(
                 "dof_max_force",

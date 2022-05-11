@@ -116,9 +116,10 @@ For good practice for Python package management, it is recommended to install th
       SIM.RENDER True
     ```
 
-3. Running a benchmark environment:
+3. Running a benchmark wrapper:
 
     ```Shell
-    python examples/demo_benchmark_env.py \
-      SIM.RENDER True
+    python examples/demo_benchmark_wrapper.py \
+      SIM.RENDER True \
+      ENV.ID HandoverStateEnv-v1
     ```

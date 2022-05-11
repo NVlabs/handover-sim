@@ -1,4 +1,5 @@
 import easysim
+import abc
 import numpy as np
 
 from handover.dex_ycb import DexYCB
@@ -18,6 +19,10 @@ class HandoverEnv(easysim.SimulatorEnv):
         self._mano = MANO(self.cfg, self.scene, self._dex_ycb)
 
         self._release_step_thresh = self.cfg.ENV.RELEASE_TIME_THRESH / self.cfg.SIM.TIME_STEP
+
+    @property
+    def dex_ycb(self):
+        return self._dex_ycb
 
     @property
     def table(self):
@@ -44,7 +49,8 @@ class HandoverEnv(easysim.SimulatorEnv):
             self._release_draw_reset()
 
     def post_reset(self, env_ids, scene_id):
-        return None
+        self._frame = 0
+        return self.get_observation()
 
     def pre_step(self, action):
         self.panda.step(action)
@@ -58,7 +64,34 @@ class HandoverEnv(easysim.SimulatorEnv):
         if self.cfg.ENV.IS_DRAW_RELEASE:
             self._release_draw_step()
 
-        return None, None, False, {}
+        self._frame += 1
+
+        observation = self.get_observation()
+        reward = self.get_reward()
+        done = self.get_done()
+        info = self.get_info()
+
+        return observation, reward, done, info
+
+    @property
+    def frame(self):
+        return self._frame
+
+    @abc.abstractmethod
+    def get_observation(self):
+        """ """
+
+    @abc.abstractmethod
+    def get_reward(self):
+        """ """
+
+    @abc.abstractmethod
+    def get_done(self):
+        """ """
+
+    @abc.abstractmethod
+    def get_info(self):
+        """ """
 
     def _release_reset(self):
         self._release_step_counter_passive = 0
@@ -153,3 +186,29 @@ class HandoverEnv(easysim.SimulatorEnv):
 
     def _release_draw_step(self):
         raise NotImplementedError
+
+
+class HandoverBasicEnv(HandoverEnv):
+    def get_observation(self):
+        return None
+
+    def get_reward(self):
+        return None
+
+    def get_done(self):
+        return False
+
+    def get_info(self):
+        return {}
+
+
+class HandoverStateEnv(HandoverBasicEnv):
+    def get_observation(self):
+        observation = {}
+        observation["frame"] = self.frame
+        observation["panda_link_ind_hand"] = self.panda.LINK_IND_HAND
+        observation["panda_body"] = self.panda.body
+        observation["ycb_classes"] = self.ycb.CLASSES
+        observation["ycb_bodies"] = self.ycb.bodies
+        observation["mano_body"] = self.mano.body
+        return observation

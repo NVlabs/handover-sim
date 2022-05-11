@@ -1,8 +1,8 @@
 import numpy as np
+import gym
 import pybullet
 
 from handover.config import get_config_from_args
-from handover.handover_env import HandoverEnv
 
 scene_id = 105
 
@@ -67,7 +67,7 @@ back_step_size = 0.03
 def main():
     cfg = get_config_from_args()
 
-    env = HandoverEnv(cfg)
+    env = gym.make(cfg.ENV.ID, cfg=cfg)
 
     while True:
         env.reset(scene_id=scene_id)
