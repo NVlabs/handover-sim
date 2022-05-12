@@ -50,14 +50,14 @@ class SimplePolicy(abc.ABC):
     def forward(self, obs):
         if obs["frame"] < self._steps_wait:
             # Wait.
-            action = start_conf
+            action = start_conf.copy()
         elif not self._done:
             # Approach object until reaching grasp pose.
             action, done = self.plan(obs)
             if done:
                 self._done = True
                 self._done_frame = obs["frame"] + 1
-                self._done_action = action
+                self._done_action = action.copy()
         else:
             # Close gripper and back out.
             if obs["frame"] < self._done_frame + self._steps_close_gripper:
@@ -83,7 +83,7 @@ class SimplePolicy(abc.ABC):
                     obs["frame"] - self._done_frame - self._steps_close_gripper
                 ) // self._steps_action_repeat
                 i = min(i, len(self._back) - 1)
-                action = self._back[i]
+                action = self._back[i].copy()
 
         return action
 

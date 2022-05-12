@@ -90,11 +90,11 @@ class OMGPlannerPolicy(SimplePolicy):
                 self._traj = traj
 
         if len(self._traj) == 0:
-            action = start_conf
+            action = start_conf.copy()
             done = False
         else:
             i = (obs["frame"] - self._steps_wait) // self._steps_action_repeat
-            action = self._traj[i]
+            action = self._traj[i].copy()
             done = (
                 obs["frame"] == self._steps_wait + len(self._traj) * self._steps_action_repeat - 1
             )
