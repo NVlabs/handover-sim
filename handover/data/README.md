@@ -36,6 +36,8 @@
             - `meshes/visual/camera.DAE`: [`camera.DAE`](https://github.com/liruiw/GA-DDPG/blob/4f01d2aadb8cf81e15e3ab1a84fd4c34f9c38910/env/models/panda/meshes/visual/camera.DAE) from [GA-DDPG](https://github.com/liruiw/GA-DDPG).
             - `panda_gripper.urdf`: [`panda_gripper.urdf`](https://github.com/liruiw/OMG-Planner/blob/114a0b8c56e3f2418657610473f198004a5fe53d/bullet/models/panda/panda_gripper.urdf) from [OMG-Planner](https://github.com/liruiw/OMG-Planner).
             - `panda_gripper_hand_camera.urdf`: [`panda_gripper_hand_camera.urdf`](https://github.com/liruiw/GA-DDPG/blob/139b28c0b4715071738f334fae5ef07da45bca7c/env/models/panda/panda_gripper_hand_camera.urdf) from [GA-DDPG](https://github.com/liruiw/GA-DDPG).
+    - Grasp poses for each YCB object.
+        - `grasps/`: [data file](https://drive.google.com/uc?export=download&id=1tHPAQ2aPdkp8cwtFP4gs4wdcP02jfGpH) of [OMG-Planner](https://github.com/liruiw/OMG-Planner) (`data/grasps/simulated/`).
    
 2. Compiled assets.
     - Table.

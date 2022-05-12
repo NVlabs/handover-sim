@@ -40,11 +40,11 @@ For good practice for Python package management, it is recommended to install th
 
 5. Compile assets.
 
-    1. Download [`assets-3rd-party-20220425.tar.gz`](https://drive.google.com/uc?export=download&id=1nZqyzWDCaZqGglptkQKusDpTboTNpT4-) (155M) and place the file under `handover/data/`. Extract with:
+    1. Download [`assets-3rd-party-20220511.tar.gz`](https://drive.google.com/uc?export=download&id=1tDiXvW5vwJDOCgK61VEsFaZ7Z00gF0vj) (155M) and place the file under `handover/data/`. Extract with:
 
         ```Shell
         cd handover/data
-        tar zxvf assets-3rd-party.tar.gz
+        tar zxvf assets-3rd-party-20220511.tar.gz
         cd ../..
         ```
 
