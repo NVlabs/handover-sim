@@ -38,27 +38,7 @@ For good practice for Python package management, it is recommended to install th
 
     This will extract a folder `handover/data/mano_v1_2/`.
 
-5. Compile assets.
-
-    1. Download [`assets-3rd-party-20220511.tar.gz`](https://drive.google.com/uc?export=download&id=1tDiXvW5vwJDOCgK61VEsFaZ7Z00gF0vj) (155M) and place the file under `handover/data/`. Extract with:
-
-        ```Shell
-        cd handover/data
-        tar zxvf assets-3rd-party-20220511.tar.gz
-        cd ../..
-        ```
-
-        This will extract a folder `handover/data/assets/` with 3rd party assets. See [handover/data/README.md](./handover/data/README.md) for the source of these assets.
-
-    2. Compile assets:
-
-        ```Shell
-        ./handover/data/compile_assets.sh
-        ```
-
-        The compiled assets will be saved to `handover/data/assets/`.
-
-6. Download the DexYCB dataset.
+5. Download the DexYCB dataset.
 
     **Option 1**: Download cached dataset: **(recommended)**
 
@@ -99,6 +79,26 @@ For good practice for Python package management, it is recommended to install th
         ```
 
         The cached dataset will be saved to `handover/data/dex-ycb-cache/`.
+
+6. Compile assets.
+
+    1. Download [`assets-3rd-party-20220511.tar.gz`](https://drive.google.com/uc?export=download&id=1tDiXvW5vwJDOCgK61VEsFaZ7Z00gF0vj) (155M) and place the file under `handover/data/`. Extract with:
+
+        ```Shell
+        cd handover/data
+        tar zxvf assets-3rd-party-20220511.tar.gz
+        cd ../..
+        ```
+
+        This will extract a folder `handover/data/assets/` with 3rd party assets. See [handover/data/README.md](./handover/data/README.md) for the source of these assets.
+
+    2. Compile assets:
+
+        ```Shell
+        ./handover/data/compile_assets.sh
+        ```
+
+        The compiled assets will be saved to `handover/data/assets/`.
 
 ## Running Examples
 
