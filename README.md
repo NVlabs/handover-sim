@@ -120,6 +120,5 @@ For good practice for Python package management, it is recommended to install th
 
     ```Shell
     python examples/demo_benchmark_wrapper.py \
-      SIM.RENDER True \
-      ENV.ID HandoverStateEnv-v1
+      SIM.RENDER True
     ```

@@ -50,7 +50,7 @@ class HandoverEnv(easysim.SimulatorEnv):
 
     def post_reset(self, env_ids, scene_id):
         self._frame = 0
-        return self.get_observation()
+        return self._get_observation()
 
     def pre_step(self, action):
         self.panda.step(action)
@@ -66,10 +66,10 @@ class HandoverEnv(easysim.SimulatorEnv):
 
         self._frame += 1
 
-        observation = self.get_observation()
-        reward = self.get_reward()
-        done = self.get_done()
-        info = self.get_info()
+        observation = self._get_observation()
+        reward = self._get_reward()
+        done = self._get_done()
+        info = self._get_info()
 
         return observation, reward, done, info
 
@@ -78,19 +78,19 @@ class HandoverEnv(easysim.SimulatorEnv):
         return self._frame
 
     @abc.abstractmethod
-    def get_observation(self):
+    def _get_observation(self):
         """ """
 
     @abc.abstractmethod
-    def get_reward(self):
+    def _get_reward(self):
         """ """
 
     @abc.abstractmethod
-    def get_done(self):
+    def _get_done(self):
         """ """
 
     @abc.abstractmethod
-    def get_info(self):
+    def _get_info(self):
         """ """
 
     def _release_reset(self):
@@ -188,22 +188,8 @@ class HandoverEnv(easysim.SimulatorEnv):
         raise NotImplementedError
 
 
-class HandoverBasicEnv(HandoverEnv):
-    def get_observation(self):
-        return None
-
-    def get_reward(self):
-        return None
-
-    def get_done(self):
-        return False
-
-    def get_info(self):
-        return {}
-
-
-class HandoverStateEnv(HandoverBasicEnv):
-    def get_observation(self):
+class HandoverStateEnv(HandoverEnv):
+    def _get_observation(self):
         observation = {}
         observation["frame"] = self.frame
         observation["panda_link_ind_hand"] = self.panda.LINK_IND_HAND
@@ -212,3 +198,12 @@ class HandoverStateEnv(HandoverBasicEnv):
         observation["ycb_bodies"] = self.ycb.bodies
         observation["mano_body"] = self.mano.body
         return observation
+
+    def _get_reward(self):
+        return None
+
+    def _get_done(self):
+        return False
+
+    def _get_info(self):
+        return {}
