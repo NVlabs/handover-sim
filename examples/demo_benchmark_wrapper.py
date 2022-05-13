@@ -110,7 +110,7 @@ def main():
     cfg.BENCHMARK.SETUP = setup
     cfg.BENCHMARK.SPLIT = split
     # TODO(ywchao):
-    # cfg.BENCHMARK.IS_DRAW_GOAL = True
+    # cfg.BENCHMARK.DRAW_GOAL = True
 
     env = HandoverBenchmarkWrapper(gym.make(cfg.ENV.ID, cfg=cfg))
 

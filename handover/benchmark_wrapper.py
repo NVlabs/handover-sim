@@ -19,7 +19,7 @@ class HandoverStatusWrapper(easysim.SimulatorWrapper):
     def reset(self, env_ids=None, **kwargs):
         observation = super().reset(env_ids=env_ids, **kwargs)
 
-        if self.cfg.BENCHMARK.IS_DRAW_GOAL:
+        if self.cfg.BENCHMARK.DRAW_GOAL:
             raise NotImplementedError
 
         self._elapsed_steps = 0

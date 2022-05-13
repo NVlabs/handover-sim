@@ -45,7 +45,7 @@ class HandoverEnv(easysim.SimulatorEnv):
         self.mano.reset(scene_id)
 
         self._release_reset()
-        if self.cfg.ENV.IS_DRAW_RELEASE:
+        if self.cfg.ENV.DRAW_RELEASE_CONTACT:
             self._release_draw_reset()
 
     def post_reset(self, env_ids, scene_id):
@@ -61,7 +61,7 @@ class HandoverEnv(easysim.SimulatorEnv):
         if not self.ycb.released and self._release_check():
             self.ycb.release()
 
-        if self.cfg.ENV.IS_DRAW_RELEASE:
+        if self.cfg.ENV.DRAW_RELEASE_CONTACT:
             self._release_draw_step()
 
         self._frame += 1
