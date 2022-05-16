@@ -88,7 +88,7 @@ class SimplePolicy(abc.ABC):
         return action
 
     @abc.abstractmethod
-    def plan(self):
+    def plan(self, obs):
         """ """
 
 
