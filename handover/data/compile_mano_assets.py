@@ -260,10 +260,10 @@ def main():
                 (make_link_mesh(True, 0, model), os.path.join(urdf_dir, collision_filename))
             )
             mesh_counter += 1
-            shape_rpy = Rot.from_matrix(joints[0].basis.T).as_euler("xyz").astype(np.float64)
+            shape_rpy = Rot.from_matrix(joints[0].basis.T).as_euler("xyz")
             xyz = joints[0].origin
             mat = joints[0].basis
-            rpy = Rot.from_matrix(mat).as_euler("xyz").astype(np.float64)
+            rpy = Rot.from_matrix(mat).as_euler("xyz")
             axis = [0, 0, 0]
             robot.append(
                 create_link(
@@ -317,17 +317,15 @@ def main():
                             )
                         )
                         mesh_counter += 1
-                        shape_rpy = (
-                            Rot.from_matrix(joints[j].basis.T).as_euler("xyz").astype(np.float64)
-                        )
+                        shape_rpy = Rot.from_matrix(joints[j].basis.T).as_euler("xyz")
                     if k == 0:
                         xyz = joints[i].basis.T @ (joints[j].origin - joints[i].origin)
                         mat = joints[i].basis.T @ joints[j].basis
                     else:
                         xyz = [0, 0, 0]
-                        mat = np.eye(3, dtype=np.float64)
-                    rpy = Rot.from_matrix(mat).as_euler("xyz").astype(np.float64)
-                    axis = np.eye(3, dtype=np.float64)[ord(axis) - ord("x")]
+                        mat = np.eye(3)
+                    rpy = Rot.from_matrix(mat).as_euler("xyz")
+                    axis = np.eye(3)[ord(axis) - ord("x")]
                     robot.append(
                         create_link(
                             link_name,
