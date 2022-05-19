@@ -240,7 +240,7 @@ class YangICRA2021Policy:
 
     @property
     def name(self):
-        return "yang_icra2021"
+        return "yang-icra2021"
 
     def reset(self):
         self._done = False
