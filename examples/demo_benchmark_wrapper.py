@@ -61,26 +61,26 @@ class SimplePolicy(abc.ABC):
                 self._done_frame = obs["frame"] + 1
                 self._done_action = action.copy()
         else:
-            if self._back is None:
-                self._back = []
-                pos = obs["panda_body"].link_state[0, obs["panda_link_ind_hand"], 0:3]
-                dpos_goal = self._cfg.BENCHMARK.GOAL_CENTER - np.array(pos, dtype=np.float32)
-                dpos_step = dpos_goal / np.linalg.norm(dpos_goal) * self._back_step_size
-                num_steps = int(np.ceil(np.linalg.norm(dpos_goal) / self._back_step_size))
-                for _ in range(num_steps):
-                    pos += dpos_step
-                    conf = pybullet.calculateInverseKinematics(
-                        obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos
-                    )
-                    conf = np.array(conf, dtype=np.float32)
-                    conf[7:9] = 0.0
-                    self._back.append(conf)
-
             # Close gripper and back out.
             if obs["frame"] < self._done_frame + self._steps_close_gripper:
                 action = self._done_action.copy()
                 action[7:9] = 0.0
             else:
+                if self._back is None:
+                    self._back = []
+                    pos = obs["panda_body"].link_state[0, obs["panda_link_ind_hand"], 0:3].numpy()
+                    dpos_goal = self._cfg.BENCHMARK.GOAL_CENTER - pos
+                    dpos_step = dpos_goal / np.linalg.norm(dpos_goal) * self._back_step_size
+                    num_steps = int(np.ceil(np.linalg.norm(dpos_goal) / self._back_step_size))
+                    for _ in range(num_steps):
+                        pos += dpos_step
+                        conf = pybullet.calculateInverseKinematics(
+                            obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos
+                        )
+                        conf = np.array(conf, dtype=np.float32)
+                        conf[7:9] = 0.0
+                        self._back.append(conf)
+
                 i = (
                     obs["frame"] - self._done_frame - self._steps_close_gripper
                 ) // self._steps_action_repeat
