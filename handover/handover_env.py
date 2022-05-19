@@ -2,9 +2,9 @@ import easysim
 import abc
 import numpy as np
 
-from handover.dex_ycb import DexYCB
 from handover.table import Table
-from handover.panda import Panda
+from handover.panda import Panda, PandaHandCamera
+from handover.dex_ycb import DexYCB
 from handover.ycb import YCB
 from handover.mano import MANO
 from handover.transform3d import get_t3d_from_qt
@@ -12,17 +12,19 @@ from handover.transform3d import get_t3d_from_qt
 
 class HandoverEnv(easysim.SimulatorEnv):
     def init(self):
-        self._dex_ycb = DexYCB(self.cfg)
         self._table = Table(self.cfg, self.scene)
-        self._panda = Panda(self.cfg, self.scene)
+
+        self._panda = self._get_panda_cls()(self.cfg, self._scene)
+
+        self._dex_ycb = DexYCB(self.cfg)
         self._ycb = YCB(self.cfg, self.scene, self._dex_ycb)
         self._mano = MANO(self.cfg, self.scene, self._dex_ycb)
 
         self._release_step_thresh = self.cfg.ENV.RELEASE_TIME_THRESH / self.cfg.SIM.TIME_STEP
 
-    @property
-    def dex_ycb(self):
-        return self._dex_ycb
+    @abc.abstractmethod
+    def _get_panda_cls(self):
+        """ """
 
     @property
     def table(self):
@@ -31,6 +33,10 @@ class HandoverEnv(easysim.SimulatorEnv):
     @property
     def panda(self):
         return self._panda
+
+    @property
+    def dex_ycb(self):
+        return self._dex_ycb
 
     @property
     def ycb(self):
@@ -189,6 +195,9 @@ class HandoverEnv(easysim.SimulatorEnv):
 
 
 class HandoverStateEnv(HandoverEnv):
+    def _get_panda_cls(self):
+        return Panda
+
     def _get_observation(self):
         observation = {}
         observation["frame"] = self.frame
@@ -207,3 +216,119 @@ class HandoverStateEnv(HandoverEnv):
 
     def _get_info(self):
         return {}
+
+
+import pybullet
+
+from transforms3d.euler import euler2mat
+from transforms3d.quaternions import quat2mat
+
+
+class HandoverHandCameraPointStateEnv(HandoverEnv):
+    def init(self):
+        super().init()
+
+        # Create projection matrix.
+        self._width = 224
+        self._height = 224
+        self._fov = 90.0
+        self._aspect = self._width / self._height
+        self._near = 0.035
+        self._far = 2.0
+        self._projection_matrix = pybullet.computeProjectionMatrixFOV(
+            self._fov, self._aspect, self._near, self._far
+        )
+
+        # Get deproject points before depth multiplication.
+        K = np.eye(3)
+        K[0, 0] = self._width * self._projection_matrix[0] / 2
+        K[1, 1] = self._height * self._projection_matrix[5] / 2
+        K[0, 2] = self._width / 2
+        K[1, 2] = self._height / 2
+        K_inv = np.linalg.inv(K)
+        x, y = np.meshgrid(np.arange(self._width), np.arange(self._height))
+        ones = np.ones((self._height, self._width), dtype=np.float32)
+        xy1s = np.stack((x, y, ones), axis=2).reshape(self._width * self._height, 3).T
+        self._deproject_p = np.matmul(K_inv, xy1s)
+
+        # Get transform from hand to pinhole camera frame.
+        self._hand_to_camera = np.eye(4)
+        self._hand_to_camera[:3, 3] = [+0.036, 0.0, +0.036]
+        self._hand_to_camera[:3, :3] = euler2mat(0.0, 0.0, np.pi / 2)
+
+    def _get_panda_cls(self):
+        return PandaHandCamera
+
+    def post_reset(self, env_ids, scene_id):
+        self._point_state = None
+
+        return super().post_reset(env_ids, scene_id)
+
+    def post_step(self, action):
+        self._point_state = None
+
+        return super().post_step(action)
+
+    def _get_observation(self):
+        observation = {}
+        observation["frame"] = self.frame
+        observation["panda_link_ind_hand"] = self.panda.LINK_IND_HAND
+        observation["panda_body"] = self.panda.body
+        observation["callback_get_point_state"] = lambda: self._get_point_state()
+        return observation
+
+    def _get_reward(self):
+        return None
+
+    def _get_done(self):
+        return False
+
+    def _get_info(self):
+        return {}
+
+    def _get_point_state(self):
+        if self._point_state is not None:
+            return self._point_state
+
+        # Get OpenGL view frame from URDF camera frame.
+        pos = self.panda.body.link_state[0, self.panda.LINK_IND_CAMERA, 0:3]
+        orn = self.panda.body.link_state[0, self.panda.LINK_IND_CAMERA, 3:7]
+        R = (
+            quat2mat([orn[3], orn[0], orn[1], orn[2]])
+            .dot(euler2mat(-np.pi / 2, 0.0, 0.0))
+            .dot(euler2mat(0.0, 0.0, -np.pi))
+        )
+
+        # Create view matrix.
+        view_matrix = np.eye(4, dtype=np.float32)
+        view_matrix[:3, :3] = R.T
+        view_matrix[:3, 3] = -1 * np.matmul(R.T, pos)
+        view_matrix = view_matrix.T
+
+        # Render camera image.
+        _, _, _, depth, mask = pybullet.getCameraImage(
+            self._width,
+            self._height,
+            viewMatrix=tuple(view_matrix.flatten()),
+            projectionMatrix=self._projection_matrix,
+            renderer=pybullet.ER_BULLET_HARDWARE_OPENGL,
+        )
+
+        # Convert depth buffer to real depth.
+        depth = self._far * self._near / (self._far - (self._far - self._near) * depth)
+
+        # Get point state in pinhole camera frame.
+        mask = mask == self.ycb.bodies[self.ycb.ids[0]].contact_id[0]
+        point_state = (
+            np.tile(depth[mask].reshape(1, -1), (3, 1)) * self._deproject_p[:, mask.ravel()]
+        )
+
+        # Transform point state to hand frame.
+        point_state = (
+            np.matmul(self._hand_to_camera[:3, :3], point_state)
+            + self._hand_to_camera[:3, 3][:, None]
+        )
+
+        self._point_state = point_state
+
+        return self._point_state

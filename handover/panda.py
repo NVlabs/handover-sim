@@ -10,6 +10,11 @@ import os
 
 
 class Panda:
+    _URDF_FILE = os.path.join(
+        os.path.dirname(__file__), "data", "assets", "franka_panda", "panda_gripper.urdf"
+    )
+    _RIGID_SHAPE_COUNT = 11
+
     LINK_IND_HAND = 8
     LINK_IND_FINGERS = (9, 10)
 
@@ -19,9 +24,7 @@ class Panda:
 
         body = easysim.Body()
         body.name = "panda"
-        body.urdf_file = os.path.join(
-            os.path.dirname(__file__), "data", "assets", "franka_panda", "panda_gripper.urdf"
-        )
+        body.urdf_file = self._URDF_FILE
         body.use_fixed_base = True
         body.use_self_collision = True
         body.initial_base_position = (
@@ -29,7 +32,9 @@ class Panda:
         )
         body.initial_dof_position = self._cfg.ENV.PANDA_INITIAL_POSITION
         body.initial_dof_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_PANDA] * 11
+        body.link_collision_filter = [
+            self._cfg.ENV.COLLISION_FILTER_PANDA
+        ] * self._RIGID_SHAPE_COUNT
         body.dof_control_mode = easysim.DoFControlMode.POSITION_CONTROL
         body.dof_position_gain = self._cfg.ENV.PANDA_POSITION_GAIN
         body.dof_velocity_gain = self._cfg.ENV.PANDA_VELOCITY_GAIN
@@ -41,5 +46,18 @@ class Panda:
     def body(self):
         return self._body
 
-    def step(self, target):
-        self.body.dof_target_position = target
+    def step(self, dof_target_position):
+        self.body.dof_target_position = dof_target_position
+
+
+class PandaHandCamera(Panda):
+    _URDF_FILE = os.path.join(
+        os.path.dirname(__file__),
+        "data",
+        "assets",
+        "franka_panda",
+        "panda_gripper_hand_camera.urdf",
+    )
+    _RIGID_SHAPE_COUNT = 12
+
+    LINK_IND_CAMERA = 11

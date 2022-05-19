@@ -25,12 +25,14 @@ class SimplePolicy(abc.ABC):
     def __init__(
         self,
         cfg,
+        start_conf=start_conf,
         time_wait=time_wait,
         time_action_repeat=time_action_repeat,
         time_close_gripper=time_close_gripper,
         back_step_size=back_step_size,
     ):
         self._cfg = cfg
+        self._start_conf = start_conf
         self._steps_wait = int(time_wait / self._cfg.SIM.TIME_STEP)
         self._steps_action_repeat = int(time_action_repeat / self._cfg.SIM.TIME_STEP)
         self._steps_close_gripper = int(time_close_gripper / self._cfg.SIM.TIME_STEP)
@@ -50,7 +52,7 @@ class SimplePolicy(abc.ABC):
     def forward(self, obs):
         if obs["frame"] < self._steps_wait:
             # Wait.
-            action = start_conf.copy()
+            action = self._start_conf.copy()
         elif not self._done:
             # Approach object until reaching grasp pose.
             action, done = self.plan(obs)
@@ -59,26 +61,26 @@ class SimplePolicy(abc.ABC):
                 self._done_frame = obs["frame"] + 1
                 self._done_action = action.copy()
         else:
+            if self._back is None:
+                self._back = []
+                pos = obs["panda_body"].link_state[0, obs["panda_link_ind_hand"], 0:3]
+                dpos_goal = self._cfg.BENCHMARK.GOAL_CENTER - np.array(pos, dtype=np.float32)
+                dpos_step = dpos_goal / np.linalg.norm(dpos_goal) * self._back_step_size
+                num_steps = int(np.ceil(np.linalg.norm(dpos_goal) / self._back_step_size))
+                for _ in range(num_steps):
+                    pos += dpos_step
+                    conf = pybullet.calculateInverseKinematics(
+                        obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos
+                    )
+                    conf = np.array(conf, dtype=np.float32)
+                    conf[7:9] = 0.0
+                    self._back.append(conf)
+
             # Close gripper and back out.
             if obs["frame"] < self._done_frame + self._steps_close_gripper:
                 action = self._done_action.copy()
                 action[7:9] = 0.0
             else:
-                if self._back is None:
-                    self._back = []
-                    pos = obs["panda_body"].link_state[0, obs["panda_link_ind_hand"], 0:3].numpy()
-                    dpos_goal = self._cfg.BENCHMARK.GOAL_CENTER - pos
-                    dpos_step = dpos_goal / np.linalg.norm(dpos_goal) * self._back_step_size
-                    num_steps = int(np.ceil(np.linalg.norm(dpos_goal) / self._back_step_size))
-                    for _ in range(num_steps):
-                        pos += dpos_step
-                        conf = pybullet.calculateInverseKinematics(
-                            obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos
-                        )
-                        conf = np.array(conf, dtype=np.float32)
-                        conf[7:9] = 0.0
-                        self._back.append(conf)
-
                 i = (
                     obs["frame"] - self._done_frame - self._steps_close_gripper
                 ) // self._steps_action_repeat
