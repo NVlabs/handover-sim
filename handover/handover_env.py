@@ -224,8 +224,7 @@ class HandoverStateEnv(HandoverEnv):
 
 import pybullet
 
-from transforms3d.euler import euler2mat
-from transforms3d.quaternions import quat2mat
+from scipy.spatial.transform import Rotation as Rot
 
 
 class HandoverHandCameraPointStateEnv(HandoverEnv):
@@ -244,21 +243,23 @@ class HandoverHandCameraPointStateEnv(HandoverEnv):
         )
 
         # Get deproject points before depth multiplication.
-        K = np.eye(3)
+        K = np.eye(3, dtype=np.float32)
         K[0, 0] = self._width * self._projection_matrix[0] / 2
         K[1, 1] = self._height * self._projection_matrix[5] / 2
         K[0, 2] = self._width / 2
         K[1, 2] = self._height / 2
         K_inv = np.linalg.inv(K)
         x, y = np.meshgrid(np.arange(self._width), np.arange(self._height))
+        x = x.astype(np.float32)
+        y = y.astype(np.float32)
         ones = np.ones((self._height, self._width), dtype=np.float32)
         xy1s = np.stack((x, y, ones), axis=2).reshape(self._width * self._height, 3).T
-        self._deproject_p = np.matmul(K_inv, xy1s)
+        self._deproject_p = np.matmul(K_inv, xy1s).T
 
         # Get transform from hand to pinhole camera frame.
-        self._hand_to_camera = np.eye(4)
-        self._hand_to_camera[:3, 3] = [+0.036, 0.0, +0.036]
-        self._hand_to_camera[:3, :3] = euler2mat(0.0, 0.0, np.pi / 2)
+        pos = (+0.036, 0.0, +0.036)
+        orn = Rot.from_euler("XYZ", (0.0, 0.0, +np.pi / 2)).as_quat().astype(np.float32)
+        self._t3d_hand_to_camera = get_t3d_from_qt(orn, pos)
 
     def _get_panda_cls(self):
         return PandaHandCamera
@@ -297,10 +298,9 @@ class HandoverHandCameraPointStateEnv(HandoverEnv):
         # Get OpenGL view frame from URDF camera frame.
         pos = self.panda.body.link_state[0, self.panda.LINK_IND_CAMERA, 0:3]
         orn = self.panda.body.link_state[0, self.panda.LINK_IND_CAMERA, 3:7]
-        R = (
-            quat2mat([orn[3], orn[0], orn[1], orn[2]])
-            .dot(euler2mat(-np.pi / 2, 0.0, 0.0))
-            .dot(euler2mat(0.0, 0.0, -np.pi))
+        R = np.matmul(
+            Rot.from_quat(orn).as_matrix().astype(np.float32),
+            Rot.from_euler("XYZ", (-np.pi / 2, 0.0, -np.pi)).as_matrix().astype(np.float32),
         )
 
         # Create view matrix.
@@ -324,14 +324,11 @@ class HandoverHandCameraPointStateEnv(HandoverEnv):
         # Get point state in pinhole camera frame.
         mask = mask == self.ycb.bodies[self.ycb.ids[0]].contact_id[0]
         point_state = (
-            np.tile(depth[mask].reshape(1, -1), (3, 1)) * self._deproject_p[:, mask.ravel()]
+            np.tile(depth[mask].reshape(-1, 1), (1, 3)) * self._deproject_p[mask.ravel(), :]
         )
 
         # Transform point state to hand frame.
-        point_state = (
-            np.matmul(self._hand_to_camera[:3, :3], point_state)
-            + self._hand_to_camera[:3, 3][:, None]
-        )
+        point_state = self._t3d_hand_to_camera.transform_points(point_state)
 
         self._point_state = point_state
 

@@ -7,7 +7,7 @@ import sys
 import numpy as np
 import pybullet
 
-from transforms3d.quaternions import mat2quat
+from scipy.spatial.transform import Rotation as Rot
 
 from handover.config import get_config_from_args
 from handover.benchmark_runner import BenchmarkRunner
@@ -29,7 +29,6 @@ from core.utils import (
     regularize_pc_point_count,
     hand_finger_point,
     unpack_action,
-    ros_quat,
 )
 
 seed = 123456
@@ -40,9 +39,6 @@ class PointListener:
     def __init__(self, pretrained=pretrained, seed=seed):
         self._pretrained = pretrained
         self._seed = seed
-
-        # Enforce determinism.
-        np.random.seed(seed)
 
         cfg_from_file(os.path.join(self._pretrained, "config.yaml"), reset_model_spec=False)
         cfg.RL_MODEL_SPEC = os.path.join(self._pretrained, cfg.RL_MODEL_SPEC.split("/")[-1])
@@ -62,9 +58,16 @@ class PointListener:
         self._acc_points = np.zeros((3, 0))
         self._acc_mean = np.zeros((3, 1))
 
+        # Enforce determinism.
+        np.random.seed(seed)
+
     @property
     def remaining_step(self):
         return self._remaining_step
+
+    @property
+    def acc_points(self):
+        return self._acc_points
 
     def run_network(self, point_state, ef_pose):
         state = self._point_state_to_state(point_state, ef_pose)
@@ -80,7 +83,7 @@ class PointListener:
 
     def _point_state_to_state(self, point_state, ef_pose):
         point_state = self._process_pointcloud(point_state, ef_pose)
-        image_state = np.array([], np.float32)
+        image_state = np.array([])
         obs = (point_state, image_state)
         return obs
 
@@ -121,7 +124,7 @@ class PointListener:
         acc_diff = np.linalg.norm(self._acc_mean - acc_mean)
         if acc_diff > 0.1 and self._remaining_step < cfg.RL_MAX_STEP:
             self._remaining_step += 5
-            self._remaining_step = min(self._remaining_step, cfg.RL_MAX_STEP - 1)
+            self._remaining_step = min(self._remaining_step, cfg.RL_MAX_STEP)
         self._acc_mean = acc_mean
 
     def termination_heuristics(self, ef_pose):
@@ -145,7 +148,7 @@ class GADDPGPolicy(SimplePolicy):
     def __init__(self, cfg, time_wait=time_wait):
         super().__init__(
             cfg,
-            start_conf=np.array(cfg.ENV.PANDA_INITIAL_POSITION, dtype=np.float32),
+            start_conf=np.array(cfg.ENV.PANDA_INITIAL_POSITION),
             time_wait=time_wait,
             time_action_repeat=0.15,
             time_close_gripper=0.5,
@@ -166,32 +169,26 @@ class GADDPGPolicy(SimplePolicy):
     def plan(self, obs):
         if (obs["frame"] - self._steps_wait) % self._steps_action_repeat == 0:
             point_state = obs["callback_get_point_state"]()
+            point_state = point_state.T
 
-            if point_state.shape[1] > 0:
+            if point_state.shape[1] == 0 and self._point_listener.acc_points.shape[1] == 0:
+                action = np.array(self._cfg.ENV.PANDA_INITIAL_POSITION)
+            else:
                 ef_pose = self._get_ef_pose(obs)
                 ef_pose_new = self._point_listener.run_network(point_state, ef_pose)
+
                 pos = ef_pose_new[:3, 3]
-                orn = ros_quat(mat2quat(ef_pose_new[:3, :3]))
+                orn = Rot.from_matrix(ef_pose_new[:3, :3]).as_quat()
                 pos, orn = pybullet.multiplyTransforms(
                     self._cfg.ENV.PANDA_BASE_POSITION,
                     self._cfg.ENV.PANDA_BASE_ORIENTATION,
                     pos,
                     orn,
                 )
-                action = np.array(
-                    pybullet.calculateInverseKinematics(
-                        obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos, orn
-                    ),
-                    dtype=np.float32,
+                action = pybullet.calculateInverseKinematics(
+                    obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos, orn
                 )
-            else:
-                if len(self._traj) == 0:
-                    action = np.array(self._cfg.ENV.PANDA_INITIAL_POSITION, dtype=np.float32)
-                else:
-                    action = self._traj[-1].copy()
-                self._point_listener._remaining_step = max(
-                    self._point_listener._remaining_step - 1, 0
-                )
+                action = np.array(action)
 
             self._traj.append(action)
         else:
