@@ -1,3 +1,7 @@
+# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License [see LICENSE for details].
+
 """Handover-Sim package setuptools."""
 
 # NOTE (roflaherty): This file is still needed to allow the package to be

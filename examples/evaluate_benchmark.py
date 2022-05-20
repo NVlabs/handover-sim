@@ -1,3 +1,7 @@
+# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License [see LICENSE for details].
+
 import argparse
 
 from handover.benchmark_evaluator import evaluate

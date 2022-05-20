@@ -1,3 +1,7 @@
+# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License [see LICENSE for details].
+
 [build-system]
 requires = ["setuptools>=45", "setuptools_scm>=6.2", "wheel"]
 build-backend = "setuptools.build_meta"
