@@ -21,8 +21,7 @@ start_conf = np.array(
         +0.5870,
         +0.0400,
         +0.0400,
-    ],
-    dtype=np.float32,
+    ]
 )
 
 traj = np.array(
@@ -57,8 +56,7 @@ traj = np.array(
         [-1.9811, -0.0292, +1.8288, -2.3966, +2.4714, +1.9170, -2.0122, +0.0400, +0.0400],
         [-1.9973, -0.1114, +1.8576, -2.3592, +2.5184, +1.8992, -1.9623, +0.0400, +0.0400],
         [-2.0184, -0.1788, +1.8898, -2.3187, +2.5586, +1.8933, -1.9206, +0.0400, +0.0400],
-    ],
-    dtype=np.float32,
+    ]
 )
 
 time_wait = 3.0
@@ -96,7 +94,7 @@ def main():
             action = pybullet.calculateInverseKinematics(
                 env.panda.body.contact_id[0], env.panda.LINK_IND_HAND - 1, pos
             )
-            action = np.array(action, dtype=np.float32)
+            action = np.array(action)
             action[7:9] = 0.0
             for _ in range(int(time_action_repeat / cfg.SIM.TIME_STEP)):
                 env.step(action)

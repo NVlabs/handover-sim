@@ -81,7 +81,7 @@ class SimplePolicy(abc.ABC):
                         conf = pybullet.calculateInverseKinematics(
                             obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos
                         )
-                        conf = np.array(conf, dtype=np.float32)
+                        conf = np.array(conf)
                         conf[7:9] = 0.0
                         self._back.append(conf)
 
