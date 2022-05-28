@@ -48,7 +48,7 @@
             - `table.urdf`: see [compile_table_assets.py](./compile_table_assets.py).
     - YCB object URDF file.
         - `model_normalized.urdf` in each YCB object folder: see [compile_ycb_assets.py](./compile_ycb_assets.py).
-    - MANO hands. Compiled with [`mano_pybullet`](TODO) - see [compile_mano_assets.py](./compile_mano_assets.py).
+    - MANO hands. Compiled with [`mano_pybullet`](https://github.com/ychao-nvidia/mano_pybullet/tree/ac6fd6f8c01d103c52e63bb0d1d89265891738e8) - see [compile_mano_assets.py](./compile_mano_assets.py).
         - `20200709-subject-01_left/`
             - `mano.urdf`
             - `meshes/`

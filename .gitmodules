@@ -1,4 +1,4 @@
 [submodule "mano_pybullet"]
 	path = mano_pybullet
-	url = ssh://git@gitlab-master.nvidia.com:12051/ychao/mano_pybullet.git
+	url = git@github.com:ychao-nvidia/mano_pybullet.git
 	branch = handover-sim
