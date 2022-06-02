@@ -7,7 +7,6 @@ import easysim
 import os
 
 
-# TODO(ywchao): add ground-truth motions.
 class MANO:
     def __init__(self, cfg, scene, dex_ycb):
         self._cfg = cfg

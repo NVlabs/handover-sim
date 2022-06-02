@@ -8,7 +8,6 @@ import os
 import torch
 
 
-# TODO(ywchao): add ground-truth motions.
 class YCB:
     CLASSES = {
         1: "002_master_chef_can",

@@ -261,7 +261,6 @@ class DexYCB:
         t_int = np.zeros((len(times_int), num_o, 3), dtype=np.float32)
 
         for o in range(num_o):
-            # TODO(ywchao): to be tested with different resample time steps; might need to cut down e_int.
             s_key = np.nonzero(i[:, o])[0][0]
             e_key = np.nonzero(i[:, o])[0][-1]
             s_int = int(np.round(s_key * self._TIME_STEP_RAW / time_step_resample))

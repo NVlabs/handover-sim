@@ -43,9 +43,6 @@ class develop(_develop):
         #
         # Besides, it is currently not possible to use this method for editable (develop) mode.
         # * https://stackoverflow.com/questions/68491950/specifying-develop-mode-for-setuptools-setup-install-requires-argument
-        #
-        # TODO(ywchao): Move to `setup.cfg` by using remote git URL once released.
-        # * https://stackoverflow.com/questions/69551065/setup-with-submodules-dependencies
 
         # Use the subprocess hack. This also allows running with `--no-deps`.
         subprocess.check_call(
