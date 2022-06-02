@@ -15,20 +15,13 @@ For good practice for Python package management, it is recommended to install th
     cd handover-sim
     ```
 
-2. Install `easysim`:
-
-    ```Shell
-    git clone ssh://git@gitlab-master.nvidia.com:12051/ychao/easysim.git
-    pip install -e ./easysim
-    ```
-
-3. Install `handover-sim` as a Python package:
+2. Install `handover-sim` as a Python package:
 
     ```Shell
     pip install -e .
     ```
 
-4. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data/`. Unzip with:
+3. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data/`. Unzip with:
 
     ```Shell
     cd handover/data
@@ -38,7 +31,7 @@ For good practice for Python package management, it is recommended to install th
 
     This will extract a folder `handover/data/mano_v1_2/`.
 
-5. Download the DexYCB dataset.
+4. Download the DexYCB dataset.
 
     **Option 1**: Download cached dataset: **(recommended)**
 
@@ -80,7 +73,7 @@ For good practice for Python package management, it is recommended to install th
 
         The cached dataset will be saved to `handover/data/dex-ycb-cache/`.
 
-6. Compile assets.
+5. Compile assets.
 
     1. Download [`assets-3rd-party-20220511.tar.gz`](https://drive.google.com/uc?export=download&id=1tDiXvW5vwJDOCgK61VEsFaZ7Z00gF0vj) (155M) and place the file under `handover/data/`. Extract with:
 
