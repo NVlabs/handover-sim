@@ -1,5 +1,34 @@
 # Handover-Sim
 
+Handover-Sim is a Python-based simulation environment and benchmark for human-to-robot object handovers. The environment and benchmark were initially described in an ICRA 2022 paper:
+
+**HandoverSim: A Simulation Framework and Benchmark for Human-to-Robot Object Handovers**  
+Yu-Wei Chao, Chris Paxton, Yu Xiang, Wei Yang, Balakumar Sundaralingam, Tao Chen, Adithyavairavan Murali, Maya Cakmak, Dieter Fox  
+IEEE International Conference on Robotics and Automation (ICRA), 2022  
+[ [paper](https://handover-sim.github.io/assets/chao_icra2022.pdf) ] [ [video](https://youtu.be/lX3CF4lFKWo) ] [ [arXiv](https://arxiv.org/abs/2205.09747) ] [ [project site](https://handover-sim.github.io) ]
+
+### Citing Handover-Sim
+
+    @INPROCEEDINGS{chao:icra2022,
+      author    = {Yu-Wei Chao and Chris Paxton and Yu Xiang and Wei Yang and Balakumar Sundaralingam and Tao Chen and Adithyavairavan Murali and Maya Cakmak and Dieter Fox},
+      booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
+      title     = {{HandoverSim}: A Simulation Framework and Benchmark for Human-to-Robot Object Handovers},
+      year      = {2022},
+    }
+
+### License
+
+Handover-Sim is released under the [BSD 3-Clause License](LICENSE).
+
+### Acknowledgements
+This repo is based on a Python project template created by [Rowland O'Flaherty](https://github.com/rowoflo).
+
+### Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Installation](#installation)
+3. [Running Demos](#running-demos)
+
 ## Prerequisites
 
 This code is tested with Python 3.8 on Ubuntu 20.04.
@@ -93,7 +122,7 @@ For good practice for Python package management, it is recommended to install th
 
         The compiled assets will be saved to `handover/data/assets/`.
 
-## Running Examples
+## Running Demos
 
 1. Running a handover environment:
 
@@ -102,6 +131,8 @@ For good practice for Python package management, it is recommended to install th
       SIM.RENDER True
     ```
 
+    <img src="./docs/examples-demo_handover_env.gif">
+
 2. Running a planned trajectory:
 
     ```Shell
@@ -109,9 +140,13 @@ For good practice for Python package management, it is recommended to install th
       SIM.RENDER True
     ```
 
+    <img src="./docs/examples-demo_trajectory.gif">
+
 3. Running a benchmark wrapper:
 
     ```Shell
     python examples/demo_benchmark_wrapper.py \
       SIM.RENDER True
     ```
+
+    This will visualize the same trajectory as in `demo_trajectory.py` above but will print out the benchmark status in the terminal.
