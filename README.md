@@ -28,6 +28,12 @@ This repo is based on a Python project template created by [Rowland O'Flaherty](
 1. [Prerequisites](#prerequisites)
 2. [Installation](#installation)
 3. [Running Demos](#running-demos)
+4. [Benchmarking Baselines](#benchmarking-baselines)
+    1. [Yang et al. ICRA 2021](#yang-et-al-icra-2021)
+    2. [OMG Planner](#omg-planner)
+    3. [GA-DDPG](#ga-ddpg)
+5. [Evaluation](#evaluation)
+6. [Reproducing ICRA 2022 Results](#reproducing-icra-2022-results)
 
 ## Prerequisites
 
@@ -150,3 +156,123 @@ For good practice for Python package management, it is recommended to install th
     ```
 
     This will visualize the same trajectory as in `demo_trajectory.py` above but will print out the benchmark status in the terminal.
+
+## Benchmarking Baselines
+
+We benchmarked three baselines on Handover-Sim:
+
+1. **OMG Planner** - [GitHub](https://github.com/liruiw/OMG-Planner)
+2. **Yang et al. ICRA 2021** - [arXiv](https://arxiv.org/abs/2011.08961)
+3. **GA-DDPG** - [GitHub](https://github.com/liruiw/GA-DDPG)
+
+| OMG Planner | Yang et al. ICRA 2021 |
+| :-: | :-: |
+| <img src="./docs/examples-run_benchmark_omg_planner.gif"> | <img src="./docs/examples-run_benchmark_yang_icra2021.gif"> |
+
+| GA-DDPG (hold) | GA-DDPG (w/o hold) |
+| :-: | :-: |
+| <img src="./docs/examples-run_benchmark_gaddpg_hold.gif"> | <img src="./docs/examples-run_benchmark_gaddpg_wo_hold.gif"> |
+
+As described in the [paper Sec. IV "Training and Evaluation Setup"](https://handover-sim.github.io/assets/chao_icra2022.pdf), we divide the data into different **setups** (`s0`, `s1`, `s2`, `s3`) and **splits** (`train`, `val`, `test`). We benchmarked these baselines on the `test` split of each setup.
+
+Below we provide instructions for setting up and running benchmark for these baselines.
+
+### Yang et al. ICRA 2021
+
+- We have included our implementation of Yang et al. ICRA 2021 in this repo. The following command will run the benchmark on the `test` split of `s0`.
+
+    ```Shell
+    python examples/run_benchmark_yang_icra2021.py \
+      SIM.RENDER True \
+      BENCHMARK.SETUP s0
+    ```
+
+    This will open a visualizer window, go through each handover scene in the split, and execute the actions generated from the policy. To run on other setups, replace `s0` with `s1`, `s2`, and `s3`.
+
+- The previous command is mostly just for visualization purposes, and does not save the benchmark result. To **save the result** for evaluation later, set `BENCHMARK.SAVE_RESULT` to `True`, and remove `SIM.RENDER` to run headless if you don't need the visualizer window:
+
+    ```Shell
+    python examples/run_benchmark_yang_icra2021.py \
+      BENCHMARK.SETUP s0 \
+      BENCHMARK.SAVE_RESULT True
+    ```
+
+    The result will be saved to a new folder `results/*_yang-icra2021_*_test/`.
+
+- Once the job finishes, you can now run evaluation and see the benchmark result. See the [Evaluation](#evaluation) section.
+
+### OMG Planner
+
+### GA-DDPG
+
+## Evaluation
+
+- To evaluate the result of a baseline, all you need is the **result folder** generated from running the benchmark. For example, if your result folder is `results/2022-02-28_08-57-34_yang-icra2021_s0_test`, run the following command:
+
+    ```Shell
+    python examples/evaluate_benchmark.py \
+      --res_dir=results/2022-02-28_08-57-34_yang-icra2021_s0_test
+    ```
+
+    You should see an output similar to the following in the terminal:
+
+    ```
+    2022-06-03 16:13:46: Running evaluation for results/2022-02-28_08-57-34_yang-icra2021_s0_test
+    2022-06-03 16:13:47: Evaluation results:
+    |  success rate   |    mean accum time (s)    |                    failure (%)                     |
+    |      (%)        |  exec  |  plan  |  total  |  hand contact   |   object drop   |    timeout     |
+    |:---------------:|:------:|:------:|:-------:|:---------------:|:---------------:|:--------------:|
+    | 64.58 ( 93/144) | 4.864  | 0.036  |  4.900  | 17.36 ( 25/144) | 11.81 ( 17/144) | 6.25 (  9/144) |
+    2022-06-03 16:13:47: Printing scene ids
+    2022-06-03 16:13:47: Success (93 scenes):
+    ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---
+      0    1    2    3    4    5    6    7    8    9   10   12   13   15   16   17   18   19   21   22
+     23   25   26   27   28   30   33   34   35   36   37   38   42   43   46   49   50   53   54   56
+     59   60   62   63   64   66   68   69   70   71   72   77   81   83   85   87   89   91   92   93
+     94   95   96   98  103  106  107  108  109  110  111  112  113  114  115  116  117  120  121  123
+    125  126  127  128  130  131  132  133  137  138  139  141  143
+    ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---
+    2022-06-03 16:13:47: Failure - hand contact (25 scenes):
+    ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---
+     11   14   20   29   39   40   41   44   45   47   51   55   57   58   65   67   74   80   82   88
+    102  105  118  124  136
+    ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---
+    2022-06-03 16:13:47: Failure - object drop (17 scenes):
+    ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---
+     24   31   32   52   61   78   79   84   86   97  101  104  119  122  134  140  142
+    ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---
+    2022-06-03 16:13:47: Failure - timeout (9 scenes):
+    ---  ---  ---  ---  ---  ---  ---  ---  ---
+     48   73   75   76   90   99  100  129  135
+    ---  ---  ---  ---  ---  ---  ---  ---  ---
+    2022-06-03 16:13:47: Evaluation complete.
+    ```
+
+    The same output will also be logged to `results/2022-02-28_08-57-34_yang-icra2021_s0_test/evaluate.log`.
+
+- To benchmark and evaluate **your own method**, you need to first generate a result folder in the same format.
+    - It is advisable to use the `BenchmarkRunner` class in [`handover/benchmark_runner.py`](./handover/benchmark_runner.py) to benchmark and generate the result folder for your method.
+    - You can follow the example of [`examples/run_benchmark_omg_planner.py`](./examples/run_benchmark_omg_planner.py).
+
+## Reproducing ICRA 2022 Results
+
+We provide the result folders of the benchmarks reported in the [ICRA 2022 paper](https://handover-sim.github.io/assets/chao_icra2022.pdf). You can run evaluation on these files and reproduce the exact numbers in the paper.
+
+To run the evaluation, you need to first download the ICRA 2022 results.
+
+```Sell
+./results/fetch_icra2022_results.sh
+```
+
+This will extract a folder `results/icra2022_results/` containing the result folders.
+
+You can now run evaluation on these result folders. For example, for Yang et al. ICRA 2021 on `s0`, run:
+
+```Shell
+python examples/evaluate_benchmark.py \
+  --res_dir=results/icra2022_results/2022-02-28_08-57-34_yang-icra2021_s0_test
+```
+
+You should see the exact same result shown in the example of the [Evaluation](#evaluation) section.
+
+The full set of evaluation commands can be found in [`examples/all_icra2022_results_eval.sh`](./examples/all_icra2022_results_eval.sh).
