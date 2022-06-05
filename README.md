@@ -21,6 +21,7 @@ IEEE International Conference on Robotics and Automation (ICRA), 2022
 Handover-Sim is released under the [BSD 3-Clause License](LICENSE).
 
 ### Acknowledgements
+
 This repo is based on a Python project template created by [Rowland O'Flaherty](https://github.com/rowoflo).
 
 ### Contents
@@ -179,7 +180,7 @@ Below we provide instructions for setting up and running benchmark for these bas
 
 ### Yang et al. ICRA 2021
 
-- We have included our implementation of Yang et al. ICRA 2021 in this repo. The following command will run the benchmark on the `test` split of `s0`.
+- We have included our implementation of Yang et al. ICRA 2021 in this repo. The following command will run the benchmark on the `test` split of `s0`:
 
     ```Shell
     python examples/run_benchmark_yang_icra2021.py \
@@ -189,7 +190,7 @@ Below we provide instructions for setting up and running benchmark for these bas
 
     This will open a visualizer window, go through each handover scene in the split, and execute the actions generated from the policy. To run on other setups, replace `s0` with `s1`, `s2`, and `s3`.
 
-- The previous command is mostly just for visualization purposes, and does not save the benchmark result. To **save the result** for evaluation later, set `BENCHMARK.SAVE_RESULT` to `True`, and remove `SIM.RENDER` to run headless if you don't need the visualizer window:
+- The command above is mostly just for visualization purposes, and thus does not save the benchmark result. To **save the result** for evaluation later, set `BENCHMARK.SAVE_RESULT` to `True`, and remove `SIM.RENDER` to run headless if you don't need the visualizer window:
 
     ```Shell
     python examples/run_benchmark_yang_icra2021.py \
@@ -199,11 +200,87 @@ Below we provide instructions for setting up and running benchmark for these bas
 
     The result will be saved to a new folder `results/*_yang-icra2021_*_test/`.
 
-- Once the job finishes, you can now run evaluation and see the benchmark result. See the [Evaluation](#evaluation) section.
+- Once the job finishes, you are ready to run evaluation and see the result. See the [Evaluation](#evaluation) section.
 
 ### OMG Planner
 
+- First, you need to install [OMG-Planner](https://github.com/liruiw/OMG-Planner). See [examples/README.md](./examples/README.md) for our documentation for installation steps.
+
+- Once installed, you can run the benchmark on the `test` split of `s0` with the path to OMG-Planner (`OMG_PLANNER_DIR`):
+
+    ```Shell
+    OMG_PLANNER_DIR=OMG-Planner python examples/run_benchmark_omg_planner.py \
+      SIM.RENDER True \
+      BENCHMARK.SETUP s0
+    ```
+
+    Like in [Yang et al. ICRA 2021](#yang-et-al-icra-2021), this will open a visualizer window, go through each handover scene in the split, and execute the actions generated from the policy. To run on other setups, replace `s0` with `s1`, `s2`, and `s3`.
+
+- Likewise, the command above is mostly just for visualization purposes, and thus does not save the benchmark result. To **save the result** for evaluation later, set `BENCHMARK.SAVE_RESULT` to `True`, and remove `SIM.RENDER` to run headless if you don't need the visualizer window:
+
+    ```Shell
+    OMG_PLANNER_DIR=OMG-Planner python examples/run_benchmark_omg_planner.py \
+      BENCHMARK.SETUP s0 \
+      BENCHMARK.SAVE_RESULT True
+    ```
+
+    The result will be saved to a new folder `results/*_omg-planner_*_test/`.
+
+- Again, once the job finishes, you are ready to run evaluation and see the result. See the [Evaluation](#evaluation) section.
+
 ### GA-DDPG
+
+- First, you need to install [GA-DDPG](https://github.com/liruiw/GA-DDPG). See [examples/README.md](./examples/README.md) for our documentation for installation steps.
+
+- Once installed, you can run the benchmark. As described in the [paper Sec. V "Baselines"](https://handover-sim.github.io/assets/chao_icra2022.pdf), we benchmarked **two variants** of this baseline:
+    - Hold until the human hand stops as in the OMG Planner ("**GA-DDPG hold**")
+    - Without hold ("**GA-DDPG w/o hold**")
+
+- With the path to GA-DDPG (`GADDPG_DIR`), you can now run for "GA-DDPG hold" on the `test` split of `s0` with:
+
+    ```Shell
+    GADDPG_DIR=GA-DDPG CUDA_VISIBLE_DEVICES=0 python examples/run_benchmark_gaddpg_hold.py \
+      SIM.RENDER True \
+      ENV.ID HandoverHandCameraPointStateEnv-v1 \
+      BENCHMARK.SETUP s0
+    ```
+
+    and for "GA-DDPG w/o hold" on the `test` split of `s0` with:
+
+    ```Shell
+    GADDPG_DIR=GA-DDPG CUDA_VISIBLE_DEVICES=0 python examples/run_benchmark_gaddpg_wo_hold.py \
+      SIM.RENDER True \
+      ENV.ID HandoverHandCameraPointStateEnv-v1 \
+      BENCHMARK.SETUP s0
+    ```
+
+    Like in [Yang et al. ICRA 2021](#yang-et-al-icra-2021), this will open a visualizer window, go through each handover scene in the split, and execute the actions generated from the policy. To run on other setups, replace `s0` with `s1`, `s2`, and `s3`.
+
+- Note that different than in [Yang et al. ICRA 2021](#yang-et-al-icra-2021) and [OMG Planner](#omg-planner), we explicitly set `ENV.ID` to `HandoverHandCameraPointStateEnv-v1` in the commands above.
+    - `HandoverHandCameraPointStateEnv-v1` specifies a different environemnt than the default `HandoverStateEnv-v1` used in Yang et al. ICRA 2021 and OMG Planner.
+    - `HandoverHandCameraPointStateEnv-v1` provides the point cloud input used in GA-DDPG, while `HandoverStateEnv-v1` provides ground-truth state information of which Yang et al. ICRA 2021 and OMG Planner can directly consume.
+
+- Likewise, the command above is mostly just for visualization purposes, and thus does not save the benchmark result. To **save the result** for evaluation later, set `BENCHMARK.SAVE_RESULT` to `True`, and remove `SIM.RENDER` to run headless if you don't need the visualizer window. For "GA-DDPG hold", run:
+
+    ```Shell
+    GADDPG_DIR=GA-DDPG CUDA_VISIBLE_DEVICES=0 python examples/run_benchmark_gaddpg_hold.py \
+      ENV.ID HandoverHandCameraPointStateEnv-v1 \
+      BENCHMARK.SETUP s0 \
+      BENCHMARK.SAVE_RESULT True
+    ```
+
+    and for "GA-DDPG w/o hold", run:
+
+    ```Shell
+    GADDPG_DIR=GA-DDPG CUDA_VISIBLE_DEVICES=0 python examples/run_benchmark_gaddpg_wo_hold.py \
+      ENV.ID HandoverHandCameraPointStateEnv-v1 \
+      BENCHMARK.SETUP s0 \
+      BENCHMARK.SAVE_RESULT True
+    ```
+
+    The result will be saved to a new folder `results/*_ga-ddpg-hold_*_test/` for "GA-DDPG hold" and `results/*_ga-ddpg-wo-hold_*_test/` for "GA-DDPG w/o hold".
+
+- Again, once the job finishes, you are ready to run evaluation and see the result. See the [Evaluation](#evaluation) section.
 
 ## Evaluation
 
@@ -260,7 +337,7 @@ We provide the result folders of the benchmarks reported in the [ICRA 2022 paper
 
 To run the evaluation, you need to first download the ICRA 2022 results.
 
-```Sell
+```Shell
 ./results/fetch_icra2022_results.sh
 ```
 
