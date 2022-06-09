@@ -120,7 +120,7 @@ Below is our installation script for GA-DDPG.
 
 # Clone OMG-Planner.
 # - All our experiements were ran on commit 6d2b10ffb81c125536740c82df23283d8a1c3ac8.
-git clone git@github.com:liruiw/GA-DDPG.git
+git clone --recursive git@github.com:liruiw/GA-DDPG.git
 cd GA-DDPG
 git checkout 6d2b10f
 
