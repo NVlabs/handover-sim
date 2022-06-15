@@ -15,6 +15,7 @@ local_scheme = "dirty-tag"
 
 [tool.black]
 line-length = 100
+experimental-string-processing = true
 
 [tool.isort]
 # Multi line output mode 3 is used to conform with Black. See
