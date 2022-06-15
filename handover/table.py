@@ -13,6 +13,7 @@ class Table:
 
         body = easysim.Body()
         body.name = "table"
+        body.geometry_type = easysim.GeometryType.URDF
         body.urdf_file = os.path.join(
             os.path.dirname(__file__), "data", "assets", "table", "table.urdf"
         )

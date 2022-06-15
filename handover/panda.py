@@ -28,6 +28,7 @@ class Panda:
 
         body = easysim.Body()
         body.name = "panda"
+        body.geometry_type = easysim.GeometryType.URDF
         body.urdf_file = self._URDF_FILE
         body.use_fixed_base = True
         body.use_self_collision = True

@@ -80,6 +80,7 @@ class YCB:
             for i in self.ids:
                 body = easysim.Body()
                 body.name = f"ycb_{i:02d}"
+                body.geometry_type = easysim.GeometryType.URDF
                 body.urdf_file = os.path.join(
                     os.path.dirname(__file__),
                     "data",

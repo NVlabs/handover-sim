@@ -55,6 +55,7 @@ class MANO:
         if self.body is None:
             body = easysim.Body()
             body.name = self._name
+            body.geometry_type = easysim.GeometryType.URDF
             body.urdf_file = os.path.join(
                 os.path.dirname(__file__),
                 "data",
