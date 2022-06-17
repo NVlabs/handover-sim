@@ -20,11 +20,18 @@ class HandoverStatusWrapper(easysim.SimulatorWrapper):
         self._success_step_thresh = self.cfg.BENCHMARK.SUCCESS_TIME_THRESH / self.cfg.SIM.TIME_STEP
         self._max_episode_steps = self.cfg.BENCHMARK.MAX_EPISODE_TIME / self.cfg.SIM.TIME_STEP
 
+        if self.cfg.BENCHMARK.DRAW_GOAL:
+            body = easysim.Body()
+            body.name = "goal"
+            body.geometry_type = easysim.GeometryType.SPHERE
+            body.sphere_radius = self.cfg.BENCHMARK.GOAL_RADIUS
+            body.initial_base_position = self.cfg.BENCHMARK.GOAL_CENTER + (0.0, 0.0, 0.0, 1.0)
+            body.link_color = [self.cfg.BENCHMARK.GOAL_COLOR]
+            body.link_collision_filter = [0]
+            self.scene.add_body(body)
+
     def reset(self, env_ids=None, **kwargs):
         observation = super().reset(env_ids=env_ids, **kwargs)
-
-        if self.cfg.BENCHMARK.DRAW_GOAL:
-            raise NotImplementedError
 
         self._elapsed_steps = 0
 

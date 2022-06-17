@@ -18,7 +18,7 @@ class HandoverEnv(easysim.SimulatorEnv):
     def init(self):
         self._table = Table(self.cfg, self.scene)
 
-        self._panda = self._get_panda_cls()(self.cfg, self._scene)
+        self._panda = self._get_panda_cls()(self.cfg, self.scene)
 
         self._dex_ycb = DexYCB(self.cfg)
         self._ycb = YCB(self.cfg, self.scene, self._dex_ycb)
