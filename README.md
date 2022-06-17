@@ -153,10 +153,13 @@ For good practice for Python package management, it is recommended to install th
 
     ```Shell
     python examples/demo_benchmark_wrapper.py \
-      SIM.RENDER True
+      SIM.RENDER True \
+      BENCHMARK.DRAW_GOAL True
     ```
 
-    This will visualize the same trajectory as in `demo_trajectory.py` above but will print out the benchmark status in the terminal.
+    <img src="./docs/examples-demo_benchmark_wrapper.gif">
+
+    This will run the same trajectory as in `demo_trajectory.py` above but will also draw the goal region in the visualizer window and print out the benchmark status in the terminal.
 
 ## Benchmarking Baselines
 
