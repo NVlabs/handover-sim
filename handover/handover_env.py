@@ -279,7 +279,7 @@ class HandoverHandCameraPointStateEnv(HandoverEnv):
         observation["frame"] = self.frame
         observation["panda_link_ind_hand"] = self.panda.LINK_IND_HAND
         observation["panda_body"] = self.panda.body
-        observation["callback_get_point_state"] = lambda: self._get_point_state()
+        observation["callback_get_point_state"] = self._get_point_state
         return observation
 
     def _get_reward(self):
