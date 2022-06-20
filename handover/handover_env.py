@@ -26,6 +26,9 @@ class HandoverEnv(easysim.SimulatorEnv):
 
         self._release_step_thresh = self.cfg.ENV.RELEASE_TIME_THRESH / self.cfg.SIM.TIME_STEP
 
+        if self.cfg.ENV.DRAW_RELEASE_CONTACT:
+            self._draw_release_contact_init()
+
     @abc.abstractmethod
     def _get_panda_cls(self):
         """ """
@@ -56,7 +59,7 @@ class HandoverEnv(easysim.SimulatorEnv):
 
         self._release_reset()
         if self.cfg.ENV.DRAW_RELEASE_CONTACT:
-            self._release_draw_reset()
+            self._draw_release_contact_reset()
 
     def post_reset(self, env_ids, scene_id):
         self._frame = 0
@@ -67,12 +70,12 @@ class HandoverEnv(easysim.SimulatorEnv):
         self.ycb.step()
         self.mano.step()
 
+        if self.cfg.ENV.DRAW_RELEASE_CONTACT:
+            self._draw_release_contact_step()
+
     def post_step(self, action):
         if not self.ycb.released and self._release_check():
             self.ycb.release()
-
-        if self.cfg.ENV.DRAW_RELEASE_CONTACT:
-            self._release_draw_step()
 
         self._frame += 1
 
@@ -191,11 +194,108 @@ class HandoverEnv(easysim.SimulatorEnv):
             or self._release_step_counter_active >= self._release_step_thresh
         )
 
-    def _release_draw_reset(self):
-        raise NotImplementedError
+    def _draw_release_contact_init(self):
+        self._release_contact_center = np.array(
+            [
+                [
+                    sum(self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_X) / 2,
+                    sum(self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Y) / 2,
+                    sum(self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Z) / 2,
+                ]
+            ]
+        )
+        vertices = []
+        for x in self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_X:
+            for y in self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Y:
+                for z in self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Z:
+                    vertices.append([x, y, z])
+        self._release_contact_vertices = np.array(vertices)
 
-    def _release_draw_step(self):
-        raise NotImplementedError
+        release_contact_half_extents = [
+            (
+                self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_X[1]
+                - self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_X[0]
+            )
+            / 2,
+            (
+                self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Y[1]
+                - self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Y[0]
+            )
+            / 2,
+            (
+                self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Z[1]
+                - self.cfg.ENV.RELEASE_CONTACT_REGION_RANGE_Z[0]
+            )
+            / 2,
+        ]
+
+        self._release_contact_bodies = {}
+
+        for link_index in self.panda.LINK_IND_FINGERS:
+            body = easysim.Body()
+            body.name = "region_{:02d}".format(link_index)
+            body.geometry_type = easysim.GeometryType.BOX
+            body.box_half_extent = release_contact_half_extents
+            body.initial_base_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            body.link_color = [self.cfg.ENV.RELEASE_CONTACT_REGION_COLOR]
+            body.link_collision_filter = [0]
+            self.scene.add_body(body)
+            self._release_contact_bodies[body.name] = body
+
+            for i in range(len(self._release_contact_vertices)):
+                body = easysim.Body()
+                body.name = "vertex_{:02d}_{:d}".format(link_index, i)
+                body.geometry_type = easysim.GeometryType.SPHERE
+                body.sphere_radius = self.cfg.ENV.RELEASE_CONTACT_VERTEX_RADIUS
+                body.initial_base_velocity = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                body.link_color = [self.cfg.ENV.RELEASE_CONTACT_VERTEX_COLOR]
+                body.link_collision_filter = [0]
+                self.scene.add_body(body)
+                self._release_contact_bodies[body.name] = body
+
+    def _draw_release_contact_reset(self):
+        for link_index in self.panda.LINK_IND_FINGERS:
+            self._release_contact_bodies[
+                "region_{:02d}".format(link_index)
+            ].initial_base_position = (
+                self.cfg.ENV.PANDA_BASE_POSITION + self.cfg.ENV.PANDA_BASE_ORIENTATION
+            )
+            self._release_contact_bodies[
+                "region_{:02d}".format(link_index)
+            ].env_ids_reset_base_state = [0]
+
+            for i in range(len(self._release_contact_vertices)):
+                self._release_contact_bodies[
+                    "vertex_{:02d}_{:d}".format(link_index, i)
+                ].initial_base_position = (
+                    self.cfg.ENV.PANDA_BASE_POSITION + self.cfg.ENV.PANDA_BASE_ORIENTATION
+                )
+                self._release_contact_bodies[
+                    "vertex_{:02d}_{:d}".format(link_index, i)
+                ].env_ids_reset_base_state = [0]
+
+    def _draw_release_contact_step(self):
+        for link_index in self.panda.LINK_IND_FINGERS:
+            pos = self.panda.body.link_state[0, link_index, 0:3]
+            orn = self.panda.body.link_state[0, link_index, 3:7]
+            t3d = get_t3d_from_qt(orn, pos)
+            center = t3d.transform_points(self._release_contact_center)[0]
+            vertices = t3d.transform_points(self._release_contact_vertices)
+
+            self._release_contact_bodies[
+                "region_{:02d}".format(link_index)
+            ].initial_base_position = (center.tolist() + orn.tolist())
+            self._release_contact_bodies[
+                "region_{:02d}".format(link_index)
+            ].env_ids_reset_base_state = [0]
+
+            for i in range(len(self._release_contact_vertices)):
+                self._release_contact_bodies[
+                    "vertex_{:02d}_{:d}".format(link_index, i)
+                ].initial_base_position = vertices[i].tolist() + [0.0, 0.0, 0.0, 1.0]
+                self._release_contact_bodies[
+                    "vertex_{:02d}_{:d}".format(link_index, i)
+                ].env_ids_reset_base_state = [0]
 
 
 class HandoverStateEnv(HandoverEnv):
