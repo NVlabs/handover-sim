@@ -57,11 +57,11 @@ class HandoverEnv(easysim.SimulatorEnv):
         self.ycb.reset(scene_id)
         self.mano.reset(scene_id)
 
-        self._release_reset()
         if self.cfg.ENV.DRAW_RELEASE_CONTACT:
             self._draw_release_contact_reset()
 
     def post_reset(self, env_ids, scene_id):
+        self._release_reset()
         self._frame = 0
         return self._get_observation()
 
