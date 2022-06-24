@@ -97,7 +97,7 @@ cd ../../python_orocos_kdl
 mkdir -p build && cd build
 # ** YOU NEED TO MODIFY $VIRTUAL_ENV BELOW. **
 cmake .. \
-  -DPYTHON_EXECUTABLE=$VIRTUAL_ENV/bin/python && \
+  -DPYTHON_EXECUTABLE=$VIRTUAL_ENV/bin/python \
   -DCMAKE_PREFIX_PATH=$( cd ../../orocos_kdl/release && pwd )
 make -j8
 cp PyKDL.so $VIRTUAL_ENV/lib/python3.8/site-packages
