@@ -105,7 +105,7 @@ class DemoPolicy(SimplePolicy):
 
     def plan(self, obs):
         i = (obs["frame"] - self._steps_wait) // self._steps_action_repeat
-        action = traj[i]
+        action = traj[i].copy()
         done = obs["frame"] == self._steps_wait + len(traj) * self._steps_action_repeat - 1
         return action, done
 
