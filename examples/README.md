@@ -11,9 +11,11 @@ Below is our installation script for OMG-Planner.
 
 ```Shell
 # Install Ubuntu packages.
+# - libassimp-dev is required for pyassimp.
 # - libxslt1-dev is required for lxml.
 apt install \
     cmake \
+    libassimp-dev \
     libxslt1-dev
 
 # The script below should be ran under handover-sim/.
@@ -23,21 +25,6 @@ apt install \
 git clone --recursive git@github.com:liruiw/OMG-Planner.git
 cd OMG-Planner
 git checkout a3b8b68
-
-# Install assimp.
-# - This is required for Ubuntu 20.04. See:
-#   - https://github.com/liruiw/OMG-Planner/issues/12
-#   - https://github.com/liruiw/OMG-Planner/issues/13
-#   - https://github.com/NVlabs/PoseCNN-PyTorch/issues/4
-git clone git@github.com:assimp/assimp.git
-cd assimp
-git checkout tags/v4.1.0
-mkdir -p release && mkdir -p build && cd build
-cmake .. \
-  -DCMAKE_INSTALL_PREFIX=$( cd ../release && pwd )
-make -j8
-make install
-cd ../..
 
 # Install Python packages in requirements.txt.
 # - Remove cmake from requirements.txt to avoid conflict with apt installed cmake.
