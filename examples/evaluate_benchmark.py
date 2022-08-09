@@ -9,7 +9,7 @@ from handover.benchmark_evaluator import evaluate
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Evaluate benchmark.")
-    parser.add_argument("--res_dir", help="Result directory produced by benchmark runner")
+    parser.add_argument("--res_dir", help="result directory produced by benchmark runner")
     args = parser.parse_args()
     return args
 
