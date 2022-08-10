@@ -3,9 +3,9 @@
 DIR="$( dirname "${BASH_SOURCE[0]}" )"
 cd $DIR
 
-FILE=icra2022_results.zip
-ID=10I7EN_3yWOly_k_LnZg0nOxfDOxgnmCi
-CHECKSUM=e57c15eb9aa71c1e1fd14e03c66e63d8
+FILE=icra2022_results.tar.gz
+ID=1OnU9HMutlfBgv9wE2HOIbavZLKFSZr__
+CHECKSUM=8876c3853db101998510e4804e0bd96a
 
 if [ -f $FILE ]; then
   echo "File already exists. Checking md5..."
