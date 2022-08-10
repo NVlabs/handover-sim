@@ -6,6 +6,7 @@ import gym
 import os
 import functools
 import time
+import cv2
 import numpy as np
 
 from datetime import datetime
@@ -31,13 +32,32 @@ class BenchmarkRunner:
 
         self._env = HandoverBenchmarkWrapper(gym.make(self._cfg.ENV.ID, cfg=self._cfg))
 
-    def run(self, policy):
-        if self._cfg.BENCHMARK.SAVE_HEADLESS_RENDER and not self._cfg.BENCHMARK.SAVE_RESULT:
-            raise ValueError(
-                "SAVE_HEADLESS_RENDER can only be set to True when SAVE_RESULT is set to True"
+    @property
+    def env(self):
+        return self._env
+
+    def run(self, policy, res_dir=None):
+        if self._cfg.BENCHMARK.SAVE_OFFSCREEN_RENDER:
+            if not self._cfg.ENV.RENDER_OFFSCREEN:
+                raise ValueError(
+                    "SAVE_OFFSCREEN_RENDER can only be True when RENDER_OFFSCREEN is set to True"
+                )
+            if not self._cfg.BENCHMARK.SAVE_RESULT and res_dir is None:
+                raise ValueError(
+                    "SAVE_OFFSCREEN_RENDER can only be True when SAVE_RESULT is set to True or "
+                    "`res_dir` is not None"
+                )
+            if 1.0 / self._cfg.BENCHMARK.OFFSCREEN_RENDER_FRAME_RATE < self._cfg.SIM.TIME_STEP:
+                raise ValueError("Offscreen render time step must not be smaller than TIME_STEP")
+
+            self._render_steps = (
+                1.0 / self._cfg.BENCHMARK.OFFSCREEN_RENDER_FRAME_RATE / self._cfg.SIM.TIME_STEP
             )
 
         if self._cfg.BENCHMARK.SAVE_RESULT:
+            if res_dir is not None:
+                raise ValueError("SAVE_RESULT can only be True when `res_dir` is None")
+
             dt = datetime.now()
             dt = dt.strftime("%Y-%m-%d_%H-%M-%S")
             res_dir = os.path.join(
@@ -59,7 +79,12 @@ class BenchmarkRunner:
                 )
             )
 
-            result, elapsed_time = self._run_scene(idx, policy)
+            kwargs = {}
+            if self._cfg.BENCHMARK.SAVE_OFFSCREEN_RENDER:
+                kwargs["render_dir"] = os.path.join(res_dir, "{:03d}".format(idx))
+                os.makedirs(kwargs["render_dir"], exist_ok=True)
+
+            result, elapsed_time = self._run_scene(idx, policy, **kwargs)
 
             print("time:   {:6.2f}".format(elapsed_time))
             print("frame:  {:5d}".format(result["elapsed_frame"]))
@@ -85,13 +110,16 @@ class BenchmarkRunner:
                 np.savez_compressed(res_file, **result)
 
     @timer
-    def _run_scene(self, idx, policy):
+    def _run_scene(self, idx, policy, render_dir=None):
         obs = self._env.reset(idx=idx)
         policy.reset()
 
         result = {}
         result["action"] = []
         result["elapsed_time"] = []
+
+        if self._cfg.BENCHMARK.SAVE_OFFSCREEN_RENDER:
+            self._render_offscreen_and_save(render_dir)
 
         while True:
             action, elapsed_time = self._run_policy(policy, obs)
@@ -100,6 +128,13 @@ class BenchmarkRunner:
             result["elapsed_time"].append(elapsed_time)
 
             obs, _, _, info = self._env.step(action)
+
+            if (
+                self._cfg.BENCHMARK.SAVE_OFFSCREEN_RENDER
+                and (self._env.frame % self._render_steps)
+                <= (self._env.frame - 1) % self._render_steps
+            ):
+                self._render_offscreen_and_save(render_dir)
 
             if info["status"] != 0:
                 break
@@ -110,6 +145,10 @@ class BenchmarkRunner:
         result["result"] = info["status"]
 
         return result
+
+    def _render_offscreen_and_save(self, render_dir):
+        render_file = os.path.join(render_dir, "{:06d}.jpg".format(self._env.frame))
+        cv2.imwrite(render_file, self._env.render_offscreen()[:, :, [2, 1, 0, 3]])
 
     @timer
     def _run_policy(self, policy, obs):

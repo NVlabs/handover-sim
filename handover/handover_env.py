@@ -29,6 +29,9 @@ class HandoverEnv(easysim.SimulatorEnv):
         if self.cfg.ENV.DRAW_RELEASE_CONTACT:
             self._draw_release_contact_init()
 
+        if self.cfg.ENV.RENDER_OFFSCREEN:
+            self._render_offscreen_init()
+
     @abc.abstractmethod
     def _get_panda_cls(self):
         """ """
@@ -52,6 +55,20 @@ class HandoverEnv(easysim.SimulatorEnv):
     @property
     def mano(self):
         return self._mano
+
+    def _render_offscreen_init(self):
+        camera = easysim.Camera()
+        camera.name = "offscreen_renderer"
+        camera.width = self.cfg.ENV.OFFSCREEN_RENDERER_CAMERA_WIDTH
+        camera.height = self.cfg.ENV.OFFSCREEN_RENDERER_CAMERA_HEIGHT
+        camera.vertical_fov = self.cfg.ENV.OFFSCREEN_RENDERER_CAMERA_VERTICAL_FOV
+        camera.near = self.cfg.ENV.OFFSCREEN_RENDERER_CAMERA_NEAR
+        camera.far = self.cfg.ENV.OFFSCREEN_RENDERER_CAMERA_FAR
+        camera.position = self.cfg.ENV.OFFSCREEN_RENDERER_CAMERA_POSITION
+        camera.target = self.cfg.ENV.OFFSCREEN_RENDERER_CAMERA_TARGET
+        camera.up_vector = (0.0, 0.0, 1.0)
+        self.scene.add_camera(camera)
+        self._camera = camera
 
     def pre_reset(self, env_ids, scene_id):
         self.ycb.reset(scene_id)
@@ -296,6 +313,13 @@ class HandoverEnv(easysim.SimulatorEnv):
                 self._release_contact_bodies[
                     "vertex_{:02d}_{:d}".format(link_index, i)
                 ].env_ids_reset_base_state = [0]
+
+    def render_offscreen(self):
+        if not self.cfg.ENV.RENDER_OFFSCREEN:
+            raise ValueError(
+                "`render_offscreen()` can only be called when RENDER_OFFSCREEN is set to True"
+            )
+        return self._camera.color[0].numpy()
 
 
 class HandoverStateEnv(HandoverEnv):

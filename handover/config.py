@@ -105,6 +105,23 @@ _C.ENV.RELEASE_CONTACT_VERTEX_COLOR = (0.85, 0.19, 0.21, 1.0)
 
 _C.ENV.ID = "HandoverStateEnv-v1"
 
+
+_C.ENV.RENDER_OFFSCREEN = False
+
+_C.ENV.OFFSCREEN_RENDERER_CAMERA_WIDTH = 1600
+
+_C.ENV.OFFSCREEN_RENDERER_CAMERA_HEIGHT = 900
+
+_C.ENV.OFFSCREEN_RENDERER_CAMERA_VERTICAL_FOV = 60.0
+
+_C.ENV.OFFSCREEN_RENDERER_CAMERA_NEAR = 0.1
+
+_C.ENV.OFFSCREEN_RENDERER_CAMERA_FAR = 10.0
+
+_C.ENV.OFFSCREEN_RENDERER_CAMERA_POSITION = (1.2127, -0.5531, 1.4090)
+
+_C.ENV.OFFSCREEN_RENDERER_CAMERA_TARGET = (0.08, 0.24, 1.19)
+
 # ---------------------------------------------------------------------------- #
 # Benchmark config
 # ---------------------------------------------------------------------------- #
@@ -135,7 +152,9 @@ _C.BENCHMARK.RESULT_DIR = "results"
 
 _C.BENCHMARK.SAVE_RESULT = False
 
-_C.BENCHMARK.SAVE_HEADLESS_RENDER = False
+_C.BENCHMARK.SAVE_OFFSCREEN_RENDER = False
+
+_C.BENCHMARK.OFFSCREEN_RENDER_FRAME_RATE = 60
 
 
 get_cfg = easysim.get_cfg
