@@ -35,6 +35,7 @@ This repo is based on a Python project template created by [Rowland O'Flaherty](
     3. [GA-DDPG](#ga-ddpg)
 5. [Evaluation](#evaluation)
 6. [Reproducing ICRA 2022 Results](#reproducing-icra-2022-results)
+7. [Rendering from Result and Saving Rendering](#rendering-from-result-and-saving-rendering)
 
 ## Prerequisites
 
@@ -287,7 +288,7 @@ Below we provide instructions for setting up and running benchmark for these bas
 
 ## Evaluation
 
-- To evaluate the result of a baseline, all you need is the **result folder** generated from running the benchmark. For example, if your result folder is `results/2022-02-28_08-57-34_yang-icra2021_s0_test`, run the following command:
+- To evaluate the result of a baseline, all you need is the **result folder** generated from running the benchmark. For example, if your result folder is `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`, run the following command:
 
     ```Shell
     python examples/evaluate_benchmark.py \
@@ -356,3 +357,66 @@ python examples/evaluate_benchmark.py \
 You should see the exact same result shown in the example of the [Evaluation](#evaluation) section.
 
 The full set of evaluation commands can be found in [`examples/all_icra2022_results_eval.sh`](./examples/all_icra2022_results_eval.sh).
+
+## Rendering from Result and Saving Rendering
+
+- While you can run a benchmark with a visualizer window by adding `SIM.RENDER True` (e.g., see [Yang et al. ICRA 2021](#yang-et-al-icra-2021)), you can also run headless and **re-render the rollouts** with a **visualizer window** after the fact&mdash;as long as you saved the result with `BENCHMARK.SAVE_RESULT True`.
+
+    For example, if your result folder is `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`, run the following command:
+
+    ```Shell
+    python examples/render_benchmark.py \
+      --res_dir results/2022-02-28_08-57-34_yang-icra2021_s0_test \
+      SIM.RENDER True
+    ```
+
+    This will run the same benchmark environment with a policy that simply loads and executes the actions from the saved result.
+
+    Consequently, if you have downloaded the ICRA 2022 results following the [Reproducing ICRA 2022 Results](#reproducing-icra-2022-results) Section, you can also try rendering from one of the downloaded result folders, for example:
+
+    ```Shell
+    python examples/render_benchmark.py \
+      --res_dir results/icra2022_results/2022-02-28_08-57-34_yang-icra2021_s0_test \
+      SIM.RENDER True
+    ```
+
+    This allows you to visualize the rollouts in the ICRA 2022 results.
+
+- Apart from the visualizer window, you can also **re-render the rollouts** with an **offscreen renderer** and further **save the rendered frame** into `.jpg` files. These `.jpg` files can later further be converted into `.mp4` video files for offline visualization.
+
+    For example, if your result folder is `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`, run the following command:
+
+    ```Shell
+    python examples/render_benchmark.py \
+      --res_dir results/2022-02-28_08-57-34_yang-icra2021_s0_test \
+      ENV.RENDER_OFFSCREEN True \
+      BENCHMARK.SAVE_OFFSCREEN_RENDER True
+    ```
+
+    This will save the offscreen rendered frames to folders named after the scene ID (e.g., `000/`, `001/`, etc.) under `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`. Each folder contains the rendered frames of one scene.
+
+    By default, the offscreen rendering will use Bullet's CPU based TinyRenderer, which can be ran on a headless server but may take a long time. If you have an active display manager, you may speed up rendering by using Bullet's GPU based OpenGL visualizer. This can be done by adding `SIM.RENDER True` and a `--bullet_disable_cov_rendering` flag:
+
+    ```Shell
+    python examples/render_benchmark.py \
+      --res_dir results/2022-02-28_08-57-34_yang-icra2021_s0_test \
+      --bullet_disable_cov_rendering \
+      SIM.RENDER True \
+      ENV.RENDER_OFFSCREEN True \
+      BENCHMARK.SAVE_OFFSCREEN_RENDER True
+    ```
+
+    **Warning:** Rendering frames for a full test split with hundreds of scenes may take a couple of hours even with the GPU based OpenGL rendering.
+
+    Finally, once you have finished rendering the `.jpg` files for all the scenes, you can easily convert `.jpg` to `.mp4` with `ffmpeg`. First, install `ffmpeg` if you have not, for example, with `sudo apt install ffmpeg`.
+
+    If your result folder is `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`, you can then run:
+
+    ```Shell
+    ./examples/generate_mp4_from_jpg.sh results/2022-02-28_08-57-34_yang-icra2021_s0_test
+    ```
+
+    This will generate `.mp4` files named after the scene ID (e.g., `000.mp4`, `001.mp4`, etc.) under `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`. Each `.mp4` is converted from the `.jpg` files of one scene.
+
+    <img src="./docs/examples-render_benchmark-1.gif">
+    <img src="./docs/examples-render_benchmark-2.gif">
