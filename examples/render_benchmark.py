@@ -5,10 +5,6 @@
 import argparse
 import os
 import numpy as np
-import pybullet
-import types
-
-from contextlib import contextmanager
 
 from handover.config import get_cfg
 from handover.benchmark_runner import BenchmarkRunner
@@ -17,11 +13,7 @@ from handover.benchmark_runner import BenchmarkRunner
 def parse_args():
     parser = argparse.ArgumentParser(description="Render benchmark.")
     parser.add_argument("--res_dir", help="result directory produced by benchmark runner")
-    parser.add_argument(
-        "--bullet_disable_cov_rendering",
-        action="store_true",
-        help="disable cov rendering for Bullet",
-    )
+    parser.add_argument("--index", type=int, help="index of the scene")
     parser.add_argument(
         "opts",
         nargs=argparse.REMAINDER,
@@ -36,10 +28,13 @@ def parse_args():
 
 
 class ResultLoaderPolicy:
-    def __init__(self, res_dir):
+    def __init__(self, res_dir, index=None):
         self._res_dir = res_dir
 
-        self._idx = -1
+        if index is None:
+            self._idx = -1
+        else:
+            self._idx = index - 1
 
     def reset(self):
         self._idx += 1
@@ -49,23 +44,6 @@ class ResultLoaderPolicy:
 
     def forward(self, obs):
         return self._result["action"][obs["frame"]]
-
-
-def bullet_disable_cov_rendering(cfg, env):
-    if not cfg.SIM.RENDER:
-        raise ValueError(
-            "--bullet_disable_cov_rendering can only be used when RENDER is set to True"
-        )
-
-    @contextmanager
-    def _disable_cov_rendering(self):
-        try:
-            self._p.configureDebugVisualizer(pybullet.COV_ENABLE_RENDERING, 0)
-            yield
-        finally:
-            pass
-
-    env.simulator._disable_cov_rendering = types.MethodType(_disable_cov_rendering, env.simulator)
 
 
 def main():
@@ -91,14 +69,10 @@ def main():
         )
     cfg.merge_from_list(args.opts)
 
-    policy = ResultLoaderPolicy(args.res_dir)
+    policy = ResultLoaderPolicy(args.res_dir, index=args.index)
 
     benchmark_runner = BenchmarkRunner(cfg)
-
-    if args.bullet_disable_cov_rendering:
-        bullet_disable_cov_rendering(cfg, benchmark_runner.env)
-
-    benchmark_runner.run(policy, args.res_dir)
+    benchmark_runner.run(policy, res_dir=args.res_dir, index=args.index)
 
 
 if __name__ == "__main__":

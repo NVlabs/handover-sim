@@ -395,18 +395,13 @@ The full set of evaluation commands can be found in [`examples/all_icra2022_resu
 
     This will save the offscreen rendered frames to folders named after the scene ID (e.g., `000/`, `001/`, etc.) under `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`. Each folder contains the rendered frames of one scene.
 
-    By default, the offscreen rendering will use Bullet's CPU based TinyRenderer, which can be ran on a headless server but may take a long time. If you have an active display manager, you may speed up rendering by using Bullet's GPU based OpenGL visualizer. This can be done by adding `SIM.RENDER True` and a `--bullet_disable_cov_rendering` flag:
+    By default, the offscreen rendering will use Bullet's CPU based TinyRenderer, which may take a while to run. If you have a GPU, you may speed up rendering by using Bullet's hardware accelerated OpenGL rendering with EGL. If your result folder is `results/2022-02-28_08-57-34_yang-icra2021_s0_test/`, you can run:
 
     ```Shell
-    python examples/render_benchmark.py \
-      --res_dir results/2022-02-28_08-57-34_yang-icra2021_s0_test \
-      --bullet_disable_cov_rendering \
-      SIM.RENDER True \
-      ENV.RENDER_OFFSCREEN True \
-      BENCHMARK.SAVE_OFFSCREEN_RENDER True
+    ./examples/render_benchmark_egl.sh results/2022-02-28_08-57-34_yang-icra2021_s0_test
     ```
 
-    **Warning:** Rendering frames for a full test split with hundreds of scenes may take a couple of hours even with the GPU based OpenGL rendering.
+    **Warning:** Rendering frames for a full test split with hundreds of scenes may still take a couple of hours even with the GPU based OpenGL rendering.
 
     Finally, once you have finished rendering the `.jpg` files for all the scenes, you can easily convert `.jpg` to `.mp4` with `ffmpeg`. First, install `ffmpeg` if you have not, for example, with `sudo apt install ffmpeg`.
 

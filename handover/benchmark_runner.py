@@ -32,11 +32,7 @@ class BenchmarkRunner:
 
         self._env = HandoverBenchmarkWrapper(gym.make(self._cfg.ENV.ID, cfg=self._cfg))
 
-    @property
-    def env(self):
-        return self._env
-
-    def run(self, policy, res_dir=None):
+    def run(self, policy, res_dir=None, index=None):
         if self._cfg.BENCHMARK.SAVE_OFFSCREEN_RENDER:
             if not self._cfg.ENV.RENDER_OFFSCREEN:
                 raise ValueError(
@@ -72,7 +68,12 @@ class BenchmarkRunner:
             with open(cfg_file, "w") as f:
                 self._cfg.dump(stream=f, default_flow_style=None)
 
-        for idx in range(self._env.num_scenes):
+        if index is None:
+            indices = range(self._env.num_scenes)
+        else:
+            indices = [index]
+
+        for idx in indices:
             print(
                 "{:04d}/{:04d}: scene {}".format(
                     idx + 1, self._env.num_scenes, self._env._scene_ids[idx]
