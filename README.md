@@ -292,7 +292,7 @@ Below we provide instructions for setting up and running benchmark for these bas
 
     ```Shell
     python examples/evaluate_benchmark.py \
-      --res_dir=results/2022-02-28_08-57-34_yang-icra2021_s0_test
+      --res_dir results/2022-02-28_08-57-34_yang-icra2021_s0_test
     ```
 
     You should see an output similar to the following in the terminal:
@@ -351,7 +351,7 @@ You can now run evaluation on these result folders. For example, for Yang et al.
 
 ```Shell
 python examples/evaluate_benchmark.py \
-  --res_dir=results/icra2022_results/2022-02-28_08-57-34_yang-icra2021_s0_test
+  --res_dir results/icra2022_results/2022-02-28_08-57-34_yang-icra2021_s0_test
 ```
 
 You should see the exact same result shown in the example of the [Evaluation](#evaluation) section.
