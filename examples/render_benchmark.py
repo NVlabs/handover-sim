@@ -40,10 +40,10 @@ class ResultLoaderPolicy:
         self._idx += 1
 
         res_file = os.path.join(self._res_dir, "{:03d}.npz".format(self._idx))
-        self._result = np.load(res_file)
+        self._action = np.load(res_file)["action"]
 
     def forward(self, obs):
-        return self._result["action"][obs["frame"]]
+        return self._action[obs["frame"]]
 
 
 def main():
