@@ -9,7 +9,7 @@ fi
 
 for x in $res_dir/*.npz; do
   index=$(basename $x)
-  index=${index%.*} 
+  index=${index%.*}
   python examples/render_benchmark.py \
     --res_dir $res_dir \
     --index $index \
