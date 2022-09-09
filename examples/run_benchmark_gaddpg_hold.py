@@ -189,6 +189,7 @@ class GADDPGPolicy(SimplePolicy):
                     obs["panda_body"].contact_id[0], obs["panda_link_ind_hand"] - 1, pos, orn
                 )
                 action = np.array(action)
+                action[7:9] = 0.04
 
             self._traj.append(action)
         else:
