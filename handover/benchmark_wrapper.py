@@ -239,6 +239,10 @@ class HandoverBenchmarkWrapper(HandoverStatusWrapper):
     def num_scenes(self):
         return len(self._scene_ids)
 
+    @property
+    def scene_ids(self):
+        return self._scene_ids
+
     def reset(self, env_ids=None, **kwargs):
         if "idx" in kwargs:
             assert "scene_id" not in kwargs

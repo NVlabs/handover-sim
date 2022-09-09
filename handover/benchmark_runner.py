@@ -76,7 +76,7 @@ class BenchmarkRunner:
         for idx in indices:
             print(
                 "{:04d}/{:04d}: scene {}".format(
-                    idx + 1, self._env.num_scenes, self._env._scene_ids[idx]
+                    idx + 1, self._env.num_scenes, self._env.scene_ids[idx]
                 )
             )
 
