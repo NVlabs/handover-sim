@@ -285,7 +285,7 @@ class YangICRA2021Policy:
                         self._back = self._get_back(current_cfg)
                     action = self._back.copy()
 
-        return action
+        return action, {}
 
     def _load_grasps(self, obs):
         class_name = obs["ycb_classes"][list(obs["ycb_bodies"])[0]]

@@ -54,12 +54,14 @@ class SimplePolicy(abc.ABC):
         self._back = None
 
     def forward(self, obs):
+        info = {}
+
         if obs["frame"] < self._steps_wait:
             # Wait.
             action = self._start_conf.copy()
         elif not self._done:
             # Approach object until reaching grasp pose.
-            action, done = self.plan(obs)
+            action, done, info = self.plan(obs)
             if done:
                 self._done = True
                 self._done_frame = obs["frame"] + 1
@@ -91,7 +93,7 @@ class SimplePolicy(abc.ABC):
                 i = min(i, len(self._back) - 1)
                 action = self._back[i].copy()
 
-        return action
+        return action, info
 
     @abc.abstractmethod
     def plan(self, obs):
@@ -107,7 +109,7 @@ class DemoPolicy(SimplePolicy):
         i = (obs["frame"] - self._steps_wait) // self._steps_action_repeat
         action = traj[i].copy()
         done = obs["frame"] == self._steps_wait + len(traj) * self._steps_action_repeat - 1
-        return action, done
+        return action, done, {}
 
 
 def main():
@@ -125,7 +127,7 @@ def main():
         policy.reset()
 
         while True:
-            action = policy.forward(obs)
+            action, _ = policy.forward(obs)
             obs, _, _, info = env.step(action)
 
             if info["status"] != 0:

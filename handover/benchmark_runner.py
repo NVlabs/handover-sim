@@ -123,7 +123,10 @@ class BenchmarkRunner:
             self._render_offscreen_and_save(render_dir)
 
         while True:
-            action, elapsed_time = self._run_policy(policy, obs)
+            (action, info), elapsed_time = self._run_policy(policy, obs)
+
+            if "obs_time" in info:
+                elapsed_time -= info["obs_time"]
 
             result["action"].append(action)
             result["elapsed_time"].append(elapsed_time)

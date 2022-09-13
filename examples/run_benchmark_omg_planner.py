@@ -103,7 +103,7 @@ class OMGPlannerPolicy(SimplePolicy):
                 obs["frame"] == self._steps_wait + len(self._traj) * self._steps_action_repeat - 1
             )
 
-        return action, done
+        return action, done, {}
 
     def _run_omg_planner(self, obs):
         poses = []

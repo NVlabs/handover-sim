@@ -9,8 +9,8 @@ import pybullet
 
 from scipy.spatial.transform import Rotation as Rot
 
+from handover.benchmark_runner import timer, BenchmarkRunner
 from handover.config import get_config_from_args
-from handover.benchmark_runner import BenchmarkRunner
 
 from demo_benchmark_wrapper import SimplePolicy, time_wait
 
@@ -167,9 +167,11 @@ class GADDPGPolicy(SimplePolicy):
         self._point_listener.reset()
 
     def plan(self, obs):
+        info = {}
+
         if (obs["frame"] - self._steps_wait) % self._steps_action_repeat == 0:
-            point_state = obs["callback_get_point_state"]()
-            point_state = point_state.T
+            point_state, obs_time = self._get_point_state_from_callback(obs)
+            info["obs_time"] = obs_time
 
             if point_state.shape[1] == 0 and self._point_listener.acc_points.shape[1] == 0:
                 action = np.array(self._cfg.ENV.PANDA_INITIAL_POSITION)
@@ -205,7 +207,12 @@ class GADDPGPolicy(SimplePolicy):
         else:
             done = False
 
-        return action, done
+        return action, done, info
+
+    @timer
+    def _get_point_state_from_callback(self, obs):
+        point_state = obs["callback_get_point_state"]()
+        return point_state.T
 
     def _get_ef_pose(self, obs):
         pos = obs["panda_body"].link_state[0, obs["panda_link_ind_hand"], 0:3]
