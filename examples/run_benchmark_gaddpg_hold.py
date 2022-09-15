@@ -51,7 +51,17 @@ class PointListener:
         self._agent.setup_feature_extractor(net_dict)
         self._agent.load_model(self._pretrained)
 
+        # Warm up network. The first pass will be slower than later ones so we want to exclude it
+        # from benchmark time.
+        _, warm_up_time = self._warm_up_network()
+        print("warn up time: {:6.2f}".format(warm_up_time))
+
         self._cage_point_threshold = 50
+
+    @timer
+    def _warm_up_network(self):
+        state = [(np.zeros((4, 1)), np.array([])), None, None, None]
+        self._agent.select_action(state)
 
     def reset(self):
         self._remaining_step = cfg.RL_MAX_STEP
