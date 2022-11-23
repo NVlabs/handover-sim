@@ -52,10 +52,11 @@ For good practice for Python package management, it is recommended to install th
     cd handover-sim
     ```
 
-2. Install `handover-sim` as a Python package:
+2. Install `handover-sim` and submodule `mano_pybullet` as Python packages:
 
     ```Shell
     pip install -e .
+    pip install --no-deps -e ./mano_pybullet
     ```
 
 3. Download MANO models and code (`mano_v1_2.zip`) from the [MANO website](https://mano.is.tue.mpg.de) and place the file under `handover/data/`. Unzip with:
