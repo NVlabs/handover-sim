@@ -30,7 +30,6 @@ git checkout a3b8b68
 # - Remove cmake from requirements.txt to avoid conflict with apt installed cmake.
 sed -i "/cmake/d" requirements.txt
 sed -i "s/opencv-python==3.4.3.18/opencv-python/g" requirements.txt
-sed -i "s/pyopengl==3.1.0/pyopengl/g" requirements.txt
 sed -i "s/torch==1.4.0/torch/g" requirements.txt
 sed -i "s/torchvision==0.4.2/torchvision/g" requirements.txt
 pip install -r requirements.txt
