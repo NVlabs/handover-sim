@@ -50,7 +50,7 @@ def evaluate(res_dir):
     files = glob.glob(os.path.join(res_dir, "*.npz"))
     if len(files) != env.num_scenes:
         raise ValueError(
-            "Number of .npz files ({}}) does not match the number of scenes ({})".format(
+            "Number of .npz files ({}) does not match the number of scenes ({})".format(
                 len(files), env.num_scenes
             )
         )
