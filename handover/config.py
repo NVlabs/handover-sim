@@ -21,6 +21,9 @@ _C.SIM.TIME_STEP = 0.001
 _C.ENV = CN()
 
 
+_C.ENV.ID = "HandoverStateEnv-v1"
+
+
 _C.ENV.TABLE_BASE_POSITION = (0.61, 0.28, 0.0)
 
 _C.ENV.TABLE_BASE_ORIENTATION = (0, 0, 0, 1)
@@ -41,6 +44,11 @@ _C.ENV.PANDA_POSITION_GAIN = (0.01,) * 9
 _C.ENV.PANDA_VELOCITY_GAIN = (1.0,) * 9
 
 
+_C.ENV.YCB_MANO_START_FRAME = "first"
+
+
+_C.ENV.YCB_LOAD_MODE = "all"
+
 _C.ENV.YCB_TRANSLATION_MAX_FORCE = (50.0,) * 3
 
 _C.ENV.YCB_TRANSLATION_POSITION_GAIN = (0.2,) * 3
@@ -53,6 +61,8 @@ _C.ENV.YCB_ROTATION_POSITION_GAIN = (0.2,) * 3
 
 _C.ENV.YCB_ROTATION_VELOCITY_GAIN = (1.0,) * 3
 
+
+_C.ENV.MANO_SIMULATION_MODE = "default"
 
 _C.ENV.MANO_TRANSLATION_MAX_FORCE = (50.0,) * 3
 
@@ -103,9 +113,6 @@ _C.ENV.RELEASE_CONTACT_VERTEX_RADIUS = 0.001
 _C.ENV.RELEASE_CONTACT_VERTEX_COLOR = (0.85, 0.19, 0.21, 1.0)
 
 
-_C.ENV.ID = "HandoverStateEnv-v1"
-
-
 _C.ENV.RENDER_OFFSCREEN = False
 
 _C.ENV.OFFSCREEN_RENDERER_CAMERA_WIDTH = 1600
@@ -121,6 +128,14 @@ _C.ENV.OFFSCREEN_RENDERER_CAMERA_FAR = 10.0
 _C.ENV.OFFSCREEN_RENDERER_CAMERA_POSITION = (1.2127, -0.5531, 1.4090)
 
 _C.ENV.OFFSCREEN_RENDERER_CAMERA_TARGET = (0.08, 0.24, 1.19)
+
+# ---------------------------------------------------------------------------- #
+# HandoverHandCameraPointStateEnv config
+# ---------------------------------------------------------------------------- #
+_C.ENV.HANDOVER_HAND_CAMERA_POINT_STATE_ENV = CN()
+
+
+_C.ENV.HANDOVER_HAND_CAMERA_POINT_STATE_ENV.COMPUTE_MANO_POINT_STATE = False
 
 # ---------------------------------------------------------------------------- #
 # Benchmark config
@@ -156,6 +171,8 @@ _C.BENCHMARK.SAVE_OFFSCREEN_RENDER = False
 
 _C.BENCHMARK.OFFSCREEN_RENDER_FRAME_RATE = 60
 
+
+cfg = _C
 
 get_cfg = easysim.get_cfg
 

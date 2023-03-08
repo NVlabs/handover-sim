@@ -65,7 +65,10 @@ class YCB:
                     :, np.r_[ycb_grasp_ind, :ycb_grasp_ind, ycb_grasp_ind + 1 : pose.shape[1]]
                 ]
 
-            self._ids = ycb_ids
+            if self._cfg.ENV.YCB_LOAD_MODE == "all":
+                self._ids = ycb_ids
+            if self._cfg.ENV.YCB_LOAD_MODE == "grasp_only":
+                self._ids = ycb_ids[:1]
 
             self._pose = pose.copy()
             self._pose[:, :, 2] += self._cfg.ENV.TABLE_HEIGHT
@@ -73,7 +76,13 @@ class YCB:
 
             self._cur_scene_id = scene_id
 
-        self._frame = 0
+        if self._cfg.ENV.YCB_MANO_START_FRAME == "first":
+            self._frame = 0
+        if self._cfg.ENV.YCB_MANO_START_FRAME == "last":
+            self._frame = self._num_frames - 1
+        if self._cfg.ENV.YCB_MANO_START_FRAME == "one_and_half_second":
+            self._frame = int(np.round(1.5 / self._cfg.SIM.TIME_STEP))
+
         self._released = False
 
         if self.bodies == {}:
@@ -124,6 +133,10 @@ class YCB:
     @property
     def ids(self):
         return self._ids
+
+    @property
+    def pose(self):
+        return self._pose
 
     @property
     def released(self):

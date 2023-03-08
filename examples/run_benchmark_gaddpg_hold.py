@@ -221,7 +221,7 @@ class GADDPGPolicy(SimplePolicy):
 
     @timer
     def _get_point_state_from_callback(self, obs):
-        point_state = obs["callback_get_point_state"]()
+        point_state = obs["callback_get_point_states"]()[0]
         return point_state.T
 
     def _get_ef_pose(self, obs):

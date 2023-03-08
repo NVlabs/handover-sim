@@ -10,7 +10,7 @@ fi
 for x in $res_dir/*.npz; do
   index=$(basename $x)
   index=${index%.*}
-  python examples/render_benchmark.py \
+  python "$( dirname "${BASH_SOURCE[0]}" )"/render_benchmark.py \
     --res_dir $res_dir \
     --index $index \
     SIM.BULLET.USE_EGL True \

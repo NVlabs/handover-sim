@@ -85,7 +85,7 @@ class HandoverEnv(easysim.SimulatorEnv):
     def pre_step(self, action):
         self.panda.step(action)
         self.ycb.step()
-        self.mano.step()
+        self.mano.step(self.simulator)
 
         if self.cfg.ENV.DRAW_RELEASE_CONTACT:
             self._draw_release_contact_step()
@@ -321,6 +321,9 @@ class HandoverEnv(easysim.SimulatorEnv):
             )
         return self._camera.color[0].numpy()
 
+    def callback_get_reward_post_status(self, reward, status):
+        """ """
+
 
 class HandoverStateEnv(HandoverEnv):
     def _get_panda_cls(self):
@@ -351,12 +354,12 @@ class HandoverHandCameraPointStateEnv(HandoverEnv):
         return PandaHandCamera
 
     def post_reset(self, env_ids, scene_id):
-        self._point_state = None
+        self._point_states = None
 
         return super().post_reset(env_ids, scene_id)
 
     def post_step(self, action):
-        self._point_state = None
+        self._point_states = None
 
         return super().post_step(action)
 
@@ -365,7 +368,7 @@ class HandoverHandCameraPointStateEnv(HandoverEnv):
         observation["frame"] = self.frame
         observation["panda_link_ind_hand"] = self.panda.LINK_IND_HAND
         observation["panda_body"] = self.panda.body
-        observation["callback_get_point_state"] = self._get_point_state
+        observation["callback_get_point_states"] = self._get_point_states
         return observation
 
     def _get_reward(self):
@@ -377,9 +380,22 @@ class HandoverHandCameraPointStateEnv(HandoverEnv):
     def _get_info(self):
         return {}
 
-    def _get_point_state(self):
-        if self._point_state is None:
-            self._point_state = self.panda.get_point_state(
-                self.ycb.bodies[self.ycb.ids[0]].contact_id[0]
-            )
-        return self._point_state
+    def _get_point_states(self):
+        if self._point_states is None:
+            segmentation_ids = []
+            segmentation_ids.append(self.ycb.bodies[self.ycb.ids[0]].contact_id[0])
+            if (
+                self.cfg.ENV.HANDOVER_HAND_CAMERA_POINT_STATE_ENV.COMPUTE_MANO_POINT_STATE
+                and self.mano.body is not None
+            ):
+                segmentation_ids.append(self.mano.body.contact_id[0])
+
+            self._point_states = self.panda.get_point_states(segmentation_ids)
+
+            if (
+                self.cfg.ENV.HANDOVER_HAND_CAMERA_POINT_STATE_ENV.COMPUTE_MANO_POINT_STATE
+                and self.mano.body is None
+            ):
+                self._point_states.append(np.zeros((0, 3), dtype=np.float32))
+
+        return self._point_states

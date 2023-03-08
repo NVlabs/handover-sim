@@ -111,7 +111,7 @@ class PandaHandCamera(Panda):
         orn = Rot.from_euler("XYZ", (0.0, 0.0, +np.pi / 2)).as_quat().astype(np.float32)
         self._t3d_hand_to_camera = get_t3d_from_qt(orn, pos)
 
-    def get_point_state(self, segmentation_id):
+    def get_point_states(self, segmentation_ids):
         # Get OpenGL view frame from URDF camera frame.
         pos = self.body.link_state[0, self.LINK_IND_CAMERA, 0:3]
         orn = self.body.link_state[0, self.LINK_IND_CAMERA, 3:7]
@@ -125,17 +125,21 @@ class PandaHandCamera(Panda):
         depth = self._camera.depth[0].numpy()
         segmentation = self._camera.segmentation[0].numpy()
 
-        # Get point state in pinhole camera frame.
-        segmentation = segmentation == segmentation_id
-        point_state = (
-            np.tile(depth[segmentation].reshape(-1, 1), (1, 3))
-            * self._deproject_p[segmentation.ravel(), :]
-        )
+        point_states = []
 
-        # Transform point state to hand frame.
-        point_state = self._t3d_hand_to_camera.transform_points(point_state)
+        for segmentation_id in segmentation_ids:
+            # Get point state in pinhole camera frame.
+            mask = segmentation == segmentation_id
+            point_state = (
+                np.tile(depth[mask].reshape(-1, 1), (1, 3)) * self._deproject_p[mask.ravel(), :]
+            )
 
-        return point_state
+            # Transform point state to hand frame.
+            point_state = self._t3d_hand_to_camera.transform_points(point_state)
+
+            point_states.append(point_state)
+
+        return point_states
 
 
 def _quaternion_multiplication(q1, q2):

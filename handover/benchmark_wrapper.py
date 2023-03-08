@@ -53,6 +53,8 @@ class HandoverStatusWrapper(easysim.SimulatorWrapper):
         if self._elapsed_steps >= self._max_episode_steps and status != EpisodeStatus.SUCCESS:
             status |= EpisodeStatus.FAILURE_TIMEOUT
 
+        reward = self.callback_get_reward_post_status(reward, status)
+
         done |= status != 0
 
         info["status"] = status
