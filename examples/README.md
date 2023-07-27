@@ -22,7 +22,7 @@ apt install \
 
 # Clone OMG-Planner.
 # - All our experiements were ran on commit a3b8b683273327c63092a1454d58279e0e0be9de.
-git clone --recursive git@github.com:liruiw/OMG-Planner.git
+git clone --recursive https://github.com/liruiw/OMG-Planner.git
 cd OMG-Planner
 git checkout a3b8b68
 
@@ -40,7 +40,7 @@ python setup.py develop
 cd ..
 
 # Install eigen.
-git clone git@gitlab.com:libeigen/eigen.git
+git clone https://gitlab.com/libeigen/eigen.git
 cd eigen
 git checkout 3.4.0
 mkdir -p release && mkdir -p build && cd build
@@ -106,7 +106,7 @@ Below is our installation script for GA-DDPG.
 
 # Clone OMG-Planner.
 # - All our experiements were ran on commit 6d2b10ffb81c125536740c82df23283d8a1c3ac8.
-git clone --recursive git@github.com:liruiw/GA-DDPG.git
+git clone --recursive https://github.com/liruiw/GA-DDPG.git
 cd GA-DDPG
 git checkout 6d2b10f
 

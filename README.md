@@ -48,7 +48,7 @@ For good practice for Python package management, it is recommended to install th
 1. Clone the repo with `--recursive` and and cd into it:
 
     ```Shell
-    git clone --recursive git@github.com:NVlabs/handover-sim.git
+    git clone --recursive https://github.com/NVlabs/handover-sim.git
     cd handover-sim
     ```
 
