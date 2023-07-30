@@ -12,10 +12,15 @@ Below is our installation script for OMG-Planner.
 ```Shell
 # Install Ubuntu packages.
 # - libassimp-dev is required for pyassimp.
+# - libegl-dev is required for ycb_renderer.
+# - libgles2 is required for ycb_renderer.
+# - libglib2.0-0 is required for opencv-python.
 # - libxslt1-dev is required for lxml.
 apt install \
-    cmake \
     libassimp-dev \
+    libegl-dev \
+    libgles2 \
+    libglib2.0-0 \
     libxslt1-dev
 
 # The script below should be ran under handover-sim/.
@@ -27,8 +32,6 @@ cd OMG-Planner
 git checkout a3b8b68
 
 # Install Python packages in requirements.txt.
-# - Remove cmake from requirements.txt to avoid conflict with apt installed cmake.
-sed -i "/cmake/d" requirements.txt
 sed -i "s/opencv-python==3.4.3.18/opencv-python/g" requirements.txt
 sed -i "s/torch==1.4.0/torch/g" requirements.txt
 sed -i "s/torchvision==0.4.2/torchvision/g" requirements.txt
