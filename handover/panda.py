@@ -94,12 +94,8 @@ class PandaHandCamera(Panda):
 
         # Get deproject points before depth multiplication.
         K = np.eye(3, dtype=np.float32)
-        K[0, 0] = (
-            self._camera.width
-            / 2
-            / np.tan(np.deg2rad(camera.vertical_fov) * self._camera.width / self._camera.height / 2)
-        )
-        K[1, 1] = self._camera.height / 2 / np.tan(np.deg2rad(camera.vertical_fov) / 2)
+        K[0, 0] = self._camera.height / 2 / np.tan(np.deg2rad(self._camera.vertical_fov) / 2)
+        K[1, 1] = self._camera.height / 2 / np.tan(np.deg2rad(self._camera.vertical_fov) / 2)
         K[0, 2] = self._camera.width / 2
         K[1, 2] = self._camera.height / 2
         K_inv = np.linalg.inv(K)
