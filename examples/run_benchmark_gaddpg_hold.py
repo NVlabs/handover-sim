@@ -69,7 +69,7 @@ class PointListener:
         self._acc_mean = np.zeros((3, 1))
 
         # Enforce determinism.
-        np.random.seed(seed)
+        np.random.seed(self._seed)
 
     @property
     def remaining_step(self):
