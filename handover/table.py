@@ -21,8 +21,7 @@ class Table:
         body.initial_base_position = (
             self._cfg.ENV.TABLE_BASE_POSITION + self._cfg.ENV.TABLE_BASE_ORIENTATION
         )
-        if self._cfg.SIM.SIMULATOR == "bullet":
-            body.link_color = [(1.0, 1.0, 1.0, 1.0)]
+        body.link_color = [(1.0, 1.0, 1.0, 1.0)]
         body.link_collision_filter = [self._cfg.ENV.COLLISION_FILTER_TABLE]
         self._scene.add_body(body)
         self._body = body
