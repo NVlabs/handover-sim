@@ -12,7 +12,7 @@ def _get_version() -> str:
     # Standard Library
     import pathlib
 
-    root = pathlib.Path(__file__).resolve().parent.parent.parent
+    root = pathlib.Path(__file__).resolve().parent.parent
     if (root / ".git").exists() and not (root / ".git/shallow").exists():
         # Third Party
         import setuptools_scm
