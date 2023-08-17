@@ -8,7 +8,6 @@
 
 # Temporary and binary files
 *~
-*.cfg
 *.log
 *.pot
 *.py[cod]

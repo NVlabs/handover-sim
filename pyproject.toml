@@ -15,7 +15,7 @@ local_scheme = "dirty-tag"
 
 [tool.black]
 line-length = 100
-experimental-string-processing = true
+preview = true
 
 [tool.isort]
 # Multi line output mode 3 is used to conform with Black. See
@@ -34,15 +34,23 @@ no_implicit_optional = true
 show_error_codes = true
 warn_unused_ignores = true
 exclude = [
-	"venv",
+    "build",
+    "venv",
 ]
 
 [[tool.mypy.overrides]]
 module = [
-	"setuptools",
-	"setuptools_scm",
+    "setuptools",
+    "setuptools_scm",
 ]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 python_files = ["*_test.py"]
+
+[tool.coverage.report]
+# NOTE: Single-quoted strings are required in TOML for regular expressions
+exclude_lines = [
+	"pragma: no cover", # Need to re-enable the standard no cover match
+	'^\s*pass\s*$',  # Skip any pass lines
+]
