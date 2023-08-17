@@ -185,9 +185,9 @@ def compose_qp(q, pt):
     qz = q[..., 5]
     qw = q[..., 6]
 
-    qxx = qx ** 2
-    qyy = qy ** 2
-    qzz = qz ** 2
+    qxx = qx**2
+    qyy = qy**2
+    qzz = qz**2
     qwx = qw * qx
     qwy = qw * qy
     qwz = qw * qz

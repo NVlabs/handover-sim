@@ -120,7 +120,7 @@ class PointListener:
 
         step = cfg.RL_MAX_STEP - self._remaining_step
         aggr_sample_point_num = min(
-            int(cfg.RL_TRAIN.pt_accumulate_ratio ** step * cfg.RL_TRAIN.uniform_num_pts),
+            int(cfg.RL_TRAIN.pt_accumulate_ratio**step * cfg.RL_TRAIN.uniform_num_pts),
             new_points.shape[1],
         )
         index = np.random.choice(
