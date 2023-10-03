@@ -43,7 +43,7 @@ class ResultLoaderPolicy:
         self._action = np.load(res_file)["action"]
 
     def forward(self, obs):
-        return self._action[obs["frame"]]
+        return self._action[obs["frame"]], {}
 
 
 def main():
