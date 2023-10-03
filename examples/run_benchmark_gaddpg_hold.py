@@ -82,12 +82,12 @@ class PointListener:
     def run_network(self, point_state, ef_pose):
         state = self._point_state_to_state(point_state, ef_pose)
         state = [state, None, None, None]
-        action, _, _, _ = self._agent.select_action(state, remain_timestep=self._remaining_step)
+        action, _, _, _ = self._agent.select_action(state, remain_timestep=self.remaining_step)
 
         ef_pose_delta = unpack_action(action)
         ef_pose_new = np.matmul(ef_pose, ef_pose_delta)
 
-        self._remaining_step = max(self._remaining_step - 1, 0)
+        self._remaining_step = max(self.remaining_step - 1, 0)
 
         return ef_pose_new
 
@@ -103,7 +103,7 @@ class PointListener:
             self._update_curr_acc_points(point_state, ef_pose)
 
         inv_ef_pose = se3_inverse(ef_pose)
-        point_state = se3_transform_pc(inv_ef_pose, self._acc_points)
+        point_state = se3_transform_pc(inv_ef_pose, self.acc_points)
 
         point_state = regularize_pc_point_count(point_state.T, cfg.RL_TRAIN.uniform_num_pts).T
 
@@ -118,7 +118,7 @@ class PointListener:
     def _update_curr_acc_points(self, new_points, ef_pose):
         new_points = se3_transform_pc(ef_pose, new_points)
 
-        step = cfg.RL_MAX_STEP - self._remaining_step
+        step = cfg.RL_MAX_STEP - self.remaining_step
         aggr_sample_point_num = min(
             int(cfg.RL_TRAIN.pt_accumulate_ratio**step * cfg.RL_TRAIN.uniform_num_pts),
             new_points.shape[1],
@@ -128,18 +128,18 @@ class PointListener:
         )
         new_points = new_points[:, index]
 
-        self._acc_points = np.concatenate((new_points, self._acc_points), axis=1)
+        self._acc_points = np.concatenate((new_points, self.acc_points), axis=1)
 
-        acc_mean = np.mean(self._acc_points, axis=1)
+        acc_mean = np.mean(self.acc_points, axis=1)
         acc_diff = np.linalg.norm(self._acc_mean - acc_mean)
-        if acc_diff > 0.1 and self._remaining_step < cfg.RL_MAX_STEP:
+        if acc_diff > 0.1 and self.remaining_step < cfg.RL_MAX_STEP:
             self._remaining_step += 5
-            self._remaining_step = min(self._remaining_step, cfg.RL_MAX_STEP)
+            self._remaining_step = min(self.remaining_step, cfg.RL_MAX_STEP)
         self._acc_mean = acc_mean
 
     def termination_heuristics(self, ef_pose):
         inv_ef_pose = se3_inverse(ef_pose)
-        point_state = se3_transform_pc(inv_ef_pose, self._acc_points)
+        point_state = se3_transform_pc(inv_ef_pose, self.acc_points)
         cage_points_mask = (
             (point_state[2] > +0.06)
             & (point_state[2] < +0.11)

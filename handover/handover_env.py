@@ -21,8 +21,8 @@ class HandoverEnv(easysim.SimulatorEnv):
         self._panda = self._get_panda_cls()(self.cfg, self.scene)
 
         self._dex_ycb = DexYCB(self.cfg)
-        self._ycb = YCB(self.cfg, self.scene, self._dex_ycb)
-        self._mano = MANO(self.cfg, self.scene, self._dex_ycb)
+        self._ycb = YCB(self.cfg, self.scene, self.dex_ycb)
+        self._mano = MANO(self.cfg, self.scene, self.dex_ycb)
 
         self._release_step_thresh = self.cfg.ENV.RELEASE_TIME_THRESH / self.cfg.SIM.TIME_STEP
 

@@ -222,7 +222,7 @@ class HandoverBenchmarkWrapper(HandoverStatusWrapper):
                 continue
             if i // 100 in subject_ind and i % 100 in sequence_ind:
                 if mano_side == ["right", "left"]:
-                    self._scene_ids.append(i)
+                    self.scene_ids.append(i)
                 else:
                     if i % 5 != 4:
                         if (
@@ -231,13 +231,13 @@ class HandoverBenchmarkWrapper(HandoverStatusWrapper):
                             or i % 5 in (2, 3)
                             and mano_side == ["left"]
                         ):
-                            self._scene_ids.append(i)
+                            self.scene_ids.append(i)
                     elif mano_side == self.dex_ycb.load_meta_from_cache(i)["mano_sides"]:
-                        self._scene_ids.append(i)
+                        self.scene_ids.append(i)
 
     @property
     def num_scenes(self):
-        return len(self._scene_ids)
+        return len(self.scene_ids)
 
     @property
     def scene_ids(self):
@@ -246,9 +246,9 @@ class HandoverBenchmarkWrapper(HandoverStatusWrapper):
     def reset(self, env_ids=None, **kwargs):
         if "idx" in kwargs:
             assert "scene_id" not in kwargs
-            kwargs["scene_id"] = self._scene_ids[kwargs["idx"]]
+            kwargs["scene_id"] = self.scene_ids[kwargs["idx"]]
             del kwargs["idx"]
         else:
-            assert kwargs["scene_id"] in self._scene_ids
+            assert kwargs["scene_id"] in self.scene_ids
 
         return super().reset(env_ids=env_ids, **kwargs)
