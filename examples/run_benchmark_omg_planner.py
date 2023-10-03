@@ -25,7 +25,6 @@ class OMGPlanner:
         cfg.ik_parallel = False
         cfg.vis = False
         cfg.scene_file = ""
-        cfg.cam_V = None
 
         # Enforce determinism. This accounts for the call of random.sample() in
         # `Robot.load_collision_points()` in `OMG-Planner/omg/core.py`.
