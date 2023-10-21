@@ -107,7 +107,7 @@ Below is our installation script for GA-DDPG.
 ```Shell
 # The script below should be ran under handover-sim/.
 
-# Clone OMG-Planner.
+# Clone GA-DDPG.
 # - All our experiements were ran on commit 6d2b10ffb81c125536740c82df23283d8a1c3ac8.
 git clone --recursive https://github.com/liruiw/GA-DDPG.git
 cd GA-DDPG
