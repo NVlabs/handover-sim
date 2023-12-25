@@ -106,12 +106,8 @@ class MANO:
             self._mass_zeroed = False
 
     def step(self, simulator):
-        if (
-            self._frame >= self._sid
-            and self._frame <= self._eid
-            and self._cfg.ENV.MANO_SIMULATION_MODE == "disable_control_and_move_by_reset"
-        ):
-            skip_reset = self._frame == self._num_frames - 1
+        if self._cfg.ENV.MANO_SIMULATION_MODE == "disable_control_and_move_by_reset":
+            skip_reset = self._frame == self._sid - 1 or self._frame == self._num_frames - 1
 
         self._frame += 1
         self._frame = min(self._frame, self._num_frames - 1)
@@ -123,6 +119,11 @@ class MANO:
                 self.body.dof_target_position = self._pose[self._frame]
             if self._cfg.ENV.MANO_SIMULATION_MODE == "disable_control_and_move_by_reset":
                 if not self._mass_zeroed:
+                    if self._frame == self._sid:
+                        with simulator._disable_cov_rendering():
+                            simulator._load_body(self._body)
+                            simulator._cache_body_and_set_control_and_props(self._body)
+                            simulator._set_callback_body(self._body)
                     for i in range(-1, simulator._num_links[self.body.name] - 1):
                         simulator._p.changeDynamics(
                             simulator._body_ids[self.body.name], i, mass=0.0
